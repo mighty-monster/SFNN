@@ -8,31 +8,50 @@
 
 using namespace nnc;
 
-template<typename T>
+template <typename T>
+SimpleHeapMemory<T>::SimpleHeapMemory()
+{
+};
+
+template <typename T>
 SimpleHeapMemory<T>::SimpleHeapMemory(const char* file_path)
 {
   LoadFromFile(file_path);
 };
 
-template<typename T>
+template <typename T>
 SimpleHeapMemory<T>::SimpleHeapMemory(const size_t& length)
 {
   if (length > 0)
-  {
-    m_length = length;
-    m_size = length * sizeof(T);
-    m_memory = new T[m_length];
-    m_allocated = true;
-  }
+    Allocate(length);
 };
 
-template<typename T>
+template <typename T>
 SimpleHeapMemory<T>::~SimpleHeapMemory()
 {
-  delete[] (T*)m_memory;
+  Deallocate();
 };
 
-template<typename T>
+template <typename T>
+void SimpleHeapMemory<T>::Allocate(const size_t& length)
+{
+  m_length = length;
+  m_size = length * sizeof(T);
+  m_memory = new T[m_length];
+  m_allocated = true;
+};
+
+template <typename T>
+void SimpleHeapMemory<T>::Deallocate()
+{
+  delete[] (T*)m_memory;
+  m_length = 0;
+  m_size = 0;
+  m_allocated = false;
+};
+
+
+template <typename T>
 void SimpleHeapMemory<T>::LoadFromFile(const char* file_path)
 {
   auto input_file = std::fstream(file_path, std::ios::in | std::ios::binary | std::ios::ate);
@@ -42,7 +61,7 @@ void SimpleHeapMemory<T>::LoadFromFile(const char* file_path)
   input_file.close();
 };
 
-template<typename T>
+template <typename T>
 void SimpleHeapMemory<T>::LoadFromHexFile(const char* file_path)
 {
   auto input_file = std::fstream(file_path, std::ios::in | std::ios::ate);
@@ -58,12 +77,13 @@ void SimpleHeapMemory<T>::LoadFromHexFile(const char* file_path)
   nnc::HexToBuffer(m_memory, hex_str);
 };
 
-template<typename T>
+template <typename T>
 void SimpleHeapMemory<T>::Resize(const size_t& length)
 {
   if (length == m_length) return;
+  if (length == 0) {Deallocate(); return;}
 
-  if (m_size != 0)
+  if (m_allocated)
   {
     void* previous_pointer = m_memory;
 
@@ -81,25 +101,23 @@ void SimpleHeapMemory<T>::Resize(const size_t& length)
   }
   else
   {
-    m_memory = new T[length];
-    m_length = length;
-    m_size = length * sizeof(T);
+    Allocate(length);
   }
 };
 
-template<typename T>
+template <typename T>
 T& SimpleHeapMemory<T> ::operator [] (const int64_t& index)
 {
-  return *((T*)m_memory + (index));
+  return *((T*)m_memory + index);
 };
 
-template<typename T>
+template <typename T>
 const T& SimpleHeapMemory<T> ::operator [] (const int64_t& index) const
 {
-  return *((T*)m_memory + (index));
+  return *((T*)m_memory + index);
 };
 
-template<typename T>
+template <typename T>
 size_t SimpleHeapMemory<T>::Length()
 {
   return m_length;

@@ -11,9 +11,13 @@ namespace nnc {
   class SimpleHeapMemory : public SimpleMemory<nullptr, nullptr>
   {
   public:
+    SimpleHeapMemory();
     SimpleHeapMemory(const char* file_path);
     SimpleHeapMemory(const size_t& length);
     ~SimpleHeapMemory();
+
+    void Allocate(const size_t& length);
+    void Deallocate();
 
     void LoadFromFile(const char* file_path) override;
 

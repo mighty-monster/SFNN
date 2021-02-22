@@ -4,13 +4,6 @@
 
 namespace nnc {
 
-  struct BlockInfo
-  {
-    void* m_memory;
-    size_t m_size;
-
-  };
-
   template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>
   class BlockMemory : public BaseMemory<ALLOC, DEALLOC>
   {
@@ -20,13 +13,13 @@ namespace nnc {
 
     virtual void SaveToFile(const char* file_path);
     virtual void LoadFromFile(const char* file_path) = 0;
-    virtual void LoadFromFile(const char* file_path, uint16_t no_of_blocks) = 0;
+    virtual void LoadFromFile(const char* file_path, const size_t& no_of_blocks) = 0;
 
     virtual void SaveToHexFile(const char* file_path);
     virtual void LoadFromHexFile(const char* file_path) = 0;
-    virtual void LoadFromHexFile(const char* file_path, uint16_t no_of_blocks) = 0;
+    virtual void LoadFromHexFile(const char* file_path, const size_t& no_of_blocks) = 0;
 
-    virtual void Reshape(const uint16_t& no_of_blocks);
+    virtual void Reshape(const size_t& no_of_blocks) = 0;
 
     virtual std::string ToHex();
 
@@ -39,8 +32,10 @@ namespace nnc {
   protected:
     BlockMemory() {};
     virtual ~BlockMemory(){};
-    void* m_block_array;
-    uint16_t m_no_of_blocks = default_no_of_block;
-    static const uint16_t default_no_of_block = 4;
+    size_t m_block_size;
+    size_t m_block_length;
+    void** m_block_array;
+    size_t m_no_of_blocks = default_no_of_block;
+    static const size_t default_no_of_block = 2;
   };
 }
