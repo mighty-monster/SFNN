@@ -23,5 +23,6 @@ namespace nnc {
   // The buffer should have enough allocated memory
   // Length of hex string determines size of buffer
   void HexToBuffer(void* buffer, const std::string& hex);
+  void HexToBuffer(void* buffer, const char* hex, const size_t& hex_size);
 }
 

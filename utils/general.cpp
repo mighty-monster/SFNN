@@ -70,3 +70,40 @@ void nnc::HexToBuffer(void* buffer, const std::string& hex)
     }
   }
 }
+
+// Loads an Hex string into a block of memory
+// The buffer should have enough allocated memory
+void nnc::HexToBuffer(void* buffer, const char* hex, const size_t& hex_size)
+{
+  // This implementation is not optimized, should change it if
+  // the function is used in performance critical sections of code
+
+  // Hex string should have even number of characters
+  if (hex_size % 2)
+  {
+    Logger::Error(std::string(__func__) +
+                  " --> Length of hex string should be an even number. "
+                  "Nothing was writen into the buffer");
+  }
+  else
+  {
+    // Act as a stack allocated buffer, because short strings
+    // allocate memory on stack in release mode
+    std::string temp_str("01");
+
+    for(uint64_t i=0; i < hex_size; i=i+2)
+    {
+      // Two hex letters contain one byte of data
+      temp_str[0] = hex[i]; temp_str[1] = hex[i+1];
+
+      // Convert the hex value to unsigned integer
+      uint8_t temp_int = std::stoi(temp_str, 0, 16);
+
+      uint64_t index = (i+1)/2;
+
+      // Fill memory with content of unsigned int
+      // corresponding to hex letters
+      ((uint8_t*)buffer)[index] = temp_int;
+    }
+  }
+}

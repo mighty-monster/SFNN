@@ -1,6 +1,7 @@
 #include <iostream>
 #include <immintrin.h>
 #include <memory>
+#include <assert.h>
 
 #include "utils/logger.hpp"
 #include "utils/timer.hpp"
@@ -19,31 +20,20 @@ int main()
 
     ENABLE_PRINT_ALLOC
     {
-      auto mem = new nnc::BlockHeapMemory<int>(2048*1024, 16);
+      auto mem = new nnc::BlockHeapMemory<int>(1024, 2);
 
       for (size_t i=0; i < mem->Length(); i++)
         (*mem)[i] = i;
 
-      mem->Reshape(2);
-      mem->Reshape(3);
-      mem->Reshape(5);
-      mem->Reshape(7);
-      mem->Reshape(11);
-      mem->Reshape(13);
-      mem->Reshape(17);
-      mem->Reshape(19);
-      mem->Reshape(23);
-      mem->Reshape(29);
-      mem->Reshape(53);
-      mem->Reshape(132);
-      mem->Reshape(13);
-      mem->Reshape(1024);
-      mem->Reshape(17);
-      mem->Reshape(1);
+      mem->SaveToFile("file.bin");
+      mem->SaveToHexFile("file.hex");
+
+      nnc::BlockHeapMemory<int> mem2;
+      mem2.LoadFromHexFile("file.hex");
 
       for (size_t i=0; i < mem->Length(); i++)
       {
-        _ASSERT((*mem)[i] == i);
+        assert(mem2[i] == i);
       }
 
       delete mem;

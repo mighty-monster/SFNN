@@ -1,5 +1,6 @@
-
+#include "cstring"
 #include "block_heap.hpp"
+
 
 using namespace nnc;
 
@@ -28,9 +29,7 @@ template <typename T>
 BlockHeapMemory<T>::BlockHeapMemory(const size_t& length, const size_t& no_of_blocks)
 {
   if (length > 0)
-  {
     Allocate(length, no_of_blocks);
-  }
 };
 
 template <typename T>
@@ -83,7 +82,20 @@ void BlockHeapMemory<T>::LoadFromFile(const char* file_path)
 
 template <typename T>
 void BlockHeapMemory<T>::LoadFromFile(const char* file_path, const size_t& no_of_blocks)
-{};
+{
+  auto input_file = std::fstream(file_path, std::ios::in | std::ios::binary | std::ios::ate);
+  size_t length = input_file.tellg()/sizeof(T);
+  Resize(length);
+  Reshape(no_of_blocks);
+
+  for (size_t i=0; i<m_no_of_blocks; i++)
+  {
+    void* buffer = *(m_block_array + i);
+    input_file.seekg( i*m_block_size, std::ios::beg);
+    input_file.read((char*)buffer, m_block_size);
+  }
+  input_file.close();
+};
 
 template <typename T>
 void BlockHeapMemory<T>::LoadFromHexFile(const char* file_path)
@@ -93,7 +105,31 @@ void BlockHeapMemory<T>::LoadFromHexFile(const char* file_path)
 
 template <typename T>
 void BlockHeapMemory<T>::LoadFromHexFile(const char* file_path, const size_t& no_of_blocks)
-{};
+{
+  auto input_file = std::fstream(file_path, std::ios::in | std::ios::ate);
+  size_t length = input_file.tellg()/sizeof(T)/2;
+  Resize(length);
+  Reshape(no_of_blocks);
+
+
+  size_t file_buffer_size = 2*m_block_size;
+  char* file_buffer_string = new char[file_buffer_size];
+
+  for (int i=0; i<m_no_of_blocks; i++)
+  {
+
+    input_file.seekg(i*file_buffer_size, std::ios::beg);
+    input_file.read(file_buffer_string, file_buffer_size);
+
+    void* buffer = *(m_block_array + i);
+    nnc::HexToBuffer(buffer, file_buffer_string, file_buffer_size);
+  }
+
+
+  delete[] file_buffer_string;
+
+  input_file.close();
+};
 
 template <typename T>
 void BlockHeapMemory<T>::Resize(const size_t& length)
