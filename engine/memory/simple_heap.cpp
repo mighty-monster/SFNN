@@ -2,11 +2,9 @@
 #include <fstream>
 
 #include "simple_heap.hpp"
-
 #include "utils/general.hpp"
 
-
-using namespace nnc;
+using namespace nne;
 
 template <typename T>
 SimpleHeapMemory<T>::SimpleHeapMemory()
@@ -16,6 +14,7 @@ SimpleHeapMemory<T>::SimpleHeapMemory()
 template <typename T>
 SimpleHeapMemory<T>::SimpleHeapMemory(const char* file_path)
 {
+  assert(file_path);
   LoadFromFile(file_path);
 };
 
@@ -66,15 +65,20 @@ void SimpleHeapMemory<T>::LoadFromHexFile(const char* file_path)
 {
   auto input_file = std::fstream(file_path, std::ios::in | std::ios::ate);
 
-  std::string hex_str;
-  input_file.seekg( 0, std::ios::beg);
-  input_file >> hex_str;
-  input_file.close();
-
-  uint64_t length = hex_str.size()/2/sizeof(T);
+  size_t length = input_file.tellg()/sizeof(T)/2;
   Resize(length);
 
-  nnc::HexToBuffer(m_memory, hex_str);
+  size_t file_buffer_size = 2*m_size;
+  char* file_buffer_string = new char[file_buffer_size];
+
+  input_file.seekg(0, std::ios::beg);
+  input_file.read(file_buffer_string, file_buffer_size);
+
+  input_file.close();
+
+  nne::HexToBuffer(m_memory, file_buffer_string, file_buffer_size);
+
+  delete[] file_buffer_string;
 };
 
 template <typename T>

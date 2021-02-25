@@ -1,8 +1,9 @@
-#include "cstring"
+#include <cstring>
+
 #include "block_heap.hpp"
 
 
-using namespace nnc;
+using namespace nne;
 
 template <typename T>
 BlockHeapMemory<T>::BlockHeapMemory(){};
@@ -52,9 +53,7 @@ void BlockHeapMemory<T>::Allocate(const size_t& length, const size_t& no_of_bloc
   m_block_size = m_block_length * sizeof (T);
 
   for(int i=0; i<no_of_blocks; i++)
-  {
     *(m_block_array + i) = static_cast<void*>(new T[m_block_length]);
-  }
 
   m_allocated = true;
 };
@@ -122,7 +121,7 @@ void BlockHeapMemory<T>::LoadFromHexFile(const char* file_path, const size_t& no
     input_file.read(file_buffer_string, file_buffer_size);
 
     void* buffer = *(m_block_array + i);
-    nnc::HexToBuffer(buffer, file_buffer_string, file_buffer_size);
+    nne::HexToBuffer(buffer, file_buffer_string, file_buffer_size);
   }
 
 
@@ -147,6 +146,7 @@ void BlockHeapMemory<T>::Resize(const size_t& length)
     void** previous_block_array = m_block_array;
     size_t previous_no_of_blocks = m_no_of_blocks;
 
+    // Check whether avaible free memory is enough for resizing
     int64_t no_of_new_blocks = extra_memory_bytes / static_cast<int64_t>(m_block_size);
     no_of_new_blocks += length > m_length ? 1 : 0;
 

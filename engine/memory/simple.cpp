@@ -5,10 +5,10 @@
 #include "simple.hpp"
 #include "utils/general.hpp"
 
-using namespace nnc;
+using namespace nne;
 
 template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>
-size_t SimpleMemory<ALLOC, DEALLOC>::Size()
+size_t SimpleMemory<ALLOC, DEALLOC>::SizeInBytes()
 {
   // "this->" is added because of lookup error when using templates
   return this->m_size;
@@ -35,7 +35,7 @@ void SimpleMemory<ALLOC, DEALLOC>::SaveToHexFile(const char* file_path)
 template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>
 std::string SimpleMemory<ALLOC, DEALLOC>::ToHex()
 {
-  return nnc::BufferToHex(m_memory, this->m_size);
+  return nne::BufferToHex(m_memory, this->m_size);
 };
 
 template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>

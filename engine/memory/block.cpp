@@ -5,11 +5,10 @@
 #include "block.hpp"
 #include "utils/general.hpp"
 
-using namespace nnc;
-
+using namespace nne;
 
 template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>
-size_t BlockMemory<ALLOC, DEALLOC>::Size()
+size_t BlockMemory<ALLOC, DEALLOC>::SizeInBytes()
 {
   // "this->" is added because of lookup error when using templates
   return this->m_size;
@@ -43,7 +42,7 @@ std::string BlockMemory<ALLOC, DEALLOC>::ToHex()
   std::stringstream string_stream;
 
   for(size_t i=0; i < m_no_of_blocks; i++)
-    string_stream << nnc::BufferToHex(*(m_block_array + i), m_block_size);
+    string_stream << nne::BufferToHex(*(m_block_array + i), m_block_size);
 
   return string_stream.str();
 };

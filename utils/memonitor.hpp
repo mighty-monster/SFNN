@@ -1,34 +1,49 @@
-///////////////////////////////////////////////////////////////////////////////
-// @File Name:     memonitor.hpp                                             //
-// @Author:        Arash Fatehi                                              //
-// @L.M.D:         18th Feb 2021                                             //
-// @Description:   Simple header to monitor heap allocation                  //
-//                                                                           //
-// Detail Description:                                                       //
-// By including in one the execution units, it overloads "new" and "delete"  //
-// operatations, in addition to detect meamory leaks, it is usefull to trace //
-// third party libraries memory allocation calls when debuging               //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
+// File Name:     memonitor.hpp
+// Author:        Arash Fatehi
+// Date:          18th Feb 2021
+// Description:   Simple header to monitor heap allocation
+// --------------------
+// Detail Description:
+// By including this header in one of the execution units, it overloads "new" and "delete"
+// operatations, in addition to detect meamory leaks, it is usefull to trace
+// third party libraries memory allocation calls when debuging
+// ---------------------
+// Help:
+// Including the header in more than one execution unit leads to linker errors, it should be
+// included only once, "DISABLE_PRINT_ALLOC" and "ENABLE_PRINT_ALLOC" macros do as they suggest
+// "PRINT_ALLOC_SUMMERY" macro prints allocated and deallocated bytes from beginning
 
 #pragma once
 
 #include <iostream>
 #include <future>
 
-#define DISABLE_PRINT_ALLOC nnc::s_print_allocations = false;
-#define ENABLE_PRINT_ALLOC nnc::s_print_allocations = true;
-#define PRINT_ALLOC_SUMMERY nnc::PrintAllocationSummery();
+#include "general.hpp"
 
-namespace nnc {
+#define DISABLE_PRINT_ALLOC nne::g_print_allocations = false;
+#define ENABLE_PRINT_ALLOC nne::g_print_allocations = true;
+#define PRINT_ALLOC_SUMMERY nne::PrintAllocationSummery();
+
+namespace nne {
+  // Global variable to track allocation info
+  // Will cause Linking error if included in more than one
+  // Execution unit, even by making them static, operators
+  // can`t be static and will cause Linking error
+  uint64_t g_allocation_counter = 0;
+  uint64_t g_allocated_counter = 0;
+  uint64_t g_deallocated_counter = 0;
+  uint64_t g_allocated_bytes = 0;
+  uint64_t g_deallocated_bytes = 0;
+  uint64_t g_allocation_table_bytes = 0;
+
   // Simple data structure to store allocated memory address and size
   class AllocationInfo
   {
   public:
-    void Set(void*& memory, size_t& size)
+    void Set(void*& p_memory, size_t& p_size)
     {
-      m_memory = memory;
-      m_size = size;
+      m_memory = p_memory;
+      m_size = p_size;
     };
 
     void* m_memory;
@@ -47,6 +62,7 @@ namespace nnc {
     {
       // Allocating array`s memory
       m_allocation_table = (AllocationInfo*)malloc(m_length*sizeof (AllocationInfo));
+      g_allocation_table_bytes = m_length*sizeof (AllocationInfo);
     }
 
     ~AllocationTable()
@@ -56,7 +72,7 @@ namespace nnc {
     }
 
     // Add new record of info to the table
-    void Insert(void*& memory, size_t& size)
+    void Insert(void*& p_memory, size_t& p_size)
     {
       std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -71,22 +87,23 @@ namespace nnc {
         m_allocation_table = (AllocationInfo*)realloc(m_allocation_table, m_length*sizeof (AllocationInfo));
         if (!m_allocation_table)
           std::cerr << "AllocationTable::Insert() -- realloc failed\n";
+        g_allocation_table_bytes = m_length*sizeof (AllocationInfo);
       }
 
       // Inserting the allocation info to last item in the array
-      m_allocation_table[m_occupied].Set(memory, size);
+      m_allocation_table[m_occupied].Set(p_memory, p_size);
 
       // Increase last item`s index
       m_occupied++;
     }
 
     // Remove record of info related to address "memory"
-    void Remove(void*& memory)
+    void Remove(void*& p_memory)
     {
       std::lock_guard<std::mutex> lock(m_mutex);
 
       for (uint64_t i=0; i<m_occupied; i++)
-        if (m_allocation_table[i].m_memory == memory)
+        if (m_allocation_table[i].m_memory == p_memory)
         {
           //Exchange the last item with the one to remove
           m_allocation_table[i].Set(
@@ -101,13 +118,13 @@ namespace nnc {
     };
 
     // Get size of allocated memory to address "memory"
-    size_t GetSize(void*& memory)
+    size_t GetSize(void*& p_memory)
     {
       std::lock_guard<std::mutex> lock(m_mutex);
 
       size_t result = 0;
       for (uint64_t i=0; i<m_occupied; i++)
-        if (m_allocation_table[i].m_memory == memory)
+        if (m_allocation_table[i].m_memory == p_memory)
         {
           result = m_allocation_table[i].m_size;
           break;
@@ -132,64 +149,79 @@ namespace nnc {
     AllocationInfo* m_allocation_table;
   };
 
-  // Global variable to track allocation info
-  // Will cause Linking error if included in more than one
-  // Execution unit, even by making them static, operators
-  // can`t be static and will cause Linking error
-  uint64_t g_allocation_counter = 0;
-  uint64_t g_allcoated_bytes = 0;
-  uint64_t g_deallcoated_bytes = 0;
-
   // Determine print allocations into cout or not
-  bool s_print_allocations = false;
+  bool g_print_allocations = false;
 
-  const char* s_allocation_monitor_signature = "[Heap]: ";
+  const char* g_allocation_monitor_signature = "[Heap]: ";
 
   // The AllocationTable object to store allocation info
-  AllocationTable s_allocation_table;
+  AllocationTable g_allocation_table;
 
   void PrintAllocationSummery()
   {
+    char human_readable_size[20];
+
     std::cout << "\n---------------\n----Summery----\n";
-    std::cout << "Allocation Counter: "<<nnc::g_allocation_counter<<std::endl;
-    std::cout << "Allocated: "<<nnc::g_allcoated_bytes<< " bytes" <<std::endl;
-    std::cout << "Deallocated: "<<nnc::g_deallcoated_bytes<< " bytes"<<std::endl;
+    std::cout << "Allocation Calls: "<<nne::g_allocated_counter<<std::endl;
+    std::cout << "Deallocation Calls: "<<nne::g_deallocated_counter<<std::endl;
+
+    nne::BytesToHumanReadableSize(nne::g_allocated_bytes, human_readable_size);
+    std::cout << "Allocated: "<< human_readable_size << ", " <<
+                 nne::g_allocated_bytes << " Byte(s)" <<std::endl;
+
+    nne::BytesToHumanReadableSize(nne::g_deallocated_bytes, human_readable_size);
+    std::cout << "Deallocated: "<< human_readable_size << ", " <<
+                 nne::g_deallocated_bytes << " Byte(s)" << std::endl;
+
+    nne::BytesToHumanReadableSize(nne::g_allocation_table_bytes, human_readable_size);
+    std::cout << "Allocation Table: "<< human_readable_size << ", " <<
+                 nne::g_allocation_table_bytes << " Byte(s)" << std::endl;
+
+    if (g_allocated_bytes == g_deallocated_bytes)
+      std::cout << "No memory leak detected, we are safe ;)\n";
+    else
+      std::cout << "Memory leak detected :(, better to check it with valgrind!\n";
+
     std::cout << "---------------\n";
   }
 };
 
+
 // operator overload for "new"
-void* operator new (size_t size)
+void* operator new (size_t p_size)
 {
-  nnc::g_allocation_counter++;
-  nnc::g_allcoated_bytes += size;
+  nne::g_allocation_counter++;
+  nne::g_allocated_counter++;
 
-  if (nnc::s_print_allocations)
-    std::cout << nnc::s_allocation_monitor_signature << size << " bytes allcoated\n";
+  nne::g_allocated_bytes += p_size;
 
-  void* memory = malloc(size);
+  if (nne::g_print_allocations)
+    std::cout << nne::g_allocation_monitor_signature << p_size << " bytes allcoated\n";
+
+  void* memory = malloc(p_size);
 
   if (!memory)
     throw std::bad_alloc();
 
-  nnc::s_allocation_table.Insert(memory, size);
+  nne::g_allocation_table.Insert(memory, p_size);
 
   return memory;
 }
 
 // operator overload for "delete"
-void operator delete(void* memory) noexcept
+void operator delete(void* p_memory) noexcept
 {
-  nnc::g_allocation_counter--;
+  nne::g_allocation_counter--;
+  nne::g_deallocated_counter++;
 
-  size_t size = nnc::s_allocation_table.GetSize(memory);
+  size_t size = nne::g_allocation_table.GetSize(p_memory);
 
-  nnc::g_deallcoated_bytes += size;
+  nne::g_deallocated_bytes += size;
 
-  if (nnc::s_print_allocations)
-    std::cout << nnc::s_allocation_monitor_signature << size << " bytes deallcoated\n";
+  if (nne::g_print_allocations)
+    std::cout << nne::g_allocation_monitor_signature << size << " bytes deallcoated\n";
 
-  nnc::s_allocation_table.Remove(memory);
+  nne::g_allocation_table.Remove(p_memory);
 
-  free(memory);
+  free(p_memory);
 }

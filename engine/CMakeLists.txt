@@ -1,5 +1,4 @@
 add_library(engine
-  memory/model.hpp
   memory/base.hpp
   memory/simple.hpp
   memory/simple.cpp

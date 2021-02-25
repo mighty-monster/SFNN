@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(NNC LANGUAGES CXX)
+project(NNE LANGUAGES CXX)
 
 add_subdirectory(engine)
 add_subdirectory(utils)
@@ -13,9 +13,17 @@ IF (UNIX)
 ENDIF()
 
 add_executable(${PROJECT_NAME}
-  main.cpp)
+  main.cpp
+  nne.hpp
+  nne.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE engine utils)
 
 include_directories(./ engine)
+
+
+add_executable(MemTest
+  engine/memory/mem_test.cpp)
+
+target_link_libraries(MemTest PRIVATE utils)
 

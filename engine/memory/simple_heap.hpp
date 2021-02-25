@@ -6,7 +6,7 @@
 #include "simple.hpp"
 #include "simple.cpp"
 
-namespace nnc {
+namespace nne {
   template <typename T>
   class SimpleHeapMemory : public SimpleMemory<nullptr, nullptr>
   {

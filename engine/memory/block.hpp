@@ -1,14 +1,17 @@
 #pragma once
 
+#include <cinttypes>
+#include <string>
+
 #include "base.hpp"
 
-namespace nnc {
+namespace nne {
 
   template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>
   class BlockMemory : public BaseMemory<ALLOC, DEALLOC>
   {
   public:
-    size_t Size() override;
+    size_t SizeInBytes() override;
     uint16_t NoOfBlocks();
 
     virtual void SaveToFile(const char* file_path);
@@ -30,8 +33,8 @@ namespace nnc {
     void SetAsType(const size_t& index, const T& value);
 
   protected:
-    BlockMemory() {};
-    virtual ~BlockMemory(){};
+    BlockMemory() = default;
+    virtual ~BlockMemory() = default;
     size_t m_block_size;
     size_t m_block_length;
     void** m_block_array;

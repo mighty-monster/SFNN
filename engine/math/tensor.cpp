@@ -1,9 +1,10 @@
-#include "memory/base.hpp"
+
 #include "tensor.hpp"
 
 using namespace nnc;
 
-Tensor::Tensor()
+template <typename T>
+Tensor<T>::Tensor()
 {
 
 }

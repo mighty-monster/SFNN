@@ -1,28 +1,27 @@
-///////////////////////////////////////////////////////////////////////////////
-// @File Name:     general.hpp                                               //
-// @Author:        Arash Fatehi                                              //
-// @L.M.D:         19th Feb 2021                                             //
-// @Description:   Contains general useful fucntions                         //
-//                                                                           //
-// Detail Description:                                                       //
-//                                                                           //
-// List of functions: BufferToHex, HexToBuffer                               //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
+// File Name:     general.hpp
+// Author:        Arash Fatehi
+// Date:          19th Feb 2021
+// Description:   Contains general useful fucntions
 
 #pragma once
 
 #include <cinttypes>
 #include <string>
+#include <assert.h>
 
-namespace nnc {
+#include "logger.hpp"
+
+
+namespace nne {
   // Dumps a block of memory as Hex string
-  std::string BufferToHex(void* buffer, size_t size);
+  std::string BufferToHex(void* p_buffer, size_t p_size);
 
   // Loads an hex string into a block of memory
   // The buffer should have enough allocated memory
-  // Length of hex string determines size of buffer
-  void HexToBuffer(void* buffer, const std::string& hex);
-  void HexToBuffer(void* buffer, const char* hex, const size_t& hex_size);
+  void HexToBuffer(void* p_buffer, const std::string& p_hex);
+  void HexToBuffer(void* p_buffer, const char* p_hex, const size_t& p_hex_size);
+
+  // Convert number of bytes to Kilo Byte, Mega Byte, Giga Byte, etc
+  void BytesToHumanReadableSize(size_t p_size, char* p_result);
 }
 

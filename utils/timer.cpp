@@ -1,26 +1,19 @@
-///////////////////////////////////////////////////////////////////////////////
-// @File Name:     timer.hpp                                                 //
-// @Author:        Arash Fatehi                                              //
-// @L.M.D:         12th Feb 2021                                             //
-// @Description:   Measeres execution time                                   //
-//                                                                           //
-// Detail Description:                                                       //
-// By creating an instance of object at begining of scope the execution time //
-// of targeted scope will be measured automatically                          //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
+// File Name:     timer.cpp
+// Author:        Arash Fatehi
+// Date:          12th Feb 2021
+// Description:   Measeres execution time from it`s creation till end of it`s scope
 
 #include <sstream>
 
 #include "timer.hpp"
 #include "logger.hpp"
 
-using namespace nnc;
+using namespace nne;
 
 // Pass false as parameter to hinder automatic logging
-Timer::Timer(bool auto_print)
+Timer::Timer(bool p_auto_print)
 {
-  m_auto_print = auto_print;
+  m_auto_print = p_auto_print;
   Start();
 };
 

@@ -1,13 +1,15 @@
 #pragma once
 
+#include <string>
+
 #include "base.hpp"
 
-namespace nnc {
+namespace nne {
   template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>
   class SimpleMemory : public BaseMemory<ALLOC, DEALLOC>
   {
   public:
-    size_t Size() override;
+    size_t SizeInBytes() override;
 
     virtual void SaveToFile(const char* file_path);
     virtual void LoadFromFile(const char* file_path) = 0;
@@ -24,8 +26,8 @@ namespace nnc {
     void SetAsType(const size_t& index, const T& value);
 
   protected:
-    SimpleMemory() {};
-    virtual ~SimpleMemory(){};
+    SimpleMemory() = default;
+    virtual ~SimpleMemory() = default;
     void* m_memory;
   };
 }
