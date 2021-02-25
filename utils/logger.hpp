@@ -20,6 +20,7 @@
 #include <future>
 
 #define DATETIME_BUFFER_SIZE 20
+#define WIN32_MESSAGE_MAX_LENGTH 2048
 
 namespace nne {
   class Logger

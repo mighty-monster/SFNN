@@ -22,6 +22,6 @@ namespace nne {
   void HexToBuffer(void* p_buffer, const char* p_hex, const size_t& p_hex_size);
 
   // Convert number of bytes to Kilo Byte, Mega Byte, Giga Byte, etc
-  void BytesToHumanReadableSize(size_t p_size, char* p_result);
+  void BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t& p_result_size);
 }
 

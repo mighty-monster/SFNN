@@ -15,15 +15,14 @@ int main()
   nne::Logger::Init(nne::Logger::LevelDebug, true, false);
   ENABLE_PRINT_ALLOC
   {
-    BlockHeapMemory<int> mem(16);
-
-
-
+    BlockHeapMemory<int> mem(1024);
   }
 
   DISABLE_PRINT_ALLOC
   PRINT_ALLOC_SUMMERY
 
+  std::cout << sizeof (size_t) << std::endl;
+  std::cout << sizeof (unsigned long) << std::endl;
 
   return 0;
 }

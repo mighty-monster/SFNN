@@ -159,22 +159,23 @@ namespace nne {
 
   void PrintAllocationSummery()
   {
-    char human_readable_size[20];
+    const size_t buffer_size = 20;
+    char human_readable[buffer_size];
 
     std::cout << "\n---------------\n----Summery----\n";
     std::cout << "Allocation Calls: "<<nne::g_allocated_counter<<std::endl;
     std::cout << "Deallocation Calls: "<<nne::g_deallocated_counter<<std::endl;
 
-    nne::BytesToHumanReadableSize(nne::g_allocated_bytes, human_readable_size);
-    std::cout << "Allocated: "<< human_readable_size << ", " <<
+    nne::BytesToHumanReadableSize(nne::g_allocated_bytes, human_readable, buffer_size);
+    std::cout << "Allocated: "<< human_readable << ", " <<
                  nne::g_allocated_bytes << " Byte(s)" <<std::endl;
 
-    nne::BytesToHumanReadableSize(nne::g_deallocated_bytes, human_readable_size);
-    std::cout << "Deallocated: "<< human_readable_size << ", " <<
+    nne::BytesToHumanReadableSize(nne::g_deallocated_bytes, human_readable, buffer_size);
+    std::cout << "Deallocated: "<< human_readable << ", " <<
                  nne::g_deallocated_bytes << " Byte(s)" << std::endl;
 
-    nne::BytesToHumanReadableSize(nne::g_allocation_table_bytes, human_readable_size);
-    std::cout << "Allocation Table: "<< human_readable_size << ", " <<
+    nne::BytesToHumanReadableSize(nne::g_allocation_table_bytes, human_readable, buffer_size);
+    std::cout << "Allocation Table: "<< human_readable << ", " <<
                  nne::g_allocation_table_bytes << " Byte(s)" << std::endl;
 
     if (g_allocated_bytes == g_deallocated_bytes)
@@ -208,8 +209,47 @@ void* operator new (size_t p_size)
   return memory;
 }
 
+// operator overload for "new[]"
+void* operator new[] (size_t p_size)
+{
+  nne::g_allocation_counter++;
+  nne::g_allocated_counter++;
+
+  nne::g_allocated_bytes += p_size;
+
+  if (nne::g_print_allocations)
+    std::cout << nne::g_allocation_monitor_signature << p_size << " bytes allcoated\n";
+
+  void* memory = malloc(p_size);
+
+  if (!memory)
+    throw std::bad_alloc();
+
+  nne::g_allocation_table.Insert(memory, p_size);
+
+  return memory;
+}
+
 // operator overload for "delete"
 void operator delete(void* p_memory) noexcept
+{
+  nne::g_allocation_counter--;
+  nne::g_deallocated_counter++;
+
+  size_t size = nne::g_allocation_table.GetSize(p_memory);
+
+  nne::g_deallocated_bytes += size;
+
+  if (nne::g_print_allocations)
+    std::cout << nne::g_allocation_monitor_signature << size << " bytes deallcoated\n";
+
+  nne::g_allocation_table.Remove(p_memory);
+
+  free(p_memory);
+}
+
+// operator overload for "delete[]"
+void operator delete[](void* p_memory) noexcept
 {
   nne::g_allocation_counter--;
   nne::g_deallocated_counter++;

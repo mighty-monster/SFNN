@@ -99,12 +99,23 @@ void Logger::IError(const char* p_message)
 {
   if (m_level >= LevelError)
   {
+
+#ifdef _MSC_VER
+    char temp_str[WIN32_MESSAGE_MAX_LENGTH];
+    std::fill(temp_str, temp_str + strlen(temp_str) ,0);
+
+    strncpy_s(temp_str, m_str_error, strlen(m_str_error));
+    strncpy_s(temp_str, p_message, strlen(p_message));
+    strncpy_s(temp_str, m_str_enter, strlen(m_str_enter));
+#elif defined(__GNUC__) || defined(__GNUG__) || defined(__clang__)
     char temp_str[strlen(m_str_error) + strlen(p_message) + strlen(m_str_enter)];
     std::fill(temp_str, temp_str + strlen(temp_str) ,0);
 
     strncpy(temp_str, m_str_error, strlen(m_str_error));
     strncat(temp_str, p_message, strlen(p_message));
     strncat(temp_str, m_str_enter, strlen(m_str_enter));
+#endif
+
     ILog(temp_str);
   }
 };
@@ -113,12 +124,21 @@ void Logger::IWarn(const char* p_message)
 {
   if (m_level >= LevelWarning)
   {
+#ifdef _MSC_VER
+    char temp_str[WIN32_MESSAGE_MAX_LENGTH];
+    std::fill(temp_str, temp_str + strlen(temp_str) ,0);
+
+    strncpy_s(temp_str, m_str_warning, strlen(m_str_warning));
+    strncat_s(temp_str, p_message, strlen(p_message));
+    strncat_s(temp_str, m_str_enter, strlen(m_str_enter));
+#elif defined(__GNUC__) || defined(__GNUG__) || defined(__clang__)
     char temp_str[strlen(m_str_warning) + strlen(p_message) + strlen(m_str_enter)];
     std::fill(temp_str, temp_str + strlen(temp_str) ,0);
 
     strncpy(temp_str, m_str_warning, strlen(m_str_warning));
     strncat(temp_str, p_message, strlen(p_message));
     strncat(temp_str, m_str_enter, strlen(m_str_enter));
+#endif
     ILog(temp_str);
   }
 };
@@ -127,12 +147,21 @@ void Logger::IInfo(const char* p_message)
 {
   if (m_level >= LevelInfo)
   {
+#ifdef _MSC_VER
+    char temp_str[WIN32_MESSAGE_MAX_LENGTH];
+    std::fill(temp_str, temp_str + strlen(temp_str) ,0);
+
+    strncpy_s(temp_str, m_str_info, strlen(m_str_info));
+    strncat_s(temp_str, p_message, strlen(p_message));
+    strncat_s(temp_str, m_str_enter, strlen(m_str_enter));
+#elif defined(__GNUC__) || defined(__GNUG__) || defined(__clang__)
     char temp_str[strlen(m_str_info) + strlen(p_message) + strlen(m_str_enter)];
     std::fill(temp_str, temp_str + strlen(temp_str) ,0);
 
     strncpy(temp_str, m_str_info, strlen(m_str_info));
     strncat(temp_str, p_message, strlen(p_message));
     strncat(temp_str, m_str_enter, strlen(m_str_enter));
+#endif
     ILog(temp_str);
   }
 };
@@ -141,12 +170,21 @@ void Logger::IDebug(const char* p_message)
 {
   if (m_level >= LevelDebug)
   {
+#ifdef _MSC_VER
+    char temp_str[WIN32_MESSAGE_MAX_LENGTH];
+    std::fill(temp_str, temp_str + strlen(temp_str) ,0);
+
+    strncpy_s(temp_str, m_str_debug, strlen(m_str_debug));
+    strncat_s(temp_str, p_message, strlen(p_message));
+    strncat_s(temp_str, m_str_enter, strlen(m_str_enter));
+#elif defined(__GNUC__) || defined(__GNUG__) || defined(__clang__)
     char temp_str[strlen(m_str_debug) + strlen(p_message) + strlen(m_str_enter)];
     std::fill(temp_str, temp_str + strlen(temp_str) ,0);
 
     strncpy(temp_str, m_str_debug, strlen(m_str_debug));
     strncat(temp_str, p_message, strlen(p_message));
     strncat(temp_str, m_str_enter, strlen(m_str_enter));
+#endif
     ILog(temp_str);
   }
 };
@@ -171,16 +209,26 @@ void Logger::ILog(const char* p_message)
   char current_time[DATETIME_BUFFER_SIZE];
   GetCurrentTime(current_time);
 
+#ifdef _MSC_VER
+  char temp_str[WIN32_MESSAGE_MAX_LENGTH];
+
+  std::fill(temp_str, temp_str + strlen(temp_str) ,0);
+
+  strncpy_s(temp_str, m_str_left_decorator, strlen(m_str_left_decorator));
+  strncat_s(temp_str, current_time, strlen(current_time));
+  strncat_s(temp_str, m_str_right_decorator, strlen(m_str_right_decorator));
+  strncat_s(temp_str, p_message, strlen(p_message));
+#elif defined(__GNUC__) || defined(__GNUG__) || defined(__clang__)
   char temp_str[strlen(m_str_left_decorator) + strlen(current_time) +
       strlen(m_str_right_decorator) + strlen(p_message)];
 
   std::fill(temp_str, temp_str + strlen(temp_str) ,0);
 
-  strncpy(temp_str, m_str_left_decorator, strlen(m_str_left_decorator) );
+  strncpy(temp_str, m_str_left_decorator, strlen(m_str_left_decorator));
   strncat(temp_str, current_time, strlen(current_time));
   strncat(temp_str, m_str_right_decorator, strlen(m_str_right_decorator));
   strncat(temp_str, p_message, strlen(p_message));
-
+#endif
   if(m_log_to_console)
     ILogToConsole(temp_str);
 
@@ -223,14 +271,18 @@ void Logger::GetCurrentTime(char* p_date_time_str)
   if (localtime_s(&tm_struct, &time_t_now))
   {
     std::cerr<<"Logger::GetCurrentTime() -- Failed to convert time_t to tm struct\n";
-    return std::string("Unknown");
+    strncpy_s(p_date_time_str, DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown));
   }
 
   // Format tm struct into the buffer
-  if (!std::strftime(date_time_str,
+  if (!std::strftime(p_date_time_str,
                      DATETIME_BUFFER_SIZE,
                      "%Y-%m-%d %H:%M:%S",
                      &tm_struct))
+  {
+    std::cerr<<"Logger::GetCurrentTime() -- Failed to format tm struct\n";
+    strncpy_s(p_date_time_str, DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown));
+  }
 #elif __unix__
   // Convert time_t to tm struct
   struct tm* tm_struct = localtime(&time_t_now);
@@ -245,9 +297,10 @@ void Logger::GetCurrentTime(char* p_date_time_str)
                      DATETIME_BUFFER_SIZE,
                      "%Y-%m-%d %H:%M:%S",
                      tm_struct))
-#endif
   {
     std::cerr<<"Logger::GetCurrentTime() -- Failed to format tm struct\n";
     strncpy(p_date_time_str, m_str_unknown, strlen(m_str_unknown));
   }
+#endif
+
 };
