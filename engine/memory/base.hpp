@@ -53,7 +53,7 @@ namespace nne {
   public:
     // Attention: Recieves the length and not the size
     virtual void Resize(const size_t& p_length) = 0;
-    virtual size_t SizeInBytes() = 0;
+    virtual inline size_t SizeInBytes() = 0;
 
   protected:
     virtual ~BaseMemory() = default;

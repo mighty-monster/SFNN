@@ -118,7 +118,7 @@ const T& SimpleHeapMemory<T> ::operator [] (const size_t& p_index) const
 };
 
 template <typename T>
-size_t SimpleHeapMemory<T>::Length()
+inline size_t SimpleHeapMemory<T>::Length()
 {
   return m_length;
 }

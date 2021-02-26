@@ -28,7 +28,7 @@ namespace nne {
     T& operator [] (const size_t& p_index);
     const T& operator [] (const size_t& p_index) const;
 
-    size_t Length();
+    inline size_t Length();
 
   private:
     size_t m_length = 0;

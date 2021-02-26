@@ -134,7 +134,7 @@ void BlockHeapMemory<T>::Resize(const size_t& p_length)
     void** previous_block_array = m_block_array;
     uint16_t previous_no_of_blocks = m_no_of_blocks;
 
-    int16_t no_of_new_blocks = extra_memory_bytes / static_cast<int64_t>(m_block_size);
+    int16_t no_of_new_blocks = (int16_t)(extra_memory_bytes / (int64_t)(m_block_size));
     no_of_new_blocks += p_length > m_length ? 1 : 0;
 
     if (no_of_new_blocks != 0)
@@ -292,5 +292,5 @@ const T& BlockHeapMemory<T>::operator [] (const size_t& p_index) const
 };
 
 template <typename T>
-size_t BlockHeapMemory<T>::Length()
+inline size_t BlockHeapMemory<T>::Length()
 { return m_length; };

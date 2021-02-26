@@ -2,13 +2,13 @@
 #include <string>
 #include <iostream>
 
-#include "simple.hpp"
+#include "memory/simple.hpp"
 #include "utils/general.hpp"
 
 using namespace nne;
 
 template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>
-size_t SimpleMemory<ALLOC, DEALLOC>::SizeInBytes()
+inline size_t SimpleMemory<ALLOC, DEALLOC>::SizeInBytes()
 {
   // "this->" is added because of lookup error when using templates
   return this->m_size;
@@ -40,14 +40,14 @@ std::string SimpleMemory<ALLOC, DEALLOC>::ToHex()
 
 template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>
 template<typename T>
-T SimpleMemory<ALLOC, DEALLOC>::GetAsType(const size_t& index)
+T& SimpleMemory<ALLOC, DEALLOC>::GetAsType(const size_t& p_index)
 {
-  return *((T*)m_memory + (index));
+  return *(T*)((char*)m_memory + (p_index));
 };
 
 template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>
 template<typename T>
-void SimpleMemory<ALLOC, DEALLOC>::SetAsType(const size_t& index, const T& value)
+void SimpleMemory<ALLOC, DEALLOC>::SetAsType(const size_t& p_index, const T& value)
 {
-  *((T*)m_memory + (index)) = value;
+  *(T*)((char*)m_memory + (p_index)) = value;
 };

@@ -8,10 +8,17 @@
 using namespace nne;
 
 template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>
-size_t BlockMemory<ALLOC, DEALLOC>::SizeInBytes()
+inline size_t BlockMemory<ALLOC, DEALLOC>::SizeInBytes()
 {
   // "this->" is added because of linking lookup error when using templates
   return this->m_size;
+};
+
+template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>
+inline uint16_t BlockMemory<ALLOC, DEALLOC>::NoOfBlocks()
+{
+  // "this->" is added because of linking lookup error when using templates
+  return this->m_no_of_blocks;
 };
 
 template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>

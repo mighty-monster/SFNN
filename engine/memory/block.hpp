@@ -13,8 +13,8 @@ namespace nne {
   class BlockMemory : public BaseMemory<ALLOC, DEALLOC>
   {
   public:
-    size_t SizeInBytes() override;
-    uint16_t NoOfBlocks();
+    inline size_t SizeInBytes() override;
+    inline uint16_t NoOfBlocks();
 
     virtual void SaveToFile(const char* p_file_path);
     virtual void LoadFromFile(const char* p_file_path) = 0;
