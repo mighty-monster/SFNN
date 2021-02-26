@@ -188,8 +188,7 @@ namespace nne {
 };
 
 
-// operator overload for "new"
-void* operator new (size_t p_size)
+void RecordAllocation(size_t p_size)
 {
   nne::g_allocation_counter++;
   nne::g_allocated_counter++;
@@ -198,6 +197,23 @@ void* operator new (size_t p_size)
 
   if (nne::g_print_allocations)
     std::cout << nne::g_allocation_monitor_signature << p_size << " bytes allcoated\n";
+}
+
+void RecordDeallocation(size_t p_size)
+{
+  nne::g_allocation_counter--;
+  nne::g_deallocated_counter++;
+
+  nne::g_deallocated_bytes += p_size;
+
+  if (nne::g_print_allocations)
+    std::cout << nne::g_allocation_monitor_signature << p_size << " bytes deallcoated\n";
+}
+
+// operator overload for "new"
+void* operator new (size_t p_size)
+{
+  RecordAllocation(p_size);
 
   void* memory = malloc(p_size);
 
@@ -212,13 +228,7 @@ void* operator new (size_t p_size)
 // operator overload for "new[]"
 void* operator new[] (size_t p_size)
 {
-  nne::g_allocation_counter++;
-  nne::g_allocated_counter++;
-
-  nne::g_allocated_bytes += p_size;
-
-  if (nne::g_print_allocations)
-    std::cout << nne::g_allocation_monitor_signature << p_size << " bytes allcoated\n";
+  RecordAllocation(p_size);
 
   void* memory = malloc(p_size);
 
@@ -233,15 +243,9 @@ void* operator new[] (size_t p_size)
 // operator overload for "delete"
 void operator delete(void* p_memory) noexcept
 {
-  nne::g_allocation_counter--;
-  nne::g_deallocated_counter++;
-
   size_t size = nne::g_allocation_table.GetSize(p_memory);
 
-  nne::g_deallocated_bytes += size;
-
-  if (nne::g_print_allocations)
-    std::cout << nne::g_allocation_monitor_signature << size << " bytes deallcoated\n";
+  RecordDeallocation(size);
 
   nne::g_allocation_table.Remove(p_memory);
 
@@ -251,15 +255,9 @@ void operator delete(void* p_memory) noexcept
 // operator overload for "delete[]"
 void operator delete[](void* p_memory) noexcept
 {
-  nne::g_allocation_counter--;
-  nne::g_deallocated_counter++;
-
   size_t size = nne::g_allocation_table.GetSize(p_memory);
 
-  nne::g_deallocated_bytes += size;
-
-  if (nne::g_print_allocations)
-    std::cout << nne::g_allocation_monitor_signature << size << " bytes deallcoated\n";
+  RecordDeallocation(size);
 
   nne::g_allocation_table.Remove(p_memory);
 

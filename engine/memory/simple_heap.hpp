@@ -12,21 +12,21 @@ namespace nne {
   {
   public:
     SimpleHeapMemory();
-    SimpleHeapMemory(const char* file_path);
-    SimpleHeapMemory(const size_t& length);
+    SimpleHeapMemory(const char* p_file_path);
+    SimpleHeapMemory(const size_t& p_length);
     ~SimpleHeapMemory();
 
-    void Allocate(const size_t& length);
+    void Allocate(const size_t& p_length);
     void Deallocate();
 
-    void LoadFromFile(const char* file_path) override;
+    void LoadFromFile(const char* p_file_path) override;
 
-    void LoadFromHexFile(const char* file_path) override;
+    void LoadFromHexFile(const char* p_file_path) override;
 
-    void Resize(const size_t& length) override;
+    void Resize(const size_t& p_length) override;
 
-    T& operator [] (const int64_t& index);
-    const T& operator [] (const int64_t& index) const;
+    T& operator [] (const size_t& p_index);
+    const T& operator [] (const size_t& p_index) const;
 
     size_t Length();
 

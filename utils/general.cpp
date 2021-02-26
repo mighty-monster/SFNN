@@ -104,7 +104,7 @@ void nne::HexToBuffer(void* p_buffer, const char* p_hex, const size_t& p_hex_siz
 }
 
 // Convert  bytes to Kilo Byte, Mega Byte, Giga Byte, etc
-void nne::BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t& p_result_size)
+void nne::BytesToHumanReadableSize(size_t p_size, char* p_result, const size_t& p_result_size)
 {
 
   uint64_t exa  = 1000LL*1000*1000*1000*1000*1000;
@@ -113,6 +113,9 @@ void nne::BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t
   uint64_t giga = 1000LL*1000*1000;
   uint64_t mega = 1000LL*1000;
   uint64_t kilo = 1000LL;
+
+  // Silences unused warning in __unix__ mode where the paramter is not used
+  (void)p_result_size;
 
 #ifdef WIN32
 
@@ -131,22 +134,22 @@ void nne::BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t
   else
     sprintf_s (p_result, p_result_size, "%llu Byte(s)", p_size);
 
-#elif __uinx__
+#elif __unix__
 
   if (p_size > exa)
     sprintf(p_result, "? Exabyte(s)");
   else if (p_size > peta)
-    sprintf(p_result,"%0.2f Petabyte(s)", (double)p_size / exa);
+    sprintf(p_result, "%0.2f Petabyte(s)", (double)p_size / exa);
   else if (p_size > tera)
-    sprintf(p_result,"%0.2f Terabyte(s)", (double)p_size / tera);
+    sprintf(p_result, "%0.2f Terabyte(s)", (double)p_size / tera);
   else if (p_size > giga)
-    sprintf(p_result,"%0.2f Gigabyte(s)", (double)p_size / giga);
+    sprintf(p_result, "%0.2f Gigabyte(s)", (double)p_size / giga);
   else if (p_size > mega)
     sprintf(p_result, "%0.2f Megabyte(s)", (double)p_size / mega);
   else if (p_size > kilo)
     sprintf(p_result, "%0.2f Kilobyte(s)", (double)p_size / kilo);
   else
-    sprintf(p_result, "%llu Byte(s)", p_size);
+    sprintf(p_result, "%lu Byte(s)", p_size);
 
 #endif
 }

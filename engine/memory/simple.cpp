@@ -15,18 +15,18 @@ size_t SimpleMemory<ALLOC, DEALLOC>::SizeInBytes()
 };
 
 template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>
-void SimpleMemory<ALLOC, DEALLOC>::SaveToFile(const char* file_path)
+void SimpleMemory<ALLOC, DEALLOC>::SaveToFile(const char* p_file_path)
 {
-  auto output_file = std::fstream(file_path, std::ios::out | std::ios::binary);
+  auto output_file = std::fstream(p_file_path, std::ios::out | std::ios::binary);
   output_file.write((char*)m_memory, this->m_size);
   output_file.close();
 };
 
 template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>
-void SimpleMemory<ALLOC, DEALLOC>::SaveToHexFile(const char* file_path)
+void SimpleMemory<ALLOC, DEALLOC>::SaveToHexFile(const char* p_file_path)
 {
   std::string memory_as_hex = ToHex();
-  auto output_file = std::fstream(file_path, std::ios::out);
+  auto output_file = std::fstream(p_file_path, std::ios::out);
   output_file << memory_as_hex;
   output_file.close();
 };

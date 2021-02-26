@@ -8,34 +8,31 @@ using namespace nne;
 
 template <typename T>
 SimpleHeapMemory<T>::SimpleHeapMemory()
+{};
+
+template <typename T>
+SimpleHeapMemory<T>::SimpleHeapMemory(const char* p_file_path)
 {
+  assert(p_file_path);
+  LoadFromFile(p_file_path);
 };
 
 template <typename T>
-SimpleHeapMemory<T>::SimpleHeapMemory(const char* file_path)
+SimpleHeapMemory<T>::SimpleHeapMemory(const size_t& p_length)
 {
-  assert(file_path);
-  LoadFromFile(file_path);
-};
-
-template <typename T>
-SimpleHeapMemory<T>::SimpleHeapMemory(const size_t& length)
-{
-  if (length > 0)
-    Allocate(length);
+  if (p_length > 0)
+    Allocate(p_length);
 };
 
 template <typename T>
 SimpleHeapMemory<T>::~SimpleHeapMemory()
-{
-  Deallocate();
-};
+{ Deallocate(); };
 
 template <typename T>
-void SimpleHeapMemory<T>::Allocate(const size_t& length)
+void SimpleHeapMemory<T>::Allocate(const size_t& p_length)
 {
-  m_length = length;
-  m_size = length * sizeof(T);
+  m_length = p_length;
+  m_size = p_length * sizeof(T);
   m_memory = new T[m_length];
   m_allocated = true;
 };
@@ -49,11 +46,10 @@ void SimpleHeapMemory<T>::Deallocate()
   m_allocated = false;
 };
 
-
 template <typename T>
-void SimpleHeapMemory<T>::LoadFromFile(const char* file_path)
+void SimpleHeapMemory<T>::LoadFromFile(const char* p_file_path)
 {
-  auto input_file = std::fstream(file_path, std::ios::in | std::ios::binary | std::ios::ate);
+  auto input_file = std::fstream(p_file_path, std::ios::in | std::ios::binary | std::ios::ate);
   Resize(input_file.tellg()/sizeof(T));
   input_file.seekg( 0, std::ios::beg);
   input_file.read((char*)m_memory, m_size);
@@ -61,9 +57,9 @@ void SimpleHeapMemory<T>::LoadFromFile(const char* file_path)
 };
 
 template <typename T>
-void SimpleHeapMemory<T>::LoadFromHexFile(const char* file_path)
+void SimpleHeapMemory<T>::LoadFromHexFile(const char* p_file_path)
 {
-  auto input_file = std::fstream(file_path, std::ios::in | std::ios::ate);
+  auto input_file = std::fstream(p_file_path, std::ios::in | std::ios::ate);
 
   size_t length = input_file.tellg()/sizeof(T)/2;
   Resize(length);
@@ -82,43 +78,43 @@ void SimpleHeapMemory<T>::LoadFromHexFile(const char* file_path)
 };
 
 template <typename T>
-void SimpleHeapMemory<T>::Resize(const size_t& length)
+void SimpleHeapMemory<T>::Resize(const size_t& p_length)
 {
-  if (length == m_length) return;
-  if (length == 0) {Deallocate(); return;}
+  if (p_length == m_length) return;
+  if (p_length == 0) {Deallocate(); return;}
 
   if (m_allocated)
   {
     void* previous_pointer = m_memory;
 
-    m_memory = new T[length];
+    m_memory = new T[p_length];
 
-    size_t copy_size_bytes = sizeof (T) * (length > m_length ? m_length : length);
+    size_t copy_size_bytes = sizeof (T) * (p_length > m_length ? m_length : p_length);
     memcpy(m_memory, previous_pointer, copy_size_bytes);
 
     delete[] (T*)previous_pointer;
 
-    m_length = length;
-    m_size = length * sizeof(T);
+    m_length = p_length;
+    m_size = p_length * sizeof(T);
 
     m_allocated = true;
   }
   else
   {
-    Allocate(length);
+    Allocate(p_length);
   }
 };
 
 template <typename T>
-T& SimpleHeapMemory<T> ::operator [] (const int64_t& index)
+T& SimpleHeapMemory<T> ::operator [] (const size_t& p_index)
 {
-  return *((T*)m_memory + index);
+  return *((T*)m_memory + p_index);
 };
 
 template <typename T>
-const T& SimpleHeapMemory<T> ::operator [] (const int64_t& index) const
+const T& SimpleHeapMemory<T> ::operator [] (const size_t& p_index) const
 {
-  return *((T*)m_memory + index);
+  return *((T*)m_memory + p_index);
 };
 
 template <typename T>

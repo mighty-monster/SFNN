@@ -16,13 +16,11 @@ int main()
   ENABLE_PRINT_ALLOC
   {
     BlockHeapMemory<int> mem(1024);
+    mem.Resize(11);
   }
 
   DISABLE_PRINT_ALLOC
   PRINT_ALLOC_SUMMERY
-
-  std::cout << sizeof (size_t) << std::endl;
-  std::cout << sizeof (unsigned long) << std::endl;
 
   return 0;
 }

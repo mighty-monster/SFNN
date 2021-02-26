@@ -9,26 +9,26 @@ namespace nne {
   {
   public:
     BlockHeapMemory();
-    BlockHeapMemory(const char* file_path);
-    BlockHeapMemory(const char* file_path, const size_t& no_of_blocks);
-    BlockHeapMemory(const size_t& length);
-    BlockHeapMemory(const size_t& length, const size_t& no_of_blocks);
+    BlockHeapMemory(const char* p_file_path);
+    BlockHeapMemory(const char* p_file_path, const uint16_t& p_no_of_blocks);
+    BlockHeapMemory(const size_t& p_length);
+    BlockHeapMemory(const size_t& p_length, const uint16_t& p_no_of_blocks);
     ~BlockHeapMemory();
 
-    void Allocate(const size_t& length, const size_t& no_of_blocks);
+    void Allocate(const size_t& p_length, const uint16_t& p_no_of_blocks);
     void Deallocate();
 
-    virtual void LoadFromFile(const char* file_path) override;
-    virtual void LoadFromFile(const char* file_path, const size_t& no_of_blocks) override;
+    virtual void LoadFromFile(const char* p_file_path) override;
+    virtual void LoadFromFile(const char* p_file_path, const uint16_t& p_no_of_blocks) override;
 
-    virtual void LoadFromHexFile(const char* file_path) override;
-    virtual void LoadFromHexFile(const char* file_path, const size_t& no_of_blocks) override;
+    virtual void LoadFromHexFile(const char* p_file_path) override;
+    virtual void LoadFromHexFile(const char* p_file_path, const uint16_t& p_no_of_blocks) override;
 
-    void Resize(const size_t& length) override;
-    void Reshape(const size_t& no_of_blocks) override;
+    void Resize(const size_t& p_length) override;
+    void Reshape(const uint16_t& p_no_of_blocks) override;
 
-    T& operator [] (const int64_t& index);
-    const T& operator [] (const int64_t& index) const;
+    T& operator [] (const size_t& p_index);
+    const T& operator [] (const size_t& p_index) const;
 
     size_t Length();
 

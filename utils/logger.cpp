@@ -264,6 +264,7 @@ void Logger::GetCurrentTime(char* p_date_time_str)
 
   // Buffer to store formated datetime
 
+// MinGW and Clang support strncpy_s on windows, so checking for
 #ifdef WIN32
   // Convert time_t to tm struct
   // localtime_s returns 0 if succesfull, that`s why the if`s logic is twisted ;)

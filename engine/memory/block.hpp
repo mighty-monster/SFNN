@@ -5,6 +5,8 @@
 
 #include "base.hpp"
 
+#define BLOCKMEMORY_DEFAULT_NO_OF_BLOCKS  2
+
 namespace nne {
 
   template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>
@@ -14,23 +16,23 @@ namespace nne {
     size_t SizeInBytes() override;
     uint16_t NoOfBlocks();
 
-    virtual void SaveToFile(const char* file_path);
-    virtual void LoadFromFile(const char* file_path) = 0;
-    virtual void LoadFromFile(const char* file_path, const size_t& no_of_blocks) = 0;
+    virtual void SaveToFile(const char* p_file_path);
+    virtual void LoadFromFile(const char* p_file_path) = 0;
+    virtual void LoadFromFile(const char* p_file_path, const uint16_t& p_no_of_blocks) = 0;
 
-    virtual void SaveToHexFile(const char* file_path);
-    virtual void LoadFromHexFile(const char* file_path) = 0;
-    virtual void LoadFromHexFile(const char* file_path, const size_t& no_of_blocks) = 0;
+    virtual void SaveToHexFile(const char* p_file_path);
+    virtual void LoadFromHexFile(const char* p_file_path) = 0;
+    virtual void LoadFromHexFile(const char* p_file_path, const uint16_t& p_no_of_blocks) = 0;
 
-    virtual void Reshape(const size_t& no_of_blocks) = 0;
+    virtual void Reshape(const uint16_t& no_of_blocks) = 0;
 
     virtual std::string ToHex();
 
     template<typename T>
-    T GetAsType(const size_t& index);
+    T GetAsType(const size_t& p_index);
 
     template<typename T>
-    void SetAsType(const size_t& index, const T& value);
+    void SetAsType(const size_t& p_index, const T& p_value);
 
   protected:
     BlockMemory() = default;
@@ -38,7 +40,6 @@ namespace nne {
     size_t m_block_size;
     size_t m_block_length;
     void** m_block_array;
-    size_t m_no_of_blocks = default_no_of_block;
-    static const size_t default_no_of_block = 2;
+    uint16_t m_no_of_blocks = BLOCKMEMORY_DEFAULT_NO_OF_BLOCKS;
   };
 }

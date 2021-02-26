@@ -35,7 +35,6 @@
 // BlockMemory the allocated memory might exceeds the memory available to end user.
 // Always use "Length" when you want to access all items in a loop.
 
-
 #pragma once
 
 #include <cstddef>
