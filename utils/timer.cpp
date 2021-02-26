@@ -3,10 +3,10 @@
 // Date:          12th Feb 2021
 // Description:   Measeres execution time from it`s creation till end of it`s scope
 
-#include <sstream>
-
 #include "timer.hpp"
 #include "logger.hpp"
+
+#include <sstream>
 
 using namespace nne;
 

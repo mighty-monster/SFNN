@@ -5,14 +5,26 @@
 
 #pragma once
 
+#include "logger.hpp"
+
 #include <cinttypes>
 #include <string>
 #include <assert.h>
 
-#include "logger.hpp"
 
+#ifdef _MSC_VER
+  #define __NNEFUNC__ __FUNCSIG__
+#elif defined(__GNUC__) || defined(__GNUG__) || defined(__clang__)
+  #define __NNEFUNC__ __PRETTY_FUNCTION__
+#endif
+
+#define NNERORR(_exp, _msg)  LogError(_exp, __NNEFUNC__, _msg); assert(_exp && _msg);
 
 namespace nne {
+  // __FUNC__ is not a macro, it`s constant static char*, to add function name to
+  // error, need to use a function
+  void LogError(bool condition, const char* p_function_name, const char* p_message);
+
   // Dumps a block of memory as Hex string
   std::string BufferToHex(void* p_buffer, size_t p_size);
 

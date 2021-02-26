@@ -1,23 +1,24 @@
+#include "memory/block.hpp"
+
+#include "utils/general.hpp"
+
 #include <fstream>
 #include <sstream>
 #include <string>
-
-#include "block.hpp"
-#include "utils/general.hpp"
 
 using namespace nne;
 
 template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>
 inline size_t BlockMemory<ALLOC, DEALLOC>::SizeInBytes()
 {
-  // "this->" is added because of linking lookup error when using templates
+  // "this->" is added because of lookup error when using templates
   return this->m_size;
 };
 
 template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>
 inline uint16_t BlockMemory<ALLOC, DEALLOC>::NoOfBlocks()
 {
-  // "this->" is added because of linking lookup error when using templates
+  // "this->" is added because of lookup error when using templates
   return this->m_no_of_blocks;
 };
 

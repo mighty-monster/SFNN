@@ -1,6 +1,6 @@
-#include <cstring>
+#include "memory/block_heap.hpp"
 
-#include "block_heap.hpp"
+#include <cstring>
 
 using namespace nne;
 

@@ -16,18 +16,8 @@ int main()
   ENABLE_PRINT_ALLOC
   {
     SimpleHeapMemory<float> mem(1024);
+    mem.SaveToFile("//24asd7a^%");
 
-    for (size_t i=0; i<mem.Length(); i++)
-      mem[i] = i + 0.5f;
-
-    float ref = mem.GetAsType<float>(8);
-
-    std::cout << ref << std::endl;
-    ref = 18.0f;
-
-    std::cout << mem.GetAsType<float>(8) << std::endl;
-
-    std::cout << ref << std::endl;
 
   }
 

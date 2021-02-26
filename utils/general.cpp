@@ -3,6 +3,8 @@
 // Date:          19th Feb 2021
 // Description:   Contains general useful fucntions
 
+#include "general.hpp"
+#include "logger.hpp"
 
 #include <sstream>
 #include <iomanip>
@@ -11,8 +13,35 @@
 #include <cinttypes>
 #include <cstring>
 
-#include "general.hpp"
-#include "logger.hpp"
+// __FUNC__ is not a macro, it`s constant static char*, to add function name to
+// error, need to use a function
+void nne::LogError(bool condition, const char* p_function_name, const char* p_message)
+{
+  if (condition) {return;}
+  char arrow[] = " --> ";
+
+#ifdef _MSC_VER
+
+  char message[WIN32_MESSAGE_MAX_LENGTH];
+  std::fill(message, message + strlen(message) ,0);
+  strncpy_s(message, p_function_name, strlen(p_function_name));
+  strncat_s(message, arrow, strlen(arrow));
+  strncat_s(message, p_message, strlen(p_message));
+
+#elif defined(__GNUC__) || defined(__GNUG__) || defined(__clang__)
+
+  size_t message_length = strlen(p_function_name) + strlen(p_message) + strlen(arrow);
+  char message[message_length];
+  std::fill(message, message + strlen(message) ,0);
+
+  strncpy(message, p_function_name, strlen(p_function_name));
+  strncat(message, arrow, strlen(arrow));
+  strncat(message, p_message, strlen(p_message));
+
+#endif
+
+  Logger::Error(message);
+}
 
 // Dumps a block of memory as Hex string
 std::string nne::BufferToHex(void* p_buffer, size_t p_size)

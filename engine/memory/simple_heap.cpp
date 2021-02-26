@@ -1,8 +1,14 @@
+// File Name:     simple_heap.hpp
+// Author:        Arash Fatehi
+// Date:          27th Feb 2021
+// Description:   Typed linear heap memory class
+
+#include "memory/simple_heap.hpp"
+
+#include "utils/general.hpp"
+
 #include <cstring>
 #include <fstream>
-
-#include "simple_heap.hpp"
-#include "utils/general.hpp"
 
 using namespace nne;
 
@@ -13,7 +19,6 @@ SimpleHeapMemory<T>::SimpleHeapMemory()
 template <typename T>
 SimpleHeapMemory<T>::SimpleHeapMemory(const char* p_file_path)
 {
-  assert(p_file_path);
   LoadFromFile(p_file_path);
 };
 
@@ -29,11 +34,17 @@ SimpleHeapMemory<T>::~SimpleHeapMemory()
 { Deallocate(); };
 
 template <typename T>
-void SimpleHeapMemory<T>::Allocate(const size_t& p_length)
+void SimpleHeapMemory<T>::Allocate(const size_t& p_length) noexcept
 {
+  m_memory = new T[p_length];
+  if (!m_memory)
+  {
+    NNERORR(m_memory, "new operation failed, this is a severe error!");
+    return;
+  }
+
   m_length = p_length;
   m_size = p_length * sizeof(T);
-  m_memory = new T[m_length];
   m_allocated = true;
 };
 
@@ -50,9 +61,31 @@ template <typename T>
 void SimpleHeapMemory<T>::LoadFromFile(const char* p_file_path)
 {
   auto input_file = std::fstream(p_file_path, std::ios::in | std::ios::binary | std::ios::ate);
-  Resize(input_file.tellg()/sizeof(T));
+
+  if (input_file.fail())
+  {
+    NNERORR(!input_file.fail(), "file path is not valid");
+    return;
+  }
+
+  size_t file_size = input_file.tellg();
+
+  if (input_file.fail())
+  {
+    NNERORR(!input_file.fail(), "failed to get file size");
+    return;
+  }
+
+  Resize(file_size/sizeof(T));
+
   input_file.seekg( 0, std::ios::beg);
   input_file.read((char*)m_memory, m_size);
+  if (input_file.fail())
+  {
+    NNERORR(!input_file.fail(), "failed to read the file");
+    return;
+  }
+
   input_file.close();
 };
 
@@ -61,9 +94,23 @@ void SimpleHeapMemory<T>::LoadFromHexFile(const char* p_file_path)
 {
   auto input_file = std::fstream(p_file_path, std::ios::in | std::ios::ate);
 
+  if (input_file.fail())
+  {
+    NNERORR(!input_file.fail(), "file path is not valid");
+    return;
+  }
+
   size_t length = input_file.tellg()/sizeof(T)/2;
+  if (input_file.fail())
+  {
+    NNERORR(!input_file.fail(), "failed to get file size");
+    return;
+  }
+
   Resize(length);
 
+  // The whole file is read at once, if used extensively, this should be done in
+  // a loop that read the file gradually
   size_t file_buffer_size = 2*m_size;
   char* file_buffer_string = new char[file_buffer_size];
 

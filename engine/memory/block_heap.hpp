@@ -1,7 +1,7 @@
 #pragma once
 
-#include "block.hpp"
-#include "block.cpp"
+#include "memory/block.hpp"
+#include "memory/block.cpp"
 
 namespace nne {
   template <typename T>

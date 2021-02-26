@@ -1,9 +1,9 @@
 #pragma once
 
+#include "memory/base.hpp"
+
 #include <cinttypes>
 #include <string>
-
-#include "base.hpp"
 
 #define BLOCKMEMORY_DEFAULT_NO_OF_BLOCKS  2
 

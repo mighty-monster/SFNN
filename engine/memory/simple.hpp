@@ -6,7 +6,7 @@
 // Detail Description:
 // Simple memory class has a linear structure,  contains a single pointer with allocated memory to it,
 // acts as the base class for any custom memory class that uses a user-defined Allocator,
-// and Deallocator with a linear structure. Also, the MemoryViewer classes derive from it.
+// and Deallocator with a linear structure. Also, the MemoryViewer classes probably derive from it.
 // ---------------------
 // Hint:
 // "Save" and "Load" functions work with memory regardless of the ISA`s endianness, they dump and load
@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include <string>
-
 #include "memory/base.hpp"
+
+#include <string>
 
 namespace nne {
   template <ALLOCATOR* ALLOC, DEALLOCATOR* DEALLOC>

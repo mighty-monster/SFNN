@@ -3,11 +3,11 @@
 // Date:          12th Feb 2021
 // Description:   Facilitates logging to console and files
 
+#include "logger.hpp"
+
 #include <chrono>
 #include <ctime>
 #include <cstring>
-
-#include "logger.hpp"
 
 using namespace nne;
 
