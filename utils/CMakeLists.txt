@@ -1,4 +1,5 @@
 add_library(utils
+  platform.hpp
   memonitor.hpp
   general.hpp
   general.cpp

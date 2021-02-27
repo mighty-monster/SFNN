@@ -5,6 +5,8 @@
 
 #include "logger.hpp"
 
+#include "general.hpp"
+
 #include <chrono>
 #include <ctime>
 #include <cstring>
@@ -99,24 +101,8 @@ void Logger::IError(const char* p_message)
 {
   if (m_level >= LevelError)
   {
-
-#ifdef _MSC_VER
-    char temp_str[WIN32_MESSAGE_MAX_LENGTH];
-    std::fill(temp_str, temp_str + strlen(temp_str) ,0);
-
-    strncpy_s(temp_str, m_str_error, strlen(m_str_error));
-    strncpy_s(temp_str, p_message, strlen(p_message));
-    strncpy_s(temp_str, m_str_enter, strlen(m_str_enter));
-#elif defined(__GNUC__) || defined(__GNUG__) || defined(__clang__)
-    char temp_str[strlen(m_str_error) + strlen(p_message) + strlen(m_str_enter)];
-    std::fill(temp_str, temp_str + strlen(temp_str) ,0);
-
-    strncpy(temp_str, m_str_error, strlen(m_str_error));
-    strncat(temp_str, p_message, strlen(p_message));
-    strncat(temp_str, m_str_enter, strlen(m_str_enter));
-#endif
-
-    ILog(temp_str);
+    IAddTitle(m_str_error, p_message);
+    ILog();
   }
 };
 
@@ -124,22 +110,8 @@ void Logger::IWarn(const char* p_message)
 {
   if (m_level >= LevelWarning)
   {
-#ifdef _MSC_VER
-    char temp_str[WIN32_MESSAGE_MAX_LENGTH];
-    std::fill(temp_str, temp_str + strlen(temp_str) ,0);
-
-    strncpy_s(temp_str, m_str_warning, strlen(m_str_warning));
-    strncat_s(temp_str, p_message, strlen(p_message));
-    strncat_s(temp_str, m_str_enter, strlen(m_str_enter));
-#elif defined(__GNUC__) || defined(__GNUG__) || defined(__clang__)
-    char temp_str[strlen(m_str_warning) + strlen(p_message) + strlen(m_str_enter)];
-    std::fill(temp_str, temp_str + strlen(temp_str) ,0);
-
-    strncpy(temp_str, m_str_warning, strlen(m_str_warning));
-    strncat(temp_str, p_message, strlen(p_message));
-    strncat(temp_str, m_str_enter, strlen(m_str_enter));
-#endif
-    ILog(temp_str);
+    IAddTitle(m_str_warning, p_message);
+    ILog();
   }
 };
 
@@ -147,47 +119,48 @@ void Logger::IInfo(const char* p_message)
 {
   if (m_level >= LevelInfo)
   {
-#ifdef _MSC_VER
-    char temp_str[WIN32_MESSAGE_MAX_LENGTH];
-    std::fill(temp_str, temp_str + strlen(temp_str) ,0);
-
-    strncpy_s(temp_str, m_str_info, strlen(m_str_info));
-    strncat_s(temp_str, p_message, strlen(p_message));
-    strncat_s(temp_str, m_str_enter, strlen(m_str_enter));
-#elif defined(__GNUC__) || defined(__GNUG__) || defined(__clang__)
-    char temp_str[strlen(m_str_info) + strlen(p_message) + strlen(m_str_enter)];
-    std::fill(temp_str, temp_str + strlen(temp_str) ,0);
-
-    strncpy(temp_str, m_str_info, strlen(m_str_info));
-    strncat(temp_str, p_message, strlen(p_message));
-    strncat(temp_str, m_str_enter, strlen(m_str_enter));
-#endif
-    ILog(temp_str);
+    IAddTitle(m_str_info, p_message);
+    ILog();
   }
 };
 
 void Logger::IDebug(const char* p_message)
 {
   if (m_level >= LevelDebug)
-  {
-#ifdef _MSC_VER
-    char temp_str[WIN32_MESSAGE_MAX_LENGTH];
-    std::fill(temp_str, temp_str + strlen(temp_str) ,0);
-
-    strncpy_s(temp_str, m_str_debug, strlen(m_str_debug));
-    strncat_s(temp_str, p_message, strlen(p_message));
-    strncat_s(temp_str, m_str_enter, strlen(m_str_enter));
-#elif defined(__GNUC__) || defined(__GNUG__) || defined(__clang__)
-    char temp_str[strlen(m_str_debug) + strlen(p_message) + strlen(m_str_enter)];
-    std::fill(temp_str, temp_str + strlen(temp_str) ,0);
-
-    strncpy(temp_str, m_str_debug, strlen(m_str_debug));
-    strncat(temp_str, p_message, strlen(p_message));
-    strncat(temp_str, m_str_enter, strlen(m_str_enter));
-#endif
-    ILog(temp_str);
+  {    
+    IAddTitle(m_str_debug, p_message);
+    ILog();
   }
 };
+
+void Logger::IAddTitle(const char* p_title,const char* p_message)
+{
+  size_t offset = 0;
+
+  // One byte reduced to overwite the null termination character
+  // Hint: NNE_LOGGER_DATETIME_BUFFER_SIZE is the size with null charachter
+  offset += strlen(m_str_left_decorator) +
+      NNE_LOGGER_DATETIME_BUFFER_SIZE + strlen(m_str_right_decorator) - 1;
+
+  // Add content in place to m_buffer by calculating the proper offset
+  // and copying the content in the right place
+
+  nne::strcpy_nne(m_buffer, NNE_LOGGER_BUFFER_GLOBAL,
+                  p_title, strlen(p_title), offset);
+
+  offset += strlen(p_title);
+  nne::strcpy_nne(m_buffer, NNE_LOGGER_BUFFER_GLOBAL,
+                  p_message,   strlen(p_message),   offset);
+
+  offset += strlen(p_message);
+  nne::strcpy_nne(m_buffer, NNE_LOGGER_BUFFER_GLOBAL,
+                  m_str_enter, strlen(m_str_enter), offset);
+
+  // Adding null chachter to the end
+  offset += strlen(m_str_enter);
+  nne::strcpy_nne(m_buffer, NNE_LOGGER_BUFFER_GLOBAL,
+                  m_str_null, strlen(m_str_null), offset);
+}
 
 void Logger::ILogToConsole(const char* p_message)
 {
@@ -203,37 +176,30 @@ void Logger::ILogToFile(const char* p_message)
   }
 };
 
-void Logger::ILog(const char* p_message)
+void Logger::ILog()
 {
-
-  char current_time[DATETIME_BUFFER_SIZE];
+  char current_time[NNE_LOGGER_DATETIME_BUFFER_SIZE];
   GetCurrentTime(current_time);
 
-#ifdef _MSC_VER
-  char temp_str[WIN32_MESSAGE_MAX_LENGTH];
+  // Add content in place to m_buffer by calculating the proper offset
+  // and copying the content in the right place
+  size_t offset = 0;
+  nne::strcpy_nne(m_buffer, NNE_LOGGER_BUFFER_GLOBAL,
+                  m_str_left_decorator, strlen(m_str_left_decorator), offset);
 
-  std::fill(temp_str, temp_str + strlen(temp_str) ,0);
+  offset += strlen(m_str_left_decorator);
+  nne::strcpy_nne(m_buffer, NNE_LOGGER_BUFFER_GLOBAL,
+                  current_time, strlen(current_time), offset);
 
-  strncpy_s(temp_str, m_str_left_decorator, strlen(m_str_left_decorator));
-  strncat_s(temp_str, current_time, strlen(current_time));
-  strncat_s(temp_str, m_str_right_decorator, strlen(m_str_right_decorator));
-  strncat_s(temp_str, p_message, strlen(p_message));
-#elif defined(__GNUC__) || defined(__GNUG__) || defined(__clang__)
-  char temp_str[strlen(m_str_left_decorator) + strlen(current_time) +
-      strlen(m_str_right_decorator) + strlen(p_message)];
+  offset += strlen(current_time);
+  nne::strcpy_nne(m_buffer, NNE_LOGGER_BUFFER_GLOBAL,
+                  m_str_right_decorator, strlen(m_str_right_decorator), offset);
 
-  std::fill(temp_str, temp_str + strlen(temp_str) ,0);
-
-  strncpy(temp_str, m_str_left_decorator, strlen(m_str_left_decorator));
-  strncat(temp_str, current_time, strlen(current_time));
-  strncat(temp_str, m_str_right_decorator, strlen(m_str_right_decorator));
-  strncat(temp_str, p_message, strlen(p_message));
-#endif
   if(m_log_to_console)
-    ILogToConsole(temp_str);
+    ILogToConsole(m_buffer);
 
   if(m_log_to_file)
-    ILogToFile(temp_str);
+    ILogToFile(m_buffer);
 };
 
 void Logger::OpenLogFile()
@@ -262,45 +228,44 @@ void Logger::GetCurrentTime(char* p_date_time_str)
   // Convert time_point to time_t
   std::time_t time_t_now = std::chrono::system_clock::to_time_t(time_point_now);
 
-  // Buffer to store formated datetime
-
-// MinGW and Clang support strncpy_s on windows, so checking for
-#ifdef WIN32
+// MSVC prefers localtime_s
+#if defined(NNE_WIN_MSVC)
   // Convert time_t to tm struct
   // localtime_s returns 0 if succesfull, that`s why the if`s logic is twisted ;)
   struct tm tm_struct;
   if (localtime_s(&tm_struct, &time_t_now))
   {
     std::cerr<<"Logger::GetCurrentTime() -- Failed to convert time_t to tm struct\n";
-    strncpy_s(p_date_time_str, DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown));
+    strncpy_s(p_date_time_str, NNE_LOGGER_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
   }
 
   // Format tm struct into the buffer
   if (!std::strftime(p_date_time_str,
-                     DATETIME_BUFFER_SIZE,
+                     NNE_LOGGER_DATETIME_BUFFER_SIZE,
                      "%Y-%m-%d %H:%M:%S",
                      &tm_struct))
   {
     std::cerr<<"Logger::GetCurrentTime() -- Failed to format tm struct\n";
-    strncpy_s(p_date_time_str, DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown));
+    strncpy_s(p_date_time_str, NNE_LOGGER_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
   }
-#elif __unix__
+// GCC doesn`t currently suport localtime_s, others might not as well
+#else
   // Convert time_t to tm struct
   struct tm* tm_struct = localtime(&time_t_now);
   if (!tm_struct)
   {
     std::cerr<<"Logger::GetCurrentTime() -- Failed to convert time_t to tm struct\n";
-    strncpy(p_date_time_str, m_str_unknown, strlen(m_str_unknown));
+    strncpy(p_date_time_str, m_str_unknown, strlen(m_str_unknown) + 1);
   }
 
   // Format tm struct into the buffer
   if (!std::strftime(p_date_time_str,
-                     DATETIME_BUFFER_SIZE,
+                     NNE_LOGGER_DATETIME_BUFFER_SIZE,
                      "%Y-%m-%d %H:%M:%S",
                      tm_struct))
   {
     std::cerr<<"Logger::GetCurrentTime() -- Failed to format tm struct\n";
-    strncpy(p_date_time_str, m_str_unknown, strlen(m_str_unknown));
+    strncpy(p_date_time_str, m_str_unknown, strlen(m_str_unknown) + 1);
   }
 #endif
 

@@ -12,13 +12,11 @@
 
 int main()
 {
-  nne::Logger::Init(nne::Logger::LevelDebug, true, false);
+  nne::Logger::Init(nne::Logger::LevelDebug, true, true);
   ENABLE_PRINT_ALLOC
   {
     SimpleHeapMemory<float> mem(1024);
     mem.SaveToFile("//24asd7a^%");
-
-
   }
 
   DISABLE_PRINT_ALLOC

@@ -13,32 +13,29 @@
 #include <cinttypes>
 #include <cstring>
 
-// __FUNC__ is not a macro, it`s constant static char*, to add function name to
-// error, need to use a function
+
+// __FUNC__, __FUCNTION__, __FUNCSIG__, and __PRETTY_FUNCTION__ are not macros,
+// they are constant static char* variables, to add function name to
+// logged error, need to use a function in combination to a macro
 void nne::LogError(bool condition, const char* p_function_name, const char* p_message)
 {
   if (condition) {return;}
   char arrow[] = " --> ";
 
-#ifdef _MSC_VER
+  // Alocating message memory on stack,
+  // One byte extra added for null termination charachter,
+  // Hint: "strlen()" doesn`t include null termination charachter in reported length
+  size_t message_length = strlen(p_function_name) + strlen(arrow) + strlen(p_message) + 1;
+  // MSVC doesn`t support "char message[message_length]" as valid statement
+  // So "alloca" was used to allocated memory for the message
+  char* message = (char*)alloca(message_length);
 
-  char message[WIN32_MESSAGE_MAX_LENGTH];
-  std::fill(message, message + strlen(message) ,0);
-  strncpy_s(message, p_function_name, strlen(p_function_name));
-  strncat_s(message, arrow, strlen(arrow));
-  strncat_s(message, p_message, strlen(p_message));
-
-#elif defined(__GNUC__) || defined(__GNUG__) || defined(__clang__)
-
-  size_t message_length = strlen(p_function_name) + strlen(p_message) + strlen(arrow);
-  char message[message_length];
-  std::fill(message, message + strlen(message) ,0);
-
-  strncpy(message, p_function_name, strlen(p_function_name));
-  strncat(message, arrow, strlen(arrow));
-  strncat(message, p_message, strlen(p_message));
-
-#endif
+  // Null termination charchter is copied in each function call, but rewriten on the
+  // next call and only the last null charachter will remain at the end.
+  // This is necessary for strcat_nne to work.
+  nne::strcpy_nne(message, message_length, p_function_name, strlen(p_function_name) + 1);
+  nne::strcat_nne(message, message_length, arrow, strlen(arrow) + 1);
+  nne::strcat_nne(message, message_length, p_message, strlen(p_message) + 1);
 
   Logger::Error(message);
 }
@@ -133,7 +130,7 @@ void nne::HexToBuffer(void* p_buffer, const char* p_hex, const size_t& p_hex_siz
 }
 
 // Convert  bytes to Kilo Byte, Mega Byte, Giga Byte, etc
-void nne::BytesToHumanReadableSize(size_t p_size, char* p_result, const size_t& p_result_size)
+void nne::BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t& p_result_size)
 {
 
   uint64_t exa  = 1000LL*1000*1000*1000*1000*1000;
@@ -143,42 +140,59 @@ void nne::BytesToHumanReadableSize(size_t p_size, char* p_result, const size_t& 
   uint64_t mega = 1000LL*1000;
   uint64_t kilo = 1000LL;
 
-  // Silences unused warning in __unix__ mode where the paramter is not used
-  (void)p_result_size;
-
-#ifdef WIN32
-
   if (p_size > exa)
-    strncpy_s(p_result, p_result_size, "? Exabyte(s)", strlen("? Exabyte(s)"));
+    nne::strcpy_nne(p_result, p_result_size, "? Exabyte(s)", strlen("? Exabyte(s)"));
   else if (p_size > peta)
-    sprintf_s (p_result, p_result_size ,"%0.2f Petabyte(s)", (double)p_size / exa);
+    nne::sprintf_nne (p_result, p_result_size ,"%0.2f Petabyte(s)", (double)p_size / exa);
   else if (p_size > tera)
-    sprintf_s (p_result, p_result_size, "%0.2f Terabyte(s)", (double)p_size / tera);
+    nne::sprintf_nne (p_result, p_result_size, "%0.2f Terabyte(s)", (double)p_size / tera);
   else if (p_size > giga)
-    sprintf_s (p_result, p_result_size, "%0.2f Gigabyte(s)", (double)p_size / giga);
+    nne::sprintf_nne (p_result, p_result_size, "%0.2f Gigabyte(s)", (double)p_size / giga);
   else if (p_size > mega)
-    sprintf_s (p_result, p_result_size, "%0.2f Megabyte(s)", (double)p_size / mega);
+    nne::sprintf_nne (p_result, p_result_size, "%0.2f Megabyte(s)", (double)p_size / mega);
   else if (p_size > kilo)
-    sprintf_s (p_result, p_result_size, "%0.2f Kilobyte(s)", (double)p_size / kilo);
+    nne::sprintf_nne (p_result, p_result_size, "%0.2f Kilobyte(s)", (double)p_size / kilo);
   else
-    sprintf_s (p_result, p_result_size, "%llu Byte(s)", p_size);
+    nne::sprintf_nne (p_result, p_result_size, "%llu Byte(s)", p_size);
 
-#elif __unix__
+}
 
-  if (p_size > exa)
-    sprintf(p_result, "? Exabyte(s)");
-  else if (p_size > peta)
-    sprintf(p_result, "%0.2f Petabyte(s)", (double)p_size / exa);
-  else if (p_size > tera)
-    sprintf(p_result, "%0.2f Terabyte(s)", (double)p_size / tera);
-  else if (p_size > giga)
-    sprintf(p_result, "%0.2f Gigabyte(s)", (double)p_size / giga);
-  else if (p_size > mega)
-    sprintf(p_result, "%0.2f Megabyte(s)", (double)p_size / mega);
-  else if (p_size > kilo)
-    sprintf(p_result, "%0.2f Kilobyte(s)", (double)p_size / kilo);
-  else
-    sprintf(p_result, "%lu Byte(s)", p_size);
+// Compiler independent strcpy
+int nne::strcpy_nne(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length, size_t p_offset)
+{
+  if (p_offset + p_src_length >= p_dest_length)
+  {
+    std::cerr << "strcpy_nne() --> destination doen`t have enough space";
+    return 0;
+  }
+  memcpy(p_dest + p_offset, p_src, p_src_length);
+  return 1;
+}
 
+// Compiler independent strcat
+int nne::strcat_nne(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length)
+{
+  if (p_src_length > p_dest_length)
+  {
+    std::cerr << "strcat_nne() --> destination doen`t have enough space";
+    return 0;
+  }
+#ifdef NNE_WIN_MSVC
+  strncat_s(p_dest, p_dest_length, p_src, p_src_length);
+#else
+  strncat(p_dest, p_src, p_src_length);
+#endif
+  return 1;
+}
+
+// Compiler independent sprintf
+template<typename ... Args>
+int nne::sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args)
+{
+#ifdef NNE_WIN_MSVC
+  return sprintf_s(p_dest, p_dest_length, p_format, p_args ... );
+#else
+  NNEUSE(p_dest_length);
+  return sprintf(p_dest, p_format, p_args ...);
 #endif
 }

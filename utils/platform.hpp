@@ -1,0 +1,30 @@
+// File Name:     platform.hpp
+// Author:        Arash Fatehi
+// Date:          27th Feb 2021
+// Description:   Detects platform information
+// ---------------------
+// Detail Description:
+// Consists of macros and classes that be added as per NNE needs in future
+// Currently it only detect the Compiler and OS
+// ---------------------
+// OS: Windows, Unix
+// Compiler: GCC, Clang, MSVC, MinGW
+
+#pragma once
+
+#if defined(_WIN32)
+  #if defined(_MSC_VER)
+    #define NNE_WIN_MSVC
+  #elif defined(__MINGW32__) || defined(__GNUC__)
+    #define NNE_WIN_MINGW
+  #elif defined(__clang__) || defined(__clang_version__)
+    #define NNE_WIN_CLANG
+  #endif
+#elif __unix__
+  #if defined(__GNUC__)
+    #define NNE_UNIX_GCC
+  #elif defined(__clang__)
+    #define NNE_UNIX_CLANG
+  #endif
+#endif
+

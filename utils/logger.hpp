@@ -9,8 +9,20 @@
 // Log Levels: Error, Warning, Info, Debug
 // ---------------------
 // Help:
-// Use GetInstance() to recieve a singleton instance of the object and static methods "Error", "Warn",
+// Use "GetInstance()" to recieve a singleton instance of the object and static methods "Error", "Warn",
 // "Info", and "Debug" for logging
+// ---------------------
+// Hint:
+// The Logger class will instantiate as a local static variable in "GetInstance()"
+// It is a global variable that will be allocated on .data section on most compilers
+// It wont wast stack memory, also wont cause heap allocations, that is why m_buffer
+// used as a global buffer for the class, and any recieved message will
+// be decorated in place using m_buffer, it is little bit hacky and also messy
+// But I prefer this approach due to stack limitations of windows
+// Heap allcoation was not used for "memmonitor.hpp" module to work properly,
+// otherwise it would report the allocated memory all the time as Logger is a
+// global object, this hinders the module to detect memory leaks at the end
+// of program and print a useful summery.
 
 #pragma once
 
@@ -19,8 +31,12 @@
 #include <string>
 #include <future>
 
-#define DATETIME_BUFFER_SIZE 20
-#define WIN32_MESSAGE_MAX_LENGTH 2048
+// The length datetime string, Example: "2021-02-12 12:00:00"
+#define NNE_LOGGER_DATETIME_BUFFER_SIZE 20
+
+// The size logger buffer, increase if needed, global variables will allocate
+// on .data section on most compilers and do not wast stack or cause heap allocation
+#define NNE_LOGGER_BUFFER_GLOBAL 8192
 
 namespace nne {
   class Logger
@@ -76,9 +92,12 @@ namespace nne {
     void IInfo(const char* p_message);
     void IDebug(const char* p_message);
 
+    // Decorates the message with proper title
+    void IAddTitle(const char* p_title,const char* p_message);
+
     void ILogToConsole(const char* p_message);
     void ILogToFile(const char* p_message);
-    void ILog(const char* p_message);
+    void ILog();
 
     void OpenLogFile();
     void CloseLogFile();
@@ -94,6 +113,7 @@ namespace nne {
     const char* m_str_info = "[INF]: ";
     const char* m_str_debug = "[DBG]: ";
     const char* m_str_enter = "\n";
+    const char* m_str_null = "\0";
     const char* m_str_left_decorator = "|";
     const char* m_str_right_decorator = "| ";
     const char* m_str_unknown = "Unknown";
@@ -102,8 +122,10 @@ namespace nne {
     bool m_log_to_console = true;
     bool m_log_to_file = false;
 
+    // variable to store the formated message
+    char m_buffer[NNE_LOGGER_BUFFER_GLOBAL];
+
     // The mutex used for thread safety when writing to log file
     std::mutex m_mutex;
-
   };
 }
