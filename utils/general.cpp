@@ -13,18 +13,16 @@
 #include <cinttypes>
 #include <cstring>
 
-
 // __FUNC__, __FUCNTION__, __FUNCSIG__, and __PRETTY_FUNCTION__ are not macros,
 // they are constant static char* variables, to add function name to
 // logged error, need to use a function in combination to a macro
-void nne::LogError(bool condition, const char* p_function_name, const char* p_message)
+void nne::LogError(const char* p_function_name, const char* p_message) noexcept
 {
-  if (condition) {return;}
   char arrow[] = " --> ";
 
   // Alocating message memory on stack,
   // One byte extra added for null termination charachter,
-  // Hint: "strlen()" doesn`t include null termination charachter in reported length
+  // Note: "strlen()" doesn`t include null termination charachter in reported length
   size_t message_length = strlen(p_function_name) + strlen(arrow) + strlen(p_message) + 1;
   // MSVC doesn`t support "char message[message_length]" as valid statement
   // So "alloca" was used to allocated memory for the message
@@ -62,11 +60,9 @@ void nne::HexToBuffer(void* p_buffer, const std::string& p_hex)
   // the function is used in performance critical sections of code
 
   // Hex string should have even number of characters
-  if (p_hex.size() % 2)
+  if (p_hex.size() % 2 != 0)
   {
-    Logger::Error(std::string(__func__) +
-                  " --> Length of hex string should be an even number. "
-                  "Nothing was writen into the buffer");
+    //Todo: Add error message
   }
   else
   {
@@ -91,10 +87,9 @@ void nne::HexToBuffer(void* p_buffer, const std::string& p_hex)
   }
 }
 
-
 // Loads an Hex string into a block of memory
 // The buffer should have enough allocated memory
-void nne::HexToBuffer(void* p_buffer, const char* p_hex, const size_t& p_hex_size)
+void nne::HexToBuffer(void* p_buffer, const char* p_hex, const size_t p_hex_size)
 {
   // This implementation is not optimized, should change it if
   // the function is used in performance critical sections of code
@@ -130,69 +125,75 @@ void nne::HexToBuffer(void* p_buffer, const char* p_hex, const size_t& p_hex_siz
 }
 
 // Convert  bytes to Kilo Byte, Mega Byte, Giga Byte, etc
-void nne::BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t& p_result_size)
+void nne::BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t p_result_size) noexcept
 {
+  const uint64_t exa  = 1000LL*1000*1000*1000*1000*1000;
+  const uint64_t peta = 1000LL*1000*1000*1000*1000;
+  const uint64_t tera = 1000LL*1000*1000*1000;
+  const uint64_t giga = 1000LL*1000*1000;
+  const uint64_t mega = 1000LL*1000;
+  const uint64_t kilo = 1000LL;
 
-  uint64_t exa  = 1000LL*1000*1000*1000*1000*1000;
-  uint64_t peta = 1000LL*1000*1000*1000*1000;
-  uint64_t tera = 1000LL*1000*1000*1000;
-  uint64_t giga = 1000LL*1000*1000;
-  uint64_t mega = 1000LL*1000;
-  uint64_t kilo = 1000LL;
-
-  if (p_size > exa)
-    nne::strcpy_nne(p_result, p_result_size, "? Exabyte(s)", strlen("? Exabyte(s)"));
-  else if (p_size > peta)
-    nne::sprintf_nne (p_result, p_result_size ,"%0.2f Petabyte(s)", (double)p_size / exa);
-  else if (p_size > tera)
-    nne::sprintf_nne (p_result, p_result_size, "%0.2f Terabyte(s)", (double)p_size / tera);
-  else if (p_size > giga)
-    nne::sprintf_nne (p_result, p_result_size, "%0.2f Gigabyte(s)", (double)p_size / giga);
-  else if (p_size > mega)
-    nne::sprintf_nne (p_result, p_result_size, "%0.2f Megabyte(s)", (double)p_size / mega);
-  else if (p_size > kilo)
-    nne::sprintf_nne (p_result, p_result_size, "%0.2f Kilobyte(s)", (double)p_size / kilo);
-  else
-    nne::sprintf_nne (p_result, p_result_size, "%llu Byte(s)", p_size);
-
+  try
+  {
+    if (p_size > exa)
+      nne::strcpy_nne(p_result, p_result_size, "? Exabyte(s)", strlen("? Exabyte(s)"));
+    else if (p_size > peta)
+      nne::sprintf_nne (p_result, p_result_size ,"%0.2f Petabyte(s)", (double)p_size / exa);
+    else if (p_size > tera)
+      nne::sprintf_nne (p_result, p_result_size, "%0.2f Terabyte(s)", (double)p_size / tera);
+    else if (p_size > giga)
+      nne::sprintf_nne (p_result, p_result_size, "%0.2f Gigabyte(s)", (double)p_size / giga);
+    else if (p_size > mega)
+      nne::sprintf_nne (p_result, p_result_size, "%0.2f Megabyte(s)", (double)p_size / mega);
+    else if (p_size > kilo)
+      nne::sprintf_nne (p_result, p_result_size, "%0.2f Kilobyte(s)", (double)p_size / kilo);
+    else
+      nne::sprintf_nne (p_result, p_result_size, "%llu Byte(s)", p_size);
+  }
+  catch (std::exception& ex)
+  {
+    NNELLRORR(ex.what());
+  }
+  catch (...)
+  {
+    NNELLRORR("Unkown exception thrown in BytesToHumanReadableSize(uint64_t, char*, const size_t)");
+  }
 }
 
 // Compiler independent strcpy
-int nne::strcpy_nne(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length, size_t p_offset)
+void nne::strcpy_nne(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length, size_t p_offset) noexcept
 {
-  if (p_offset + p_src_length >= p_dest_length)
+  if (p_offset + p_src_length > p_dest_length)
   {
-    std::cerr << "strcpy_nne() --> destination doen`t have enough space";
-    return 0;
+    NNELLRORR("destination doen`t have enough space");
+    return;
   }
+
   memcpy(p_dest + p_offset, p_src, p_src_length);
-  return 1;
 }
 
 // Compiler independent strcat
-int nne::strcat_nne(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length)
+void nne::strcat_nne(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length) noexcept
 {
-  if (p_src_length > p_dest_length)
+  if (p_src_length + strlen(p_dest) > p_dest_length)
   {
-    std::cerr << "strcat_nne() --> destination doen`t have enough space";
-    return 0;
+    NNELLRORR("destination doen`t have enough space");
+    return;
   }
-#ifdef NNE_WIN_MSVC
-  strncat_s(p_dest, p_dest_length, p_src, p_src_length);
-#else
-  strncat(p_dest, p_src, p_src_length);
-#endif
-  return 1;
+
+  strcpy_nne(p_dest, p_dest_length, p_src, p_src_length, strlen(p_dest));
 }
 
 // Compiler independent sprintf
 template<typename ... Args>
-int nne::sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args)
+void nne::sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args)
 {
 #ifdef NNE_WIN_MSVC
-  return sprintf_s(p_dest, p_dest_length, p_format, p_args ... );
+  sprintf_s(p_dest, p_dest_length, p_format, p_args ... );
 #else
   NNEUSE(p_dest_length);
-  return sprintf(p_dest, p_format, p_args ...);
+  sprintf(p_dest, p_format, p_args ...);
 #endif
+  //Todo: Check result and Throw Exception
 }

@@ -1,7 +1,7 @@
 // File Name:     general.hpp
 // Author:        Arash Fatehi
 // Date:          19th Feb 2021
-// Description:   Contains general useful fucntions and macros
+// Description:   Contains general fucntions and macros
 
 #pragma once
 
@@ -10,7 +10,8 @@
 
 #include <cinttypes>
 #include <string>
-#include <assert.h>
+#include <cassert>
+#include <iostream>
 
 // Helps to get rid of unused variable warnings when dealing with
 // cross-platform functions
@@ -24,15 +25,30 @@
   #define __NNEFUNC__ __PRETTY_FUNCTION__
 #endif
 
+#ifndef NDEBUG
+  #define NNEASSERT(_msg) // assert(!_msg)
+#else
+  #define NNEASSERT(_msg)
+#endif
+
+// This macro logs the errors using std::cerr, it should only be used for Logger class
+// and in memotitor.hpp files
+// Streams don't throw exceptions by default, so using std::cerr is quiet safe here
+#define NNELLRORR(_msg) \
+  std::cerr << __NNEFUNC__ << " --> " << _msg << std::endl; \
+  NNEASSERT(_msg);
 
 // This macro logs the error in release mode and cause an assert in debug mode
-#define NNERORR(_exp, _msg)  LogError(_exp, __NNEFUNC__, _msg); assert(_exp && _msg);
+#define NNERORR(_msg)  \
+  LogError(__NNEFUNC__, _msg); \
+  NNEASSERT(_msg);
+
 
 namespace nne {
   // __FUNC__, __FUCNTION__, __FUNCSIG__, and __PRETTY_FUNCTION__ are not macros,
   // they are constant static char* variables, to add function name to
   // logged error, need to use a function in combination to a macro
-  void LogError(bool condition, const char* p_function_name, const char* p_message);
+  void LogError(const char* p_function_name, const char* p_message) noexcept;
 
   // Dumps a block of memory as Hex string
   std::string BufferToHex(void* p_buffer, size_t p_size);
@@ -40,19 +56,31 @@ namespace nne {
   // Loads an hex string into a block of memory
   // The buffer should have enough allocated memory
   void HexToBuffer(void* p_buffer, const std::string& p_hex);
-  void HexToBuffer(void* p_buffer, const char* p_hex, const size_t& p_hex_size);
+  void HexToBuffer(void* p_buffer, const char* p_hex, const size_t p_hex_size);
 
   // Convert number of bytes to Kilo Byte, Mega Byte, Giga Byte, etc
-  void BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t& p_result_size);
-
-  // Compiler independent strcpy
-  int strcpy_nne(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length, size_t p_offset = 0);
+  // Hint: "sprintf_nne" throws exception, but this function is used in memonitor.hpp, which
+  // is quiet low-level, so all exception will be reported internaly
+  void BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t p_result_size) noexcept;
 
   // Compiler independent strcat
-  int strcat_nne(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length);
+  // functions strcpy_nne, strcat_nne are used in error handling mechanisms in
+  // Logger class (used for reporting and logging errors as well), and also in reporting errors
+  // within Logger and memonitor, so if they can throw expection and cause error, things gets ugly
+  // Their potential errors are:
+  // 1. Memory Access violation which will be handled using signals by OS and will
+  // lead to crash anyway, if happens, we already lost :|
+  // 2. Not having enough space in "p_dest" buffer, which cause the operation to not performed
+  // In case of error 2, it will only log to std::cerr and assert if in debug mode
+  // If there is a error in std::cerr, again we have already lost and
+  // there is no point in reporting the error for recovery
+  // P.S. Streams don't throw exceptions by default
+  void strcpy_nne(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length, size_t p_offset = 0) noexcept;
+  void strcat_nne(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length) noexcept;
 
   // Compiler independent sprintf
+  // Throws exception in case of error
   template<typename ... Args>
-  int sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args);
+  void sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args);
 }
 

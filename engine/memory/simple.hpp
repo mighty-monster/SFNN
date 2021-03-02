@@ -8,7 +8,7 @@
 // acts as the base class for any custom memory class that uses a user-defined Allocator,
 // and Deallocator with a linear structure. Also, the MemoryViewer classes probably derive from it.
 // ---------------------
-// Hint:
+// Note:
 // "Save" and "Load" functions work with memory regardless of the ISA`s endianness, they dump and load
 // memory as it is. So we can`t transfer files between computers with different endianness
 // "GetAsType" and "SetAsType" can interpret memory as variables with unaligned memory, it will decrease

@@ -28,7 +28,7 @@
 //            |--> SSDMemory
 //
 // ---------------------
-// Hint:
+// Note:
 // "Size" and "Length" are seperate concept in the context of memory classes, "Size" refers to
 // actual bytes allocated and "Length" is number of items addressable by memory class, e.g. size of
 // memory class of type int with the length of 10 is 40 if sizeof(int) = 4. Also, in some cases like

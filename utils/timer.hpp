@@ -17,12 +17,12 @@ namespace nne {
   {
   public:
     // Pass false as parameter to hinder automatic logging
-    Timer(bool p_auto_print = true);
-    ~Timer();
+    Timer(bool p_auto_print = true) noexcept;
+    ~Timer() noexcept;
 
-    void Start();
-    void Stop();
-    void PrintDuration();
+    void Start() noexcept;
+    void Stop() noexcept;
+    void PrintDuration() noexcept;
 
     // Returns duration with period of steady_clock,
     // Manual check of steady_clock::period::den is needed to interpret the result correctly

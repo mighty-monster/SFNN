@@ -9,10 +9,10 @@
 // Log Levels: Error, Warning, Info, Debug
 // ---------------------
 // Help:
-// Use "GetInstance()" to recieve a singleton instance of the object and static methods "Error", "Warn",
-// "Info", and "Debug" for logging
+// Use "GetInstance()" to recieve a singleton instance of the object and static methods
+// "Error", "Warn", "Info", and "Debug" for logging
 // ---------------------
-// Hint:
+// Note:
 // The Logger class will instantiate as a local static variable in "GetInstance()"
 // It is a global variable that will be allocated on .data section on most compilers
 // It wont wast stack memory, also wont cause heap allocations, that is why m_buffer
@@ -23,6 +23,17 @@
 // otherwise it would report the allocated memory all the time as Logger is a
 // global object, this hinders the module to detect memory leaks at the end
 // of program and print a useful summery.
+// ---------------------
+// Note:
+// The Logger is used for reporting errors, as a result, if it throws exception, things
+// can get ugly, causing errors when handling an error is source of evile ;p
+// So methods used for logging are excpetion free, it doesn`t mean they can not have errors
+// but even if they have we just report them to std::cerr, and do not handle the error
+// Their potential errors:
+// 1. Failing to open the file, wrong file path, insuficient permission, etc.
+// 2. Failing to write to the file, insuficient permission, filesystem errors, etc.
+// 3. Failing to write on std::cerr, jsut let it go ...
+// 4.
 
 #pragma once
 
@@ -31,11 +42,11 @@
 #include <string>
 #include <future>
 
-// The length datetime string, Example: "2021-02-12 12:00:00"
+// The length of datetime string, Example: "2021-02-12 12:00:00"
 #define NNE_LOGGER_DATETIME_BUFFER_SIZE 20
 
-// The size logger buffer, increase if needed, global variables will allocate
-// on .data section on most compilers and do not wast stack or cause heap allocation
+// The size of logger buffer, increase it if needed, global variables will allocate
+// on .data section with most of compilers and do not wast the stack or cause heap allocation
 #define NNE_LOGGER_BUFFER_GLOBAL 8192
 
 namespace nne {
@@ -52,61 +63,73 @@ namespace nne {
 
   public:
 
-    // Removing copy constructor, to ensure the class will remain singleton
+    // Removing copy and move constructors, to ensure that, the class will remain singleton
     Logger(const Logger&) = delete;
+    Logger(Logger&) = delete;
+    Logger(const Logger&&) = delete;
+    Logger(Logger&&) = delete;
 
     // If needed create and return the Logger object
-    static Logger& GetInstance();
+    static Logger& GetInstance() noexcept;
 
     // Should be called once, for configuration, before using the object
     static void Init(LogLevel p_level, bool p_log_to_console, bool p_log_to_file);
 
-    static void SetLevel(LogLevel p_level);
+    static void SetLevel(LogLevel p_level) noexcept;
 
     // Can be used to enable or disable logging methods
-    static void EnableLogging(bool p_log_to_console, bool p_log_to_file);
+    static void EnableLogging(bool p_log_to_console, bool p_log_to_file) noexcept;
 
     // Disable all logging methods
-    static void DisableLogging();
+    static void DisableLogging() noexcept;
 
-    static void Error(const char* p_message);
-    static void Error(const std::string& p_message);
+    static void Error(const char* p_message) noexcept;
+    static void Error(const std::string& p_message) noexcept;
 
-    static void Warn(const char* p_message);
-    static void Warn(const std::string& p_message);
+    static void Warn(const char* p_message) noexcept;
+    static void Warn(const std::string& p_message) noexcept;
 
-    static void Info(const char* p_message);
-    static void Info(const std::string& p_message);
+    static void Info(const char* p_message) noexcept;
+    static void Info(const std::string& p_message) noexcept;
 
-    static void Debug(const char* p_message);
-    static void Debug(const std::string& p_message);
+    static void Debug(const char* p_message) noexcept;
+    static void Debug(const std::string& p_message) noexcept;
 
   private:
-    Logger() = default;
-    ~Logger();
+    // Streams don't throw exceptions by default, so construtor can be noexcept
+    Logger() noexcept = default;
+    ~Logger() noexcept;
 
     // Internal implementations of logging functions, which are used by
     // public static functions
-    void IError(const char* p_message);
-    void IWarn(const char* p_message);
-    void IInfo(const char* p_message);
-    void IDebug(const char* p_message);
+    void IError(const char* p_message) noexcept;
+    void IWarn(const char* p_message) noexcept;
+    void IInfo(const char* p_message) noexcept;
+    void IDebug(const char* p_message) noexcept;
 
     // Decorates the message with proper title
-    void IAddTitle(const char* p_title,const char* p_message);
+    // Note: All used functions are noexcept, only memory access violation can
+    // be the major error, in that case we are already doomed :(
+    void IAddTitle(const char* p_title,const char* p_message) noexcept;
 
-    void ILogToConsole(const char* p_message);
+    // Streams don't throw exceptions by default
+    void ILogToConsole(const char* p_message) noexcept;
+
     void ILogToFile(const char* p_message);
-    void ILog();
+    void ILog() noexcept;
 
-    void OpenLogFile();
-    void CloseLogFile();
+    void OpenLogFile() noexcept;
+    void CloseLogFile() noexcept;
 
     void GetCurrentTime(char* p_date_time_str);
 
+    void ReportOFStreamError(const char* p_message, bool p_include_filepath = false) noexcept;
+
   private:
+    // Streams don't throw exceptions by default
     std::ofstream m_log_file;
-    const char* m_log_file_name = "log.txt";
+
+    const char* m_log_file_name = "./log.txt";
 
     const char* m_str_warning = "[WRN]: ";
     const char* m_str_error = "[ERR]: ";
@@ -126,6 +149,7 @@ namespace nne {
     char m_buffer[NNE_LOGGER_BUFFER_GLOBAL];
 
     // The mutex used for thread safety when writing to log file
+    // Note: std::mutex constructor is a noexcept method
     std::mutex m_mutex;
   };
 }

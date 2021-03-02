@@ -14,7 +14,7 @@
 using namespace nne;
 
 // If needed create and return the Logger object
-Logger& Logger::GetInstance()
+Logger& Logger::GetInstance() noexcept
 {
   // Local static variables are global but only accesable within function`s scope
   static Logger instance;
@@ -28,17 +28,20 @@ void Logger::Init(LogLevel p_level, bool p_log_to_console, bool p_log_to_file)
   EnableLogging(p_log_to_console, p_log_to_file);
 };
 
-void Logger::SetLevel(LogLevel p_level)
+void Logger::SetLevel(LogLevel p_level) noexcept
 {
   GetInstance().m_level = p_level;
 };
 
 // Can be used to enable or disable logging methods
-void Logger::EnableLogging(bool p_log_to_console, bool p_log_to_file)
+void Logger::EnableLogging(bool p_log_to_console, bool p_log_to_file) noexcept
 {
   GetInstance().m_log_to_console = p_log_to_console;
   GetInstance().m_log_to_file = p_log_to_file;
 
+  // By defualt p_log_to_file is false, in case class is used without calling "Init"
+  // File should not be opened untill user asks specificaly to use loggin to file
+  // either by calling "EnableLogging" or "Init" methods.
   if(p_log_to_file)
     GetInstance().OpenLogFile();
   else
@@ -46,58 +49,65 @@ void Logger::EnableLogging(bool p_log_to_console, bool p_log_to_file)
 };
 
 // Disable all logging methods
-void Logger::DisableLogging()
+void Logger::DisableLogging() noexcept
 {
   EnableLogging(false, false);
 };
 
-void Logger::Error(const char* p_message)
+void Logger::Error(const char* p_message) noexcept
 {
   GetInstance().IError(p_message);
 };
 
-void Logger::Error(const std::string& p_message)
+void Logger::Error(const std::string& p_message) noexcept
 {
   GetInstance().IError(p_message.c_str());
 };
 
-void Logger::Warn(const char* p_message)
+void Logger::Warn(const char* p_message) noexcept
 {
   GetInstance().IWarn(p_message);
 };
 
-void Logger::Warn(const std::string& p_message)
+void Logger::Warn(const std::string& p_message) noexcept
 {
   GetInstance().IWarn(p_message.c_str());
 };
 
-void Logger::Info(const char* p_message)
+void Logger::Info(const char* p_message) noexcept
 {
   GetInstance().IInfo(p_message);
 };
 
-void Logger::Info(const std::string& p_message)
+void Logger::Info(const std::string& p_message) noexcept
 {
   GetInstance().IInfo(p_message.c_str());
 };
 
-void Logger::Debug(const char* p_message)
+void Logger::Debug(const char* p_message) noexcept
 {
   GetInstance().IDebug(p_message);
 };
 
-void Logger::Debug(const std::string& p_message)
+void Logger::Debug(const std::string& p_message) noexcept
 {
   GetInstance().IDebug(p_message.c_str());
 };
 
 // Logger destructor
-Logger::~Logger()
+Logger::~Logger() noexcept
 {
-  CloseLogFile();
+  try
+  {
+    CloseLogFile();
+  }
+  catch (...)
+  {
+    //Todo: Add error logging
+  }
 };
 
-void Logger::IError(const char* p_message)
+void Logger::IError(const char* p_message) noexcept
 {
   if (m_level >= LevelError)
   {
@@ -106,7 +116,7 @@ void Logger::IError(const char* p_message)
   }
 };
 
-void Logger::IWarn(const char* p_message)
+void Logger::IWarn(const char* p_message) noexcept
 {
   if (m_level >= LevelWarning)
   {
@@ -115,7 +125,7 @@ void Logger::IWarn(const char* p_message)
   }
 };
 
-void Logger::IInfo(const char* p_message)
+void Logger::IInfo(const char* p_message) noexcept
 {
   if (m_level >= LevelInfo)
   {
@@ -124,7 +134,7 @@ void Logger::IInfo(const char* p_message)
   }
 };
 
-void Logger::IDebug(const char* p_message)
+void Logger::IDebug(const char* p_message) noexcept
 {
   if (m_level >= LevelDebug)
   {    
@@ -133,12 +143,12 @@ void Logger::IDebug(const char* p_message)
   }
 };
 
-void Logger::IAddTitle(const char* p_title,const char* p_message)
+void Logger::IAddTitle(const char* p_title,const char* p_message) noexcept
 {
   size_t offset = 0;
 
   // One byte reduced to overwite the null termination character
-  // Hint: NNE_LOGGER_DATETIME_BUFFER_SIZE is the size with null charachter
+  // Note: NNE_LOGGER_DATETIME_BUFFER_SIZE is the size with null charachter
   offset += strlen(m_str_left_decorator) +
       NNE_LOGGER_DATETIME_BUFFER_SIZE + strlen(m_str_right_decorator) - 1;
 
@@ -162,24 +172,54 @@ void Logger::IAddTitle(const char* p_title,const char* p_message)
                   m_str_null, strlen(m_str_null), offset);
 }
 
-void Logger::ILogToConsole(const char* p_message)
+void Logger::ILogToConsole(const char* p_message) noexcept
 {
-  std::cout<<p_message;
+  // Streams don't throw exceptions by default
+  std::cout << p_message;
 };
 
 void Logger::ILogToFile(const char* p_message)
 {
   if (m_log_file.is_open())
   {
+    // lock constructor might throw exception
     std::lock_guard<std::mutex> lock(m_mutex);
+
     GetInstance().m_log_file << p_message;
+    if(m_log_file.fail())
+       ReportOFStreamError("Failed to write to log file: ");
+  }
+  else
+  {
+    NNELLRORR("Log file is not open, can`t wite to it.");
   }
 };
 
-void Logger::ILog()
+// Note: Method "ILog" can throw two kind of exceptions
+// 1. Is caused by "std::strftime" in "GetCurrentTime" method
+// 2. "std::lock_guard" also can throw exception in "ILogToFile" method
+// By catching and reporting these exceptions, "ILog" will be noexcept
+// The reseaon for this is, Logger is used in reporting error of application
+// If it throws exception itself, it will be a mess, if somthing happens, we just report
+// to "std::cerr" and wont handle it`s errors by changing the flow of execution, as
+// there is nothing to recover from at this point
+void Logger::ILog() noexcept
 {
   char current_time[NNE_LOGGER_DATETIME_BUFFER_SIZE];
-  GetCurrentTime(current_time);
+
+  try
+  {
+    GetCurrentTime(current_time);
+  }
+  catch (std::exception& ex)
+  {
+    NNELLRORR(ex.what());
+  }
+  catch (...)
+  {
+    NNELLRORR("Unkown exception thrown in GetCurrentTime(char*)");
+  }
+
 
   // Add content in place to m_buffer by calculating the proper offset
   // and copying the content in the right place
@@ -199,26 +239,48 @@ void Logger::ILog()
     ILogToConsole(m_buffer);
 
   if(m_log_to_file)
-    ILogToFile(m_buffer);
+  {
+    try
+    {
+      ILogToFile(m_buffer);
+    }
+    catch (std::exception& ex)
+    {
+      NNELLRORR(ex.what());
+    }
+    catch (...)
+    {
+      NNELLRORR("Unkown exception thrown in ILogToFile(char*)");
+    }
+  }
+
 };
 
-void Logger::OpenLogFile()
+void Logger::OpenLogFile() noexcept
 {
   GetInstance().m_log_file.open(GetInstance().m_log_file_name,
                                 std::ofstream::out | std::ofstream::app);
-  if (m_log_file.is_open())
+  if (!m_log_file.fail())
     GetInstance().m_log_file << "\n--------------------\n";
   else
-    std::cerr << "Logger::OpenLogFile() -- Failed to open log file";
+    ReportOFStreamError("Failed to open log file", true);
 }
 
-void Logger::CloseLogFile()
+void Logger::CloseLogFile() noexcept
 {
   if (m_log_file.is_open())
+  {
     m_log_file.close();
+
+    if (m_log_file.fail())
+      ReportOFStreamError("Something went wrong when closing log file, "
+                          "it is possible that stream buffer couldn`t get flashed to file");
+  }
 }
 
 // date_time_str size should atleast have 20 bytes
+// Note: "std::strftime" throw exception, so "GetCurrentTime" have
+// Basic exception safty, it does not change invariants
 void Logger::GetCurrentTime(char* p_date_time_str)
 {
 
@@ -228,15 +290,17 @@ void Logger::GetCurrentTime(char* p_date_time_str)
   // Convert time_point to time_t
   std::time_t time_t_now = std::chrono::system_clock::to_time_t(time_point_now);
 
-// MSVC prefers localtime_s
 #if defined(NNE_WIN_MSVC)
+  // MSVC prefers localtime_s
+
   // Convert time_t to tm struct
   // localtime_s returns 0 if succesfull, that`s why the if`s logic is twisted ;)
   struct tm tm_struct;
   if (localtime_s(&tm_struct, &time_t_now))
   {
-    std::cerr<<"Logger::GetCurrentTime() -- Failed to convert time_t to tm struct\n";
-    strncpy_s(p_date_time_str, NNE_LOGGER_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
+    NNELLRORR("Failed to convert time_t to tm struct");
+    strcpy_nne(p_date_time_str, NNE_LOGGER_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
+    return;
   }
 
   // Format tm struct into the buffer
@@ -244,18 +308,17 @@ void Logger::GetCurrentTime(char* p_date_time_str)
                      NNE_LOGGER_DATETIME_BUFFER_SIZE,
                      "%Y-%m-%d %H:%M:%S",
                      &tm_struct))
-  {
-    std::cerr<<"Logger::GetCurrentTime() -- Failed to format tm struct\n";
-    strncpy_s(p_date_time_str, NNE_LOGGER_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
-  }
-// GCC doesn`t currently suport localtime_s, others might not as well
+
 #else
+  // GCC doesn`t suport localtime_s, others might not as well
+
   // Convert time_t to tm struct
   struct tm* tm_struct = localtime(&time_t_now);
   if (!tm_struct)
   {
-    std::cerr<<"Logger::GetCurrentTime() -- Failed to convert time_t to tm struct\n";
-    strncpy(p_date_time_str, m_str_unknown, strlen(m_str_unknown) + 1);
+    NNELLRORR("Failed to convert time_t to tm struct");
+    strcpy_nne(p_date_time_str, NNE_LOGGER_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
+    return;
   }
 
   // Format tm struct into the buffer
@@ -263,10 +326,34 @@ void Logger::GetCurrentTime(char* p_date_time_str)
                      NNE_LOGGER_DATETIME_BUFFER_SIZE,
                      "%Y-%m-%d %H:%M:%S",
                      tm_struct))
-  {
-    std::cerr<<"Logger::GetCurrentTime() -- Failed to format tm struct\n";
-    strncpy(p_date_time_str, m_str_unknown, strlen(m_str_unknown) + 1);
-  }
 #endif
-
+  {
+    NNELLRORR("Failed to format tm struct");
+    strcpy_nne(p_date_time_str, NNE_LOGGER_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
+  }
 };
+
+void Logger::ReportOFStreamError(const char* p_message, bool p_include_filepath) noexcept
+{
+  // getting errno can thorw exception, again, if that happens, let us be doomed ...
+  const char* reason = strerror(errno);
+  const char* separator = ", ";
+
+  size_t final_message_length = strlen(p_message) + strlen(separator) + strlen(reason) + 1;
+  final_message_length += p_include_filepath ? strlen(m_log_file_name) + strlen(reason) : 0;
+
+  char* final_message = (char*)alloca(final_message_length);
+
+  strcpy_nne(final_message, final_message_length, p_message, strlen(p_message) + 1);
+
+  if (p_include_filepath)
+  {
+    strcat_nne(final_message, final_message_length, separator, strlen(separator) + 1);
+    strcat_nne(final_message, final_message_length, m_log_file_name, strlen(m_log_file_name) + 1);
+  }
+
+  strcat_nne(final_message, final_message_length, separator, strlen(separator) + 1);
+  strcat_nne(final_message, final_message_length, reason, strlen(reason) + 1);
+
+  NNELLRORR(final_message);
+}

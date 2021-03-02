@@ -15,16 +15,17 @@
 #if defined(_WIN32)
   #if defined(_MSC_VER)
     #define NNE_WIN_MSVC
-  #elif defined(__MINGW32__) || defined(__GNUC__)
-    #define NNE_WIN_MINGW
   #elif defined(__clang__) || defined(__clang_version__)
     #define NNE_WIN_CLANG
+  #elif defined(__MINGW32__) || defined(__GNUC__)
+    #define NNE_WIN_MINGW
   #endif
-#elif __unix__
-  #if defined(__GNUC__)
+#elif defined(__unix__)
+  #if defined(__GNUC_MINOR__)
     #define NNE_UNIX_GCC
-  #elif defined(__clang__)
+  #elif defined(__clang_version__)
     #define NNE_UNIX_CLANG
   #endif
 #endif
+
 

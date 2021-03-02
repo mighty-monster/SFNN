@@ -39,7 +39,7 @@ void SimpleHeapMemory<T>::Allocate(const size_t& p_length) noexcept
   m_memory = new T[p_length];
   if (!m_memory)
   {
-    NNERORR(m_memory, "new operation failed, this is a severe error!");
+    NNERORR( "new operation failed, this is a severe error!");
     return;
   }
 
@@ -64,7 +64,7 @@ void SimpleHeapMemory<T>::LoadFromFile(const char* p_file_path)
 
   if (input_file.fail())
   {
-    NNERORR(!input_file.fail(), "file path is not valid");
+    NNERORR("file path is not valid");
     return;
   }
 
@@ -72,7 +72,7 @@ void SimpleHeapMemory<T>::LoadFromFile(const char* p_file_path)
 
   if (input_file.fail())
   {
-    NNERORR(!input_file.fail(), "failed to get file size");
+    NNERORR( "failed to get file size");
     return;
   }
 
@@ -82,7 +82,7 @@ void SimpleHeapMemory<T>::LoadFromFile(const char* p_file_path)
   input_file.read((char*)m_memory, m_size);
   if (input_file.fail())
   {
-    NNERORR(!input_file.fail(), "failed to read the file");
+    NNERORR( "failed to read the file");
     return;
   }
 
@@ -96,14 +96,14 @@ void SimpleHeapMemory<T>::LoadFromHexFile(const char* p_file_path)
 
   if (input_file.fail())
   {
-    NNERORR(!input_file.fail(), "file path is not valid");
+    NNERORR( "file path is not valid");
     return;
   }
 
   size_t length = input_file.tellg()/sizeof(T)/2;
   if (input_file.fail())
   {
-    NNERORR(!input_file.fail(), "failed to get file size");
+    NNERORR("failed to get file size");
     return;
   }
 
