@@ -10,6 +10,7 @@
 #include <chrono>
 #include <ctime>
 #include <cstring>
+#include <cerrno>
 
 using namespace nne;
 
@@ -336,10 +337,13 @@ void Logger::GetCurrentTime(char* p_date_time_str)
 void Logger::ReportOFStreamError(const char* p_message, bool p_include_filepath) noexcept
 {
   // getting errno can thorw exception, again, if that happens, let us be doomed ...
-  const char* reason = strerror(errno);
+
   const char* separator = ", ";
 
-  size_t final_message_length = strlen(p_message) + strlen(separator) + strlen(reason) + 1;
+  size_t reason_length = 512;
+  char reason[reason_length];
+
+  size_t final_message_length = strlen(p_message) + strlen(separator) + reason_length + 1;
   final_message_length += p_include_filepath ? strlen(m_log_file_name) + strlen(reason) : 0;
 
   char* final_message = (char*)alloca(final_message_length);
@@ -352,8 +356,16 @@ void Logger::ReportOFStreamError(const char* p_message, bool p_include_filepath)
     strcat_nne(final_message, final_message_length, m_log_file_name, strlen(m_log_file_name) + 1);
   }
 
-  strcat_nne(final_message, final_message_length, separator, strlen(separator) + 1);
-  strcat_nne(final_message, final_message_length, reason, strlen(reason) + 1);
+#ifdef _WIN32
+  if ( strerror_s(reason, reason_length, errno) == 0 )
+  {
+#else
+  if ( strerror_r(reason, reason_length, errno) == 0 )
+  {
+#endif
+    strcat_nne(final_message, final_message_length, separator, strlen(separator) + 1);
+    strcat_nne(final_message, final_message_length, reason, strlen(reason) + 1);
+  }
 
   NNELLRORR(final_message);
 }

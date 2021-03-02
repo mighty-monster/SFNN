@@ -97,7 +97,7 @@ int main()
   }
 
   DISABLE_PRINT_ALLOC
-  //PRINT_ALLOC_SUMMERY
+  PRINT_ALLOC_SUMMERY
 
   return 0;
 }

@@ -37,6 +37,8 @@
 
 #pragma once
 
+#include "platform.hpp"
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -97,7 +99,12 @@ namespace nne {
 
   private:
     // Streams don't throw exceptions by default, so construtor can be noexcept
+
+#ifdef NNE_WIN_MINGW
+    Logger() = default;
+#else
     Logger() noexcept = default;
+#endif
     ~Logger() noexcept;
 
     // Internal implementations of logging functions, which are used by
