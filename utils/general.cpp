@@ -22,19 +22,20 @@ void nne::LogError(const char* p_file, int p_line, const char* p_function_name, 
   char colon[] = ":";
   char arrow[] = " --> ";
 
+  // <- Converting line to string
   const uint8_t no_of_digits = 6;
   char line[no_of_digits];
 
   int result_code = nne::sprintf_nne(line, no_of_digits, "%d", p_line);
 
-  // Just reporting in case of error, can not recover if something goes wrong
+  // Just reporting in case of error, can not recover if something goes seriously wrong
   if (result_code < 0)
   {
-    NNE_ERORR_LL("Error in nne::sprintf_nne, reading errno!");
-    const size_t reason_length = 256;
-    char reason[reason_length];
-    NNE_ERRNO_PRINT_REASON(reason, reason_length, errno);
+    NNE_ERORR_LL("Error in nne::sprintf_nne, will not include line of error");
+    // setting line to 0, will cause strlen(line) to be zero
+    memset(line, 0, no_of_digits);
   }
+  // -> Converting line to string
 
   const char* last_pos = nullptr;
 
@@ -200,12 +201,7 @@ void nne::BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t
 
   // Just reporting in case of error, can not recover if something goes seroiusly wrong
   if (result_code < 0)
-  {
-    NNE_ERORR_LL("Error in nne::sprintf_nne, reading errno!");
-    const size_t reason_length = 256;
-    char reason[reason_length];
-    NNE_ERRNO_PRINT_REASON(reason, reason_length, errno);
-  }
+    NNE_ERORR_LL("Error in nne::sprintf_nne");
 }
 
 // Compiler independent strcpy
@@ -233,11 +229,12 @@ void nne::strcat_nne(char* p_dest, size_t p_dest_length, const char* p_src, size
 }
 
 // Compiler independent sprintf
+// Returns a negative number if error happens
 template<typename ... Args>
 int nne::sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args) noexcept
 {
-
 #ifdef NNE_WIN_MSVC
+  // MSVC Complains about using _snprintf
   #pragma warning(disable: 4996)
 #endif
 
@@ -245,9 +242,9 @@ int nne::sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_for
   #define snprintf _snprintf
 #endif
 
-  int needed_length = snprintf( p_dest, p_dest_length, p_format, p_args ... );
   // unix snprintf returns length output would actually require;
   // windows _snprintf returns actual output length if output fits, else negative
+  int needed_length = snprintf( p_dest, p_dest_length, p_format, p_args ... );
   if (needed_length >= (int)p_dest_length)
     needed_length = -1;
 

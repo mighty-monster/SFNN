@@ -18,6 +18,9 @@
 // cross-platform functions
 #define NNEUSE(_exp) (void)_exp;
 
+// Prints a message to std::cout and goes to next line
+#define NNE_PRINTL(_msg) std::cout<<_msg<<std::endl
+
 // Defining __NNEFUNC__ as the macro that returns the functions signature
 // on MSVC, GCC, and Clang
 #ifdef _MSC_VER
@@ -31,8 +34,8 @@
   #define __func__ __FUNCTION__
 #endif
 
-#define NNE_PRINTL(_msg) std::cout<<_msg<<std::endl
-
+// Logs the error using Logger class as per what an object of
+// class NNExcept describes, should be used in catch blocks
 #define NNE_ERORR_EX(_ex) \
   LogError(_ex.File(), _ex.Line(), _ex.Func(), _ex.What())
 
@@ -48,26 +51,28 @@
   LogError(__FILE__, __LINE__, __NNEFUNC__, _msg)
 
 
+// The macro "NNE_ERRNO_PRINT_REASON" prints description about _errno code, it is platform
+// and compiler specific
+// On window "strerror_s" is used
+// On unix "strerror_r" is used, but two implementation exits with different functionalities
+// The GNU version is used when __USE_GNU is defined, otherwise Posix version will be used
 #ifdef _WIN32
   #define NNE_ERRNO_PRINT_REASON(_reason, _reason_length, _errno) \
   if ( strerror_s(_reason, _reason_length, _errno) == 0 ) \
   { \
-   NNE_ERORR_LL(reason); \
+   NNE_ERORR(_reason); \
   }
-#elif __USE_XOPEN2K
+#elif defined __USE_XOPEN2K && !defined __USE_GNU
   #define NNE_ERRNO_PRINT_REASON(_reason, _reason_length, _errno) \
   if ( strerror_r( _errno, _reason, _reason_length) == 0 ) \
   { \
-   NNE_ERORR_LL(reason); \
+   NNE_ERORR(_reason); \
   }
 #else
   #define NNE_ERRNO_PRINT_REASON(_reason, _reason_length, _errno) \
-  if(strerror_r( _errno, _reason, reason_length)) \
-  { \
-   NNE_ERORR_LL(reason); \
-  }
-#endif
+  NNE_ERORR(strerror_r( _errno, _reason, _reason_length));
 
+#endif
 
 namespace nne {
   // __FUNC__, __FUCNTION__, __FUNCSIG__, and __PRETTY_FUNCTION__ are not macros,

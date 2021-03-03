@@ -322,7 +322,7 @@ void Logger::ReportOFStreamError(const char* p_message, bool p_include_filepath)
   char reason[reason_length];
 
   size_t final_message_length = strlen(p_message) + strlen(separator) + reason_length + 1;
-  final_message_length += p_include_filepath ? strlen(m_log_file_name) + strlen(reason) : 0;
+  final_message_length += p_include_filepath ? strlen(m_log_file_name) + strlen(separator) : 0;
 
   char* final_message = (char*)alloca(final_message_length);
 
@@ -340,21 +340,32 @@ void Logger::ReportOFStreamError(const char* p_message, bool p_include_filepath)
   {
     strcat_nne(final_message, final_message_length, separator, strlen(separator) + 1);
     strcat_nne(final_message, final_message_length, m_log_file_name, strlen(m_log_file_name) + 1);
-  }
+  }  
 
+
+// Retriveing the description of error, it is mess ...
+// On window "strerror_s" is used
+// On unix "strerror_r" is used, but two implementation exits with different functionalities
+// The GNU version is used when __USE_GNU is defined, otherwise Posix version will be used
 #ifdef _WIN32
   if ( strerror_s(reason, reason_length, errno) == 0 )
   {
-#elif __USE_XOPEN2K
-  if ( strerror_r( errno, reason, reason_length) == 0 )
-  {
-#else
-  if(strerror_r( errno, reason, reason_length))
-  {
-#endif
     strcat_nne(final_message, final_message_length, separator, strlen(separator) + 1);
     strcat_nne(final_message, final_message_length, reason, strlen(reason) + 1);
   }
+#elif defined __USE_XOPEN2K && !defined __USE_GNU
+  if ( strerror_r( errno, reason, reason_length) == 0 )
+  {
+    strcat_nne(final_message, final_message_length, separator, strlen(separator) + 1);
+    strcat_nne(final_message, final_message_length, reason, strlen(reason) + 1);
+  }
+#else
+  // The GNU version of strerror_r returns the description as a char* and may or may not
+  // use the provided buffer
+  char* GNU_version_reason = strerror_r( errno, reason, reason_length);
+  strcat_nne(final_message, final_message_length, separator, strlen(separator) + 1);
+  strcat_nne(final_message, final_message_length, GNU_version_reason, strlen(GNU_version_reason) + 1);
+#endif
 
   NNE_ERORR_LL(final_message);
 }
