@@ -49,7 +49,7 @@ namespace nne {
   // Streams don't throw exceptions by default
   void PrintAllocationSummery() noexcept
   {
-    const size_t buffer_size = 20;
+    const size_t buffer_size = NNE_MEMON_INITIAL_TABLE_SIZE;
     char human_readable[buffer_size];
 
     std::cout << "\n---------------\n----Summery----\n";
@@ -268,7 +268,7 @@ namespace nne {
     std::mutex m_mutex;
 
     // The length of array
-    uint64_t m_length = 40;
+    uint64_t m_length = NNE_MEMON_INITIAL_TABLE_SIZE;
 
     // Last item`s index, no of occupied records in the array
     uint64_t m_occupied = 0;

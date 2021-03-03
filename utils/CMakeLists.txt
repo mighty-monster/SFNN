@@ -1,4 +1,5 @@
 add_library(utils
+  configs.hpp
   platform.hpp
   memon.hpp
   general.hpp

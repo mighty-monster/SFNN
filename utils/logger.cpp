@@ -144,7 +144,7 @@ void Logger::IAddTitle(const char* p_title,const char* p_message) noexcept
   // One byte reduced to overwite the null termination character
   // Note: NNE_LOGGER_DATETIME_BUFFER_SIZE is the size with null charachter
   offset += strlen(m_str_left_decorator) +
-      NNE_LOGGER_DATETIME_BUFFER_SIZE + strlen(m_str_right_decorator) - 1;
+      NNE_DATETIME_BUFFER_SIZE + strlen(m_str_right_decorator) - 1;
 
   // Add content in place to m_buffer by calculating the proper offset
   // and copying the content in the right place
@@ -199,7 +199,7 @@ void Logger::ILogToFile(const char* p_message)
 // there is nothing to recover from at this point
 void Logger::ILog() noexcept
 {
-  char current_time[NNE_LOGGER_DATETIME_BUFFER_SIZE];
+  char current_time[NNE_DATETIME_BUFFER_SIZE];
   GetCurrentTime(current_time);
 
   // Add content in place to m_buffer by calculating the proper offset
@@ -258,59 +258,6 @@ void Logger::CloseLogFile() noexcept
                           "it is possible that stream buffer couldn`t get flashed to file");
   }
 }
-
-// date_time_str size should atleast have 20 bytes
-void Logger::GetCurrentTime(char* p_date_time_str) noexcept
-{
-
-  // Receive a time point using chrono API
-  auto time_point_now = std::chrono::system_clock::now();
-
-  // Convert time_point to time_t
-  std::time_t time_t_now = std::chrono::system_clock::to_time_t(time_point_now);
-
-#if defined(NNE_WIN_MSVC)
-  // MSVC prefers localtime_s
-
-  // Convert time_t to tm struct
-  // localtime_s returns 0 if succesfull, that`s why the if`s logic is twisted ;)
-  struct tm tm_struct;
-  if (localtime_s(&tm_struct, &time_t_now))
-  {
-    NNE_ERORR_LL("Failed to convert time_t to tm struct");
-    strcpy_nne(p_date_time_str, NNE_LOGGER_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
-    return;
-  }
-
-  // Format tm struct into the buffer
-  if (!std::strftime(p_date_time_str,
-                     NNE_LOGGER_DATETIME_BUFFER_SIZE,
-                     "%Y-%m-%d %H:%M:%S",
-                     &tm_struct))
-
-#else
-  // GCC doesn`t suport localtime_s, others might not as well
-
-  // Convert time_t to tm struct
-  struct tm* tm_struct = localtime(&time_t_now);
-  if (!tm_struct)
-  {
-    NNE_ERORR_LL("Failed to convert time_t to tm struct");
-    strcpy_nne(p_date_time_str, NNE_LOGGER_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
-    return;
-  }
-
-  // Format tm struct into the buffer
-  if (!std::strftime(p_date_time_str,
-                     NNE_LOGGER_DATETIME_BUFFER_SIZE,
-                     "%Y-%m-%d %H:%M:%S",
-                     tm_struct))
-#endif
-  {
-    NNE_ERORR_LL("Failed to format tm struct");
-    strcpy_nne(p_date_time_str, NNE_LOGGER_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
-  }
-};
 
 void Logger::ReportOFStreamError(const char* p_message, bool p_include_filepath) noexcept
 {

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "configs.hpp"
 #include "platform.hpp"
 #include "logger.hpp"
 
@@ -23,10 +24,14 @@
 
 // Defining __NNEFUNC__ as the macro that returns the functions signature
 // on MSVC, GCC, and Clang
-#ifdef _MSC_VER
-  #define __NNEFUNC__ __FUNCSIG__
-#elif defined(__GNUC__) || defined(__clang__)
-  #define __NNEFUNC__ __PRETTY_FUNCTION__
+#ifdef NNEXCEPT_FULL_FUNCNAME
+  #ifdef _MSC_VER
+    #define __NNEFUNC__ __FUNCSIG__
+  #elif defined(__GNUC__) || defined(__clang__)
+    #define __NNEFUNC__ __PRETTY_FUNCTION__
+  #endif
+#else
+  #define __NNEFUNC__ __func__
 #endif
 
 // Defining __fucn__ macro in case of MSVC compiler
@@ -37,18 +42,18 @@
 // Logs the error using Logger class as per what an object of
 // class NNExcept describes, should be used in catch blocks
 #define NNE_ERORR_EX(_ex) \
-  LogError(_ex.File(), _ex.Line(), _ex.Func(), _ex.What())
+  nne::LogError(_ex.File(), _ex.Line(), _ex.Func(), _ex.What())
 
 // Logs low level error
 // This macro logs the errors using std::cerr, it should only be used for Logger class
 // and in memotitor.hpp files
 // Streams don't throw exceptions by default, so using std::cerr is quiet safe here
 #define NNE_ERORR_LL(_msg) \
-  std::cerr << __FILE__ << ":" << __LINE__ << ", " << __NNEFUNC__ << " --> " << _msg << std::endl
+  nne::LogErrorLL(__FILE__, __LINE__, __NNEFUNC__, _msg)
 
 // Logs error using Logger class
 #define NNE_ERORR(_msg)  \
-  LogError(__FILE__, __LINE__, __NNEFUNC__, _msg)
+  nne::LogError(__FILE__, __LINE__, __NNEFUNC__, _msg)
 
 
 // The macro "NNE_ERRNO_PRINT_REASON" prints description about _errno code, it is platform
@@ -80,6 +85,10 @@ namespace nne {
   // logged error, need to use a function in combination to a macro
   void LogError(const char* p_file, int p_line, const char* p_function_name, const char* p_message) noexcept;
 
+  void LogErrorLL(const char* p_file, int p_line, const char* p_function_name, const char* p_message) noexcept;
+
+  void GetCurrentTime(char* p_date_time_str) noexcept;
+
   // Dumps a block of memory as Hex string
   std::string BufferToHex(void* p_buffer, size_t p_size);
 
@@ -90,6 +99,8 @@ namespace nne {
 
   // Convert number of bytes to Kilo Byte, Mega Byte, Giga Byte, etc
   void BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t p_result_size) noexcept;
+
+  const char* ExtractFilenameFromPath(char* p_path) noexcept;
 
   // Compiler independent strcat
   // functions strcpy_nne, strcat_nne are used in error handling mechanisms in
@@ -110,6 +121,5 @@ namespace nne {
   // Returns a negative number if error happens
   template<typename ... Args>
   int sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args) noexcept;
-
 }
 

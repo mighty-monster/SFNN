@@ -36,19 +36,13 @@
 
 #pragma once
 
+#include "configs.hpp"
 #include "platform.hpp"
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <future>
-
-// The length of datetime string, Example: "2021-02-12 12:00:00"
-#define NNE_LOGGER_DATETIME_BUFFER_SIZE 20
-
-// The size of logger buffer, increase it if needed, global variables will allocate
-// on .data section with most of compilers and do not wast the stack or cause heap allocation
-#define NNE_LOGGER_BUFFER_GLOBAL 8192
 
 namespace nne {
   class Logger
@@ -124,12 +118,15 @@ namespace nne {
     void ILogToFile(const char* p_message);
     void ILog() noexcept;
 
-    void OpenLogFile() noexcept;
-    void CloseLogFile() noexcept;
-
-    void GetCurrentTime(char* p_date_time_str) noexcept;
-
     void ReportOFStreamError(const char* p_message, bool p_include_filepath = false) noexcept;
+
+    void OpenLogFile() noexcept;
+#ifdef NDEBUG
+    void CloseLogFile() noexcept;
+#else
+  public:
+    void CloseLogFile() noexcept;
+#endif
 
   private:
     // Streams don't throw exceptions by default
@@ -145,7 +142,6 @@ namespace nne {
     const char* m_str_null = "\0";
     const char* m_str_left_decorator = "|";
     const char* m_str_right_decorator = "| ";
-    const char* m_str_unknown = "Unknown";
 
     LogLevel m_level = LevelError;
     bool m_log_to_console = true;

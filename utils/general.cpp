@@ -37,22 +37,16 @@ void nne::LogError(const char* p_file, int p_line, const char* p_function_name, 
   }
   // -> Converting line to string
 
-  const char* last_pos = nullptr;
+  size_t filename_buffer_size = strlen(p_file) + 1;
+  char* filename_buffer = (char*)alloca(filename_buffer_size);
+  strcpy_nne(filename_buffer, filename_buffer_size, p_file, filename_buffer_size);
 
-  // Finding the position of last "\" or "/" charachters in the p_filename
-  last_pos = strrchr(p_file, '\\') ;
-  if (!last_pos)
-    last_pos = strrchr(p_file, '/');
-
-  // last_pos contain the pointer to the /, we want to start from the charachter after it
-  // so "last_pos - p_filename" is the length of desired substring plus one
-  // that is why we didn`t add +1 to include null termination, it is already calculated
-  size_t filename_length = strlen(p_file) - (last_pos - p_file);
+  const char* last_pos = ExtractFilenameFromPath(filename_buffer);
 
   // Alocating message memory on stack,
   // One byte extra added for null termination charachter,
   // Note: "strlen()" doesn`t include null termination charachter in reported length
-  size_t message_length = strlen(p_file) + strlen(colon) + strlen(line) + strlen(separator) +
+  size_t message_length = strlen(last_pos) + strlen(colon) + strlen(line) + strlen(separator) +
       strlen(p_function_name) + strlen(arrow) + strlen(p_message) + 1;
 
   // MSVC doesn`t support "char message[message_length]" as valid statement
@@ -71,12 +65,8 @@ void nne::LogError(const char* p_file, int p_line, const char* p_function_name, 
   // Null termination charchter is copied in each function call, but rewriten on the
   // next call and only the last null charachter will remain at the end.
   // This is necessary for strcat_nne to work.
-  if (last_pos)
-    // Note: used ++last_pos to start copying after "/" till end of string
-    nne::strcpy_nne(message, message_length, ++last_pos, filename_length);
-  else
-    NNE_ERORR_LL("Invalid filepath string, not including file name in exception object");
 
+  nne::strcpy_nne(message, message_length, last_pos, strlen(last_pos) + 1);
   nne::strcat_nne(message, message_length, colon, strlen(colon) + 1);
   nne::strcat_nne(message, message_length, line, strlen(line) + 1);
   nne::strcat_nne(message, message_length, separator, strlen(separator) + 1);
@@ -86,6 +76,93 @@ void nne::LogError(const char* p_file, int p_line, const char* p_function_name, 
 
   Logger::Error(message);
 }
+
+void nne::LogErrorLL(const char* p_file, int p_line, const char* p_function_name, const char* p_message) noexcept
+{
+  // <- Converting line to string
+  const uint8_t no_of_digits = 6;
+  char line[no_of_digits];
+
+  int result_code = nne::sprintf_nne(line, no_of_digits, "%d", p_line);
+
+  // Just reporting in case of error, can not recover if something goes seriously wrong
+  if (result_code < 0)
+  {
+    NNE_ERORR_LL("Error in nne::sprintf_nne, will not include line of error");
+    // setting line to 0, will cause strlen(line) to be zero
+    memset(line, 0, no_of_digits);
+  }
+  // -> Converting line to string
+
+  size_t filename_buffer_size = strlen(p_file) + 1;
+  char* filename_buffer = (char*)alloca(filename_buffer_size);
+  strcpy_nne(filename_buffer, filename_buffer_size, p_file, filename_buffer_size);
+
+  ExtractFilenameFromPath(filename_buffer);
+
+  char current_time[NNE_DATETIME_BUFFER_SIZE];
+  GetCurrentTime(current_time);
+
+  std::cerr << "|" << current_time << "| "<< "[LLE]: " << filename_buffer << ":" << line << ", " << p_function_name << " --> " << p_message << std::endl;
+}
+
+
+// date_time_str size should atleast have 20 bytes
+void nne::GetCurrentTime(char* p_date_time_str) noexcept
+{
+  static const char* m_str_unknown = "Unknown";
+
+  // Receive a time point using chrono API
+  auto time_point_now = std::chrono::system_clock::now();
+
+  // Convert time_point to time_t
+  std::time_t time_t_now = std::chrono::system_clock::to_time_t(time_point_now);
+
+#if defined(NNE_WIN_MSVC)
+  // MSVC prefers localtime_s
+
+  // Convert time_t to tm struct
+  // localtime_s returns 0 if succesfull, that`s why the if`s logic is twisted ;)
+  struct tm tm_struct;
+  if (localtime_s(&tm_struct, &time_t_now))
+  {
+    NNE_ERORR_LL("Failed to convert time_t to tm struct");
+    strcpy_nne(p_date_time_str, NNE_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
+    return;
+  }
+
+  // Format tm struct into the buffer
+  if (!std::strftime(p_date_time_str,
+                     NNE_DATETIME_BUFFER_SIZE,
+                     "%Y-%m-%d %H:%M:%S",
+                     &tm_struct))
+
+#else
+  // GCC doesn`t suport localtime_s, others might not as well
+
+  // Convert time_t to tm struct
+  struct tm* tm_struct = localtime(&time_t_now);
+  if (!tm_struct)
+  {
+    NNE_ERORR_LL("Failed to convert time_t to tm struct");
+    strcpy_nne(p_date_time_str, NNE_LOGGER_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
+    return;
+  }
+
+  // Format tm struct into the buffer
+  if (!std::strftime(p_date_time_str,
+                     NNE_LOGGER_DATETIME_BUFFER_SIZE,
+                     "%Y-%m-%d %H:%M:%S",
+                     tm_struct))
+#endif
+  {
+    NNE_ERORR_LL("Failed to format tm struct");
+    strcpy_nne(p_date_time_str, NNE_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
+  }
+};
+
+
+
 
 // Dumps a block of memory as Hex string
 std::string nne::BufferToHex(void* p_buffer, size_t p_size)
@@ -202,6 +279,33 @@ void nne::BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t
   // Just reporting in case of error, can not recover if something goes seroiusly wrong
   if (result_code < 0)
     NNE_ERORR_LL("Error in nne::sprintf_nne");
+}
+
+const char* nne::ExtractFilenameFromPath(char* p_path) noexcept
+{
+  const char* last_pos = nullptr;
+
+  // Finding the position of last "\" or "/" charachters in the p_filename
+  last_pos = strrchr(p_path, '\\') ;
+  if (!last_pos)
+    last_pos = strrchr(p_path, '/');
+
+  size_t length;
+  if (last_pos)
+  {
+    // last_pos contain the pointer to the /, we want to start from the charachter after it
+    // so "last_pos - p_filename" is the length of desired substring plus one
+    // that is why we didn`t add +1 to include null termination, it is already calculated
+    length = strlen(p_path) - (last_pos - p_path);
+
+    nne::strcpy_nne(p_path, strlen(p_path)+1, ++last_pos, length);
+  }
+  else
+  {
+    last_pos = p_path;
+  }
+
+  return last_pos;
 }
 
 // Compiler independent strcpy
