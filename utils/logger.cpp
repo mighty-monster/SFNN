@@ -277,7 +277,7 @@ void Logger::GetCurrentTime(char* p_date_time_str) noexcept
   struct tm tm_struct;
   if (localtime_s(&tm_struct, &time_t_now))
   {
-    NNELLRORR("Failed to convert time_t to tm struct");
+    NNE_ERORR_LL("Failed to convert time_t to tm struct");
     strcpy_nne(p_date_time_str, NNE_LOGGER_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
     return;
   }
@@ -318,7 +318,7 @@ void Logger::ReportOFStreamError(const char* p_message, bool p_include_filepath)
 
   const char* separator = ", ";
 
-  size_t reason_length = 256;
+  const size_t reason_length = 256;
   char reason[reason_length];
 
   size_t final_message_length = strlen(p_message) + strlen(separator) + reason_length + 1;

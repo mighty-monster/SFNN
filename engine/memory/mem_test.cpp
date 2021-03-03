@@ -11,6 +11,8 @@
 #include "memory/block_heap.hpp"
 #include "memory/block_heap.cpp"
 
+#include "utils/general.cpp"
+
 int object_counter;
 
 class Vector
@@ -110,7 +112,22 @@ int main()
   nne::Logger::Init(nne::Logger::LevelDebug, true, true);
   ENABLE_PRINT_ALLOC
   {
+    char buffer[6];
 
+    int res = nne::sprintf_nne(buffer, 6, "sdfsdfsdsdfdsfsf ");
+
+    if (res <= 0)
+    {
+      NNE_ERORR_LL("Error in nne::sprintf_nne, reading errno!");
+      const size_t reason_length = 256;
+      char reason[reason_length];
+      NNE_ERRNO_PRINT_REASON(reason, reason_length, errno);
+
+    }
+    else
+    {
+      NNE_PRINTL(buffer);
+    }
   }
 
   DISABLE_PRINT_ALLOC

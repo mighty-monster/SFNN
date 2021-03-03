@@ -48,6 +48,27 @@
   LogError(__FILE__, __LINE__, __NNEFUNC__, _msg)
 
 
+#ifdef _WIN32
+  #define NNE_ERRNO_PRINT_REASON(_reason, _reason_length, _errno) \
+  if ( strerror_s(_reason, _reason_length, _errno) == 0 ) \
+  { \
+   NNE_ERORR_LL(reason); \
+  }
+#elif __USE_XOPEN2K
+  #define NNE_ERRNO_PRINT_REASON(_reason, _reason_length, _errno) \
+  if ( strerror_r( _errno, _reason, _reason_length) == 0 ) \
+  { \
+   NNE_ERORR_LL(reason); \
+  }
+#else
+  #define NNE_ERRNO_PRINT_REASON(_reason, _reason_length, _errno) \
+  if(strerror_r( _errno, _reason, reason_length)) \
+  { \
+   NNE_ERORR_LL(reason); \
+  }
+#endif
+
+
 namespace nne {
   // __FUNC__, __FUCNTION__, __FUNCSIG__, and __PRETTY_FUNCTION__ are not macros,
   // they are constant static char* variables, to add function name to
@@ -63,8 +84,6 @@ namespace nne {
   void HexToBuffer(void* p_buffer, const char* p_hex, const size_t p_hex_size);
 
   // Convert number of bytes to Kilo Byte, Mega Byte, Giga Byte, etc
-  // Hint: "sprintf_nne" throws exception, but this function is used in memon.hpp, which
-  // is quiet low-level, so all exception will be reported internaly
   void BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t p_result_size) noexcept;
 
   // Compiler independent strcat
@@ -83,7 +102,7 @@ namespace nne {
   void strcat_nne(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length) noexcept;
 
   // Compiler independent sprintf
-  // Throws exception in case of error
+  // Returns a negative number if error happens
   template<typename ... Args>
   int sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args) noexcept;
 

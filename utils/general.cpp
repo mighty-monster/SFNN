@@ -22,20 +22,18 @@ void nne::LogError(const char* p_file, int p_line, const char* p_function_name, 
   char colon[] = ":";
   char arrow[] = " --> ";
 
-  uint8_t no_of_digits = 6;
+  const uint8_t no_of_digits = 6;
   char line[no_of_digits];
 
-  // We can not afford exception in this function.
-  // Anything related to reporting errors should be noexcept
-  try
+  int result_code = nne::sprintf_nne(line, no_of_digits, "%d", p_line);
+
+  // Just reporting in case of error, can not recover if something goes wrong
+  if (result_code < 0)
   {
-    nne::sprintf_nne(line, no_of_digits, "%d", p_line);
-  }
-  catch (...)
-  {
-    NNE_ERORR_LL("This realy should not happen, we are just formating an int, "
-                 "proceeding with omiting line number");
-    memset(line, 0 , no_of_digits);
+    NNE_ERORR_LL("Error in nne::sprintf_nne, reading errno!");
+    const size_t reason_length = 256;
+    char reason[reason_length];
+    NNE_ERRNO_PRINT_REASON(reason, reason_length, errno);
   }
 
   const char* last_pos = nullptr;
@@ -184,30 +182,29 @@ void nne::BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t
   const uint64_t mega = 1000LL*1000;
   const uint64_t kilo = 1000LL;
 
-  try
+  int result_code = 0;
+  if (p_size > exa)
+    nne::strcpy_nne(p_result, p_result_size, "? Exabyte(s)", strlen("? Exabyte(s)"));
+  else if (p_size > peta)
+    result_code = nne::sprintf_nne (p_result, p_result_size ,"%0.2f Petabyte(s)", (double)p_size / exa);
+  else if (p_size > tera)
+    result_code = nne::sprintf_nne (p_result, p_result_size, "%0.2f Terabyte(s)", (double)p_size / tera);
+  else if (p_size > giga)
+    result_code = nne::sprintf_nne (p_result, p_result_size, "%0.2f Gigabyte(s)", (double)p_size / giga);
+  else if (p_size > mega)
+    result_code = nne::sprintf_nne (p_result, p_result_size, "%0.2f Megabyte(s)", (double)p_size / mega);
+  else if (p_size > kilo)
+    result_code = nne::sprintf_nne (p_result, p_result_size, "%0.2f Kilobyte(s)", (double)p_size / kilo);
+  else
+    result_code = nne::sprintf_nne (p_result, p_result_size, "%llu Byte(s)", p_size);
+
+  // Just reporting in case of error, can not recover if something goes seroiusly wrong
+  if (result_code < 0)
   {
-    if (p_size > exa)
-      nne::strcpy_nne(p_result, p_result_size, "? Exabyte(s)", strlen("? Exabyte(s)"));
-    else if (p_size > peta)
-      nne::sprintf_nne (p_result, p_result_size ,"%0.2f Petabyte(s)", (double)p_size / exa);
-    else if (p_size > tera)
-      nne::sprintf_nne (p_result, p_result_size, "%0.2f Terabyte(s)", (double)p_size / tera);
-    else if (p_size > giga)
-      nne::sprintf_nne (p_result, p_result_size, "%0.2f Gigabyte(s)", (double)p_size / giga);
-    else if (p_size > mega)
-      nne::sprintf_nne (p_result, p_result_size, "%0.2f Megabyte(s)", (double)p_size / mega);
-    else if (p_size > kilo)
-      nne::sprintf_nne (p_result, p_result_size, "%0.2f Kilobyte(s)", (double)p_size / kilo);
-    else
-      nne::sprintf_nne (p_result, p_result_size, "%llu Byte(s)", p_size);
-  }
-  catch (std::exception& ex)
-  {
-    NNE_ERORR_LL(ex.what());
-  }
-  catch (...)
-  {
-    NNE_ERORR_LL("Unkown exception thrown in BytesToHumanReadableSize(uint64_t, char*, const size_t)");
+    NNE_ERORR_LL("Error in nne::sprintf_nne, reading errno!");
+    const size_t reason_length = 256;
+    char reason[reason_length];
+    NNE_ERRNO_PRINT_REASON(reason, reason_length, errno);
   }
 }
 
@@ -239,13 +236,12 @@ void nne::strcat_nne(char* p_dest, size_t p_dest_length, const char* p_src, size
 template<typename ... Args>
 int nne::sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args) noexcept
 {
-//#ifdef NNE_WIN_MSVC
-//  sprintf_s(p_dest, p_dest_length, p_format, p_args ... );
-//#else
-//  NNEUSE(p_dest_length);
-//  sprintf(p_dest, p_format, p_args ...);
-//#endif
-#ifdef WIN32
+
+#ifdef NNE_WIN_MSVC
+  #pragma warning(disable: 4996)
+#endif
+
+#ifdef _WIN32
   #define snprintf _snprintf
 #endif
 
