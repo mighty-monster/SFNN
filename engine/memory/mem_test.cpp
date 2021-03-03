@@ -110,16 +110,7 @@ int main()
   nne::Logger::Init(nne::Logger::LevelDebug, true, true);
   ENABLE_PRINT_ALLOC
   {
-    try
-    {
-      NNETHROW("This can be along message, how long should it be to cause problem really ?");
-    }
-    catch (NNExcept& ex)
-    {
-      NNERORR(ex.What());
 
-      NNERORR(ex.Func());
-    }
   }
 
   DISABLE_PRINT_ALLOC

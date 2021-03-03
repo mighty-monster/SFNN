@@ -31,34 +31,28 @@
   #define __func__ __FUNCTION__
 #endif
 
-#ifndef NDEBUG
-  #define NNEASSERT(_msg) // Todo: remove comment, assert(!_msg)
-#else
-  #define NNEASSERT(_msg)
-#endif
+#define NNE_PRINTL(_msg) std::cout<<_msg<<std::endl
 
-#define NNEPRINTL(_msg) std::cout<<_msg<<std::endl;
+#define NNE_ERORR_EX(_ex) \
+  LogError(_ex.File(), _ex.Line(), _ex.Func(), _ex.What())
 
 // Logs low level error
 // This macro logs the errors using std::cerr, it should only be used for Logger class
 // and in memotitor.hpp files
 // Streams don't throw exceptions by default, so using std::cerr is quiet safe here
-#define NNELLRORR(_msg) \
-  std::cerr << __NNEFUNC__ << " --> " << _msg << std::endl; \
-  NNEASSERT(_msg)
+#define NNE_ERORR_LL(_msg) \
+  std::cerr << __FILE__ << ":" << __LINE__ << ", " << __NNEFUNC__ << " --> " << _msg << std::endl
 
 // Logs error using Logger class
-// This macro logs the error in release mode and cause an assert in debug mode
-#define NNERORR(_msg)  \
-  LogError(__NNEFUNC__, _msg); \
-  NNEASSERT(_msg)
+#define NNE_ERORR(_msg)  \
+  LogError(__FILE__, __LINE__, __NNEFUNC__, _msg)
 
 
 namespace nne {
   // __FUNC__, __FUCNTION__, __FUNCSIG__, and __PRETTY_FUNCTION__ are not macros,
   // they are constant static char* variables, to add function name to
   // logged error, need to use a function in combination to a macro
-  void LogError(const char* p_function_name, const char* p_message) noexcept;
+  void LogError(const char* p_file, int p_line, const char* p_function_name, const char* p_message) noexcept;
 
   // Dumps a block of memory as Hex string
   std::string BufferToHex(void* p_buffer, size_t p_size);
@@ -91,7 +85,7 @@ namespace nne {
   // Compiler independent sprintf
   // Throws exception in case of error
   template<typename ... Args>
-  void sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args);
+  int sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args) noexcept;
 
 }
 

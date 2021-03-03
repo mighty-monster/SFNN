@@ -132,7 +132,7 @@ namespace nne {
 
       if (!m_allocation_table)
       {
-        NNELLRORR("Could not allocate memory for allocation table using malloc, "
+        NNE_ERORR_LL("Could not allocate memory for allocation table using malloc, "
                   "this realy should not happen, this is the end I guess... ");
         return;
       }
@@ -163,8 +163,8 @@ namespace nne {
         m_allocation_table = (AllocationInfo*)realloc(m_allocation_table, m_length*sizeof (AllocationInfo));
         if (!m_allocation_table)
         {
-          NNELLRORR("Insert to allocation table failed. Not enough memory!");
-          NNELLRORR("realloc failed, maybe a lot memory was allocated before and we are out of "
+          NNE_ERORR_LL("Insert to allocation table failed. Not enough memory!");
+          NNE_ERORR_LL("realloc failed, maybe a lot memory was allocated before and we are out of "
                     "memory, or it`s not possible to allocate a continous chunk, "
                     "anyway, this realy should not happen, this is the end I guess... ");
           return;
@@ -207,8 +207,8 @@ namespace nne {
       }
       catch (...)
       {
-        NNELLRORR("Something went wront with the mutex!");
-        NNELLRORR("Trying to remove without mutex");
+        NNE_ERORR_LL("Something went wront with the mutex!");
+        NNE_ERORR_LL("Trying to remove without mutex");
 
         for (uint64_t i=0; i<m_occupied; i++)
           if (m_allocation_table[i].m_memory == p_memory)
@@ -245,8 +245,8 @@ namespace nne {
       }
       catch (...)
       {
-        NNELLRORR("Something went wront with the mutex!");
-        NNELLRORR("Trying to get size without mutex");
+        NNE_ERORR_LL("Something went wront with the mutex!");
+        NNE_ERORR_LL("Trying to get size without mutex");
 
         for (uint64_t i=0; i<m_occupied; i++)
           if (m_allocation_table[i].m_memory == p_memory)
@@ -257,7 +257,7 @@ namespace nne {
       }
 
       if (!result)
-        NNELLRORR("Bad news, memory entry not found in allocation table, memory monitoring "
+        NNE_ERORR_LL("Bad news, memory entry not found in allocation table, memory monitoring "
                   "module is not reliable anymore.");
 
       return result;

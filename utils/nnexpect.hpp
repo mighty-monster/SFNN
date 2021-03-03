@@ -7,31 +7,40 @@
 
 #include <exception>
 
+//#define NNEXCEPT_FULL_FUNCNAME
+//#define NNEXCEPT_FULL_FILENAME
+
 #ifndef _WIN32
   #define NNEXCEPT_FULL_FUNCNAME
   #define NNEXCEPT_FULL_FILENAME
 #endif
 
-#define NNE_EXCEPTION_MESSAGE_SIZE 256
+#define NNE_EXCEPTION_MESSAGE_SIZE 196
 
-#ifdef NNEXCEPT_FULLFUNCNAME
+#ifdef NNEXCEPT_FULL_FUNCNAME
   #define NNEXCEPT_FUNCNAME __NNEFUNC__
-  #define NNE_EXCEPTION_FUNCNAME_SIZE 512
+  #define NNE_EXCEPTION_FUNCNAME_SIZE 256
 #else
   #define NNEXCEPT_FUNCNAME __func__
   #define NNE_EXCEPTION_FUNCNAME_SIZE 50
 #endif
 
 #ifdef NNEXCEPT_FULL_FILENAME
-  #define NNE_EXCEPTION_FILENAME_SIZE 1024
+  #define NNE_EXCEPTION_FILENAME_SIZE 512
 #else
   #define NNE_EXCEPTION_FILENAME_SIZE 50
 #endif
 
-#define NNETHROW(_msg) NNETHROW_C(_msg, 0)
+#ifdef NNEXCEPT_FULL_FUNCNAME
+  #define __NNEXCEPT_FUNNAME__  __NNEFUNC__
+#else
+  #define __NNEXCEPT_FUNNAME__ __func__
+#endif
 
-#define NNETHROW_C(_msg, _code) \
-  throw NNExcept(_msg, __func__, __FILE__, __LINE__, _code)
+#define NNE_THROW(_msg) NNE_THROW_C(_msg, 0)
+
+#define NNE_THROW_C(_msg, _code) \
+  throw NNExcept(_msg, __NNEXCEPT_FUNNAME__, __FILE__, __LINE__, _code)
 
 namespace nne {
   class NNExcept : public std::exception

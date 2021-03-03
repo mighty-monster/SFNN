@@ -33,7 +33,7 @@ NNExcept::NNExcept(const char* p_message,const char* p_function,const char* p_fi
     // Note: used ++last_pos to start copying after "/" till end of string
     strcpy_nne(m_filename, NNE_EXCEPTION_FILENAME_SIZE, ++last_pos, filename_length);
   else
-    NNELLRORR("Invalid filepath string, not including file name in exception object")
+    NNE_ERORR_LL("Invalid filepath string, not including file name in exception object");
 
 #endif
 

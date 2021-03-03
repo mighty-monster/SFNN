@@ -45,7 +45,7 @@ void Timer::PrintDuration() noexcept
                    / std::chrono::steady_clock::period::den << " Seconds";
 
   if (string_stream.fail())
-    NNERORR("Could not write duration to a std::ostringstream, don`t know why though!");
+    NNE_ERORR("Could not write duration to a std::ostringstream, don`t know why though!");
 
   Logger::Debug(string_stream.str());
 };

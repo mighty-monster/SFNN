@@ -186,7 +186,7 @@ void Logger::ILogToFile(const char* p_message)
   }
   else
   {
-    NNELLRORR("Log file is not open, can`t wite to it.");
+    NNE_ERORR_LL("Log file is not open, can`t wite to it.");
   }
 };
 
@@ -227,11 +227,11 @@ void Logger::ILog() noexcept
     }
     catch (std::exception& ex)
     {
-      NNELLRORR(ex.what());
+      NNE_ERORR_LL(ex.what());
     }
     catch (...)
     {
-      NNELLRORR("Unkown exception thrown in ILogToFile(char*)");
+      NNE_ERORR_LL("Unkown exception thrown in ILogToFile(char*)");
     }
   }
 
@@ -295,7 +295,7 @@ void Logger::GetCurrentTime(char* p_date_time_str) noexcept
   struct tm* tm_struct = localtime(&time_t_now);
   if (!tm_struct)
   {
-    NNELLRORR("Failed to convert time_t to tm struct");
+    NNE_ERORR_LL("Failed to convert time_t to tm struct");
     strcpy_nne(p_date_time_str, NNE_LOGGER_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
     return;
   }
@@ -307,7 +307,7 @@ void Logger::GetCurrentTime(char* p_date_time_str) noexcept
                      tm_struct))
 #endif
   {
-    NNELLRORR("Failed to format tm struct");
+    NNE_ERORR_LL("Failed to format tm struct");
     strcpy_nne(p_date_time_str, NNE_LOGGER_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
   }
 };
@@ -330,7 +330,7 @@ void Logger::ReportOFStreamError(const char* p_message, bool p_include_filepath)
   // are high that we can not proceed anymore, no point in handling the error, just reporting
   if (!final_message)
   {
-    NNELLRORR("Could not allocate memory on stack for the message, so can not proceed");
+    NNE_ERORR_LL("Could not allocate memory on stack for the message, so can not proceed");
     return;
   }
 
@@ -356,5 +356,5 @@ void Logger::ReportOFStreamError(const char* p_message, bool p_include_filepath)
     strcat_nne(final_message, final_message_length, reason, strlen(reason) + 1);
   }
 
-  NNELLRORR(final_message);
+  NNE_ERORR_LL(final_message);
 }

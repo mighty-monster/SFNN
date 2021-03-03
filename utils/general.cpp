@@ -16,14 +16,45 @@
 // __FUNC__, __FUCNTION__, __FUNCSIG__, and __PRETTY_FUNCTION__ are not macros,
 // they are constant static char* variables, to add function name to
 // logged error, need to use a function in combination to a macro
-void nne::LogError(const char* p_function_name, const char* p_message) noexcept
+void nne::LogError(const char* p_file, int p_line, const char* p_function_name, const char* p_message) noexcept
 {
+  char separator[] = ", ";
+  char colon[] = ":";
   char arrow[] = " --> ";
+
+  uint8_t no_of_digits = 6;
+  char line[no_of_digits];
+
+  // We can not afford exception in this function.
+  // Anything related to reporting errors should be noexcept
+  try
+  {
+    nne::sprintf_nne(line, no_of_digits, "%d", p_line);
+  }
+  catch (...)
+  {
+    NNE_ERORR_LL("This realy should not happen, we are just formating an int, "
+                 "proceeding with omiting line number");
+    memset(line, 0 , no_of_digits);
+  }
+
+  const char* last_pos = nullptr;
+
+  // Finding the position of last "\" or "/" charachters in the p_filename
+  last_pos = strrchr(p_file, '\\') ;
+  if (!last_pos)
+    last_pos = strrchr(p_file, '/');
+
+  // last_pos contain the pointer to the /, we want to start from the charachter after it
+  // so "last_pos - p_filename" is the length of desired substring plus one
+  // that is why we didn`t add +1 to include null termination, it is already calculated
+  size_t filename_length = strlen(p_file) - (last_pos - p_file);
 
   // Alocating message memory on stack,
   // One byte extra added for null termination charachter,
   // Note: "strlen()" doesn`t include null termination charachter in reported length
-  size_t message_length = strlen(p_function_name) + strlen(arrow) + strlen(p_message) + 1;
+  size_t message_length = strlen(p_file) + strlen(colon) + strlen(line) + strlen(separator) +
+      strlen(p_function_name) + strlen(arrow) + strlen(p_message) + 1;
 
   // MSVC doesn`t support "char message[message_length]" as valid statement
   // So "alloca" was used to allocated memory for the message
@@ -34,14 +65,23 @@ void nne::LogError(const char* p_function_name, const char* p_message) noexcept
   // are high that we can not proceed anymore, no point in handling the error, just reporting
   if (!message)
   {
-    NNELLRORR("Could not allocate memory on stack for the message, so can not proceed");
+    NNE_ERORR_LL("Could not allocate memory on stack for the message, so can not proceed");
     return;
   }
 
   // Null termination charchter is copied in each function call, but rewriten on the
   // next call and only the last null charachter will remain at the end.
   // This is necessary for strcat_nne to work.
-  nne::strcpy_nne(message, message_length, p_function_name, strlen(p_function_name) + 1);
+  if (last_pos)
+    // Note: used ++last_pos to start copying after "/" till end of string
+    nne::strcpy_nne(message, message_length, ++last_pos, filename_length);
+  else
+    NNE_ERORR_LL("Invalid filepath string, not including file name in exception object");
+
+  nne::strcat_nne(message, message_length, colon, strlen(colon) + 1);
+  nne::strcat_nne(message, message_length, line, strlen(line) + 1);
+  nne::strcat_nne(message, message_length, separator, strlen(separator) + 1);
+  nne::strcat_nne(message, message_length, p_function_name, strlen(p_function_name) + 1);
   nne::strcat_nne(message, message_length, arrow, strlen(arrow) + 1);
   nne::strcat_nne(message, message_length, p_message, strlen(p_message) + 1);
 
@@ -163,11 +203,11 @@ void nne::BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t
   }
   catch (std::exception& ex)
   {
-    NNELLRORR(ex.what());
+    NNE_ERORR_LL(ex.what());
   }
   catch (...)
   {
-    NNELLRORR("Unkown exception thrown in BytesToHumanReadableSize(uint64_t, char*, const size_t)");
+    NNE_ERORR_LL("Unkown exception thrown in BytesToHumanReadableSize(uint64_t, char*, const size_t)");
   }
 }
 
@@ -176,7 +216,7 @@ void nne::strcpy_nne(char* p_dest, size_t p_dest_length, const char* p_src, size
 {
   if (p_offset + p_src_length > p_dest_length)
   {
-    NNELLRORR("destination doen`t have enough space");
+    NNE_ERORR_LL("destination doesn`t have enough space");
     return;
   }
 
@@ -188,7 +228,7 @@ void nne::strcat_nne(char* p_dest, size_t p_dest_length, const char* p_src, size
 {
   if (p_src_length + strlen(p_dest) > p_dest_length)
   {
-    NNELLRORR("destination doen`t have enough space");
+    NNE_ERORR_LL("destination doesn`t have enough space");
     return;
   }
 
@@ -197,14 +237,24 @@ void nne::strcat_nne(char* p_dest, size_t p_dest_length, const char* p_src, size
 
 // Compiler independent sprintf
 template<typename ... Args>
-void nne::sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args)
+int nne::sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args) noexcept
 {
-#ifdef NNE_WIN_MSVC
-  sprintf_s(p_dest, p_dest_length, p_format, p_args ... );
-#else
-  NNEUSE(p_dest_length);
-  sprintf(p_dest, p_format, p_args ...);
+//#ifdef NNE_WIN_MSVC
+//  sprintf_s(p_dest, p_dest_length, p_format, p_args ... );
+//#else
+//  NNEUSE(p_dest_length);
+//  sprintf(p_dest, p_format, p_args ...);
+//#endif
+#ifdef WIN32
+  #define snprintf _snprintf
 #endif
-  //Todo: Check result and Throw Exception
+
+  int needed_length = snprintf( p_dest, p_dest_length, p_format, p_args ... );
+  // unix snprintf returns length output would actually require;
+  // windows _snprintf returns actual output length if output fits, else negative
+  if (needed_length >= (int)p_dest_length)
+    needed_length = -1;
+
+  return needed_length;
 }
 

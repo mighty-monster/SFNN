@@ -27,7 +27,7 @@ void SimpleMemory<ALLOC, DEALLOC>::SaveToFile(const char* p_file_path)
 
   if (output_file.fail())
   {
-    NNERORR("file path is not valid");
+    NNE_ERORR("file path is not valid");
     return;
   }
 
@@ -35,7 +35,7 @@ void SimpleMemory<ALLOC, DEALLOC>::SaveToFile(const char* p_file_path)
 
   if (output_file.fail())
   {
-    NNERORR("failed to write content to file");
+    NNE_ERORR("failed to write content to file");
     return;
   }
 
@@ -49,7 +49,7 @@ void SimpleMemory<ALLOC, DEALLOC>::SaveToHexFile(const char* p_file_path)
 
   if (!output_file)
   {
-    NNERORR( "file path is not valid");
+    NNE_ERORR( "file path is not valid");
     return;
   }
 
@@ -58,7 +58,7 @@ void SimpleMemory<ALLOC, DEALLOC>::SaveToHexFile(const char* p_file_path)
 
   if (output_file.fail())
   {
-    NNERORR( "failed to write content to file");
+    NNE_ERORR( "failed to write content to file");
     return;
   }
 
