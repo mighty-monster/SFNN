@@ -24,9 +24,19 @@ void nne::LogError(const char* p_function_name, const char* p_message) noexcept
   // One byte extra added for null termination charachter,
   // Note: "strlen()" doesn`t include null termination charachter in reported length
   size_t message_length = strlen(p_function_name) + strlen(arrow) + strlen(p_message) + 1;
+
   // MSVC doesn`t support "char message[message_length]" as valid statement
   // So "alloca" was used to allocated memory for the message
   char* message = (char*)alloca(message_length);
+  memset(message, 0, message_length);
+
+  // This error is too low level to handle, if we can not allocate few bytes on stack, chances
+  // are high that we can not proceed anymore, no point in handling the error, just reporting
+  if (!message)
+  {
+    NNELLRORR("Could not allocate memory on stack for the message, so can not proceed");
+    return;
+  }
 
   // Null termination charchter is copied in each function call, but rewriten on the
   // next call and only the last null charachter will remain at the end.
@@ -197,3 +207,4 @@ void nne::sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_fo
 #endif
   //Todo: Check result and Throw Exception
 }
+

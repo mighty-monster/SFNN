@@ -1,11 +1,13 @@
 add_library(utils
   platform.hpp
-  memonitor.hpp
+  memon.hpp
   general.hpp
   general.cpp
   logger.hpp
   logger.cpp
   timer.hpp
-  timer.cpp)
+  timer.cpp
+  nnexpect.hpp
+  nnexpect.cpp)
 
 

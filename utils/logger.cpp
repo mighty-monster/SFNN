@@ -23,7 +23,7 @@ Logger& Logger::GetInstance() noexcept
 };
 
 // Should be called once, for configuration, before using the object
-void Logger::Init(LogLevel p_level, bool p_log_to_console, bool p_log_to_file)
+void Logger::Init(LogLevel p_level, bool p_log_to_console, bool p_log_to_file) noexcept
 {
   SetLevel(p_level);
   EnableLogging(p_log_to_console, p_log_to_file);
@@ -98,14 +98,7 @@ void Logger::Debug(const std::string& p_message) noexcept
 // Logger destructor
 Logger::~Logger() noexcept
 {
-  try
-  {
-    CloseLogFile();
-  }
-  catch (...)
-  {
-    //Todo: Add error logging
-  }
+  CloseLogFile();
 };
 
 void Logger::IError(const char* p_message) noexcept
@@ -167,10 +160,11 @@ void Logger::IAddTitle(const char* p_title,const char* p_message) noexcept
   nne::strcpy_nne(m_buffer, NNE_LOGGER_BUFFER_GLOBAL,
                   m_str_enter, strlen(m_str_enter), offset);
 
-  // Adding null chachter to the end
+  // Adding null chachter to the end, "strlen" wont work here
+  // because it will not count null charachter
   offset += strlen(m_str_enter);
   nne::strcpy_nne(m_buffer, NNE_LOGGER_BUFFER_GLOBAL,
-                  m_str_null, strlen(m_str_null), offset);
+                  m_str_null, 1, offset);
 }
 
 void Logger::ILogToConsole(const char* p_message) noexcept
@@ -196,9 +190,8 @@ void Logger::ILogToFile(const char* p_message)
   }
 };
 
-// Note: Method "ILog" can throw two kind of exceptions
-// 1. Is caused by "std::strftime" in "GetCurrentTime" method
-// 2. "std::lock_guard" also can throw exception in "ILogToFile" method
+// Note: Method "ILog" can throw only one kind of exceptions
+// "std::lock_guard" can throw exception in "ILogToFile" method
 // By catching and reporting these exceptions, "ILog" will be noexcept
 // The reseaon for this is, Logger is used in reporting error of application
 // If it throws exception itself, it will be a mess, if somthing happens, we just report
@@ -207,20 +200,7 @@ void Logger::ILogToFile(const char* p_message)
 void Logger::ILog() noexcept
 {
   char current_time[NNE_LOGGER_DATETIME_BUFFER_SIZE];
-
-  try
-  {
-    GetCurrentTime(current_time);
-  }
-  catch (std::exception& ex)
-  {
-    NNELLRORR(ex.what());
-  }
-  catch (...)
-  {
-    NNELLRORR("Unkown exception thrown in GetCurrentTime(char*)");
-  }
-
+  GetCurrentTime(current_time);
 
   // Add content in place to m_buffer by calculating the proper offset
   // and copying the content in the right place
@@ -280,9 +260,7 @@ void Logger::CloseLogFile() noexcept
 }
 
 // date_time_str size should atleast have 20 bytes
-// Note: "std::strftime" throw exception, so "GetCurrentTime" have
-// Basic exception safty, it does not change invariants
-void Logger::GetCurrentTime(char* p_date_time_str)
+void Logger::GetCurrentTime(char* p_date_time_str) noexcept
 {
 
   // Receive a time point using chrono API
@@ -340,13 +318,21 @@ void Logger::ReportOFStreamError(const char* p_message, bool p_include_filepath)
 
   const char* separator = ", ";
 
-  size_t reason_length = 512;
+  size_t reason_length = 256;
   char reason[reason_length];
 
   size_t final_message_length = strlen(p_message) + strlen(separator) + reason_length + 1;
   final_message_length += p_include_filepath ? strlen(m_log_file_name) + strlen(reason) : 0;
 
   char* final_message = (char*)alloca(final_message_length);
+
+  // This error is too low level to handle, if we can not allocate few bytes on stack, chances
+  // are high that we can not proceed anymore, no point in handling the error, just reporting
+  if (!final_message)
+  {
+    NNELLRORR("Could not allocate memory on stack for the message, so can not proceed");
+    return;
+  }
 
   strcpy_nne(final_message, final_message_length, p_message, strlen(p_message) + 1);
 
@@ -359,8 +345,11 @@ void Logger::ReportOFStreamError(const char* p_message, bool p_include_filepath)
 #ifdef _WIN32
   if ( strerror_s(reason, reason_length, errno) == 0 )
   {
+#elif __USE_XOPEN2K
+  if ( strerror_r( errno, reason, reason_length) == 0 )
+  {
 #else
-  if ( strerror_r(reason, reason_length, errno) == 0 )
+  if(strerror_r( errno, reason, reason_length))
   {
 #endif
     strcat_nne(final_message, final_message_length, separator, strlen(separator) + 1);

@@ -1,4 +1,4 @@
-// File Name:     memonitor.hpp
+// File Name:     memon.hpp
 // Author:        Arash Fatehi
 // Date:          18th Feb 2021
 // Description:   Simple header to monitor heap allocation

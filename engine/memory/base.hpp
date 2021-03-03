@@ -56,7 +56,8 @@ namespace nne {
     virtual inline size_t SizeInBytes() = 0;
 
   protected:
-    virtual ~BaseMemory() = default;
+    BaseMemory() noexcept = default;
+    virtual ~BaseMemory() noexcept = default;
     // Size of allocated memory in bytes
     size_t m_size = 0;
     // Determines whether the class have any memory allocated or not

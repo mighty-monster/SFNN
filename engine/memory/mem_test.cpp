@@ -2,7 +2,8 @@
 #include <assert.h>
 
 #include "nne.hpp"
-#include "utils/memonitor.hpp"
+#include "utils/memon.hpp"
+#include "utils/nnexpect.hpp"
 
 #include "memory/simple_heap.hpp"
 #include "memory/simple_heap.cpp"
@@ -18,35 +19,35 @@ public:
   Vector()
   {
     std::cout<<"Vector Empty Constructor Called\n";
-    std::cout<<"This address: " <<this <<std::endl;
+    std::cout<<"This address: \n" <<this <<std::endl;
     object_counter++;
   }
 
   Vector(const float& p_x,const float& p_y,const float& p_z) : x(p_x), y(p_y), z(p_z)
   {
     std::cout<<"Vector Full Constructor Called\n";
-    std::cout<<"This address: " <<this <<std::endl;
+    std::cout<<"This address: \n" <<this <<std::endl;
     object_counter++;
   }
 
   Vector(const Vector& p1): x(p1.x), y(p1.y), z(p1.z)
   {
     std::cout<<"Vector Copy Constructor Called\n";
-    std::cout<<"This address: " <<this <<std::endl;
+    std::cout<<"This address: \n" <<this <<std::endl;
     object_counter++;
   }
 
   Vector(const Vector&& p1) noexcept: x(std::move(p1.x)), y(std::move(p1.y)), z(std::move(p1.z))
   {
     std::cout<<"Vector Move Constructor Called\n";
-    std::cout<<"This address: " <<this <<std::endl;
+    std::cout<<"This address: \n" <<this <<std::endl;
     object_counter++;
   }
 
-  ~Vector()
+  virtual ~Vector()
   {
     std::cout<<"Vector Destructor Called\n";
-    std::cout<<"This address: " <<this <<std::endl;
+    std::cout<<"This address: \n" <<this <<std::endl;
     object_counter++;
   }
 
@@ -57,7 +58,7 @@ public:
     y = other.y;
     z = other.z;
     std::cout <<"Vector Assignment Operator Called"<<std::endl;
-    std::cout<<"This address: " <<this <<std::endl;
+    std::cout<<"This address: \n" <<this <<std::endl;
     return *this;
   }
 
@@ -75,10 +76,27 @@ public:
 class VectorPrime : public Vector
 {
 public:
+  VectorPrime()
+  {
+    std::cout<<"VectorPrime Empty Constructor Called\n";
+    std::cout<<"This address: \n" <<this <<std::endl;
+  }
+
   VectorPrime(const float& p_x,const float& p_y,const float& p_z) : Vector(p_x, p_y, p_z)
   {
     std::cout<<"VectorPrime Full Constructor Called\n";
+    std::cout<<"This address: \n" <<this <<std::endl;
+
   }
+
+   ~VectorPrime()
+  {
+    std::cout<<"VectorPrime Destructor Called\n";
+    std::cout<<"This address: \n" <<this <<std::endl;
+  }
+public:
+  char messafg[100];
+
 };
 
 Vector func(Vector vp)
@@ -92,8 +110,16 @@ int main()
   nne::Logger::Init(nne::Logger::LevelDebug, true, true);
   ENABLE_PRINT_ALLOC
   {
+    try
+    {
+      NNETHROW("This can be along message, how long should it be to cause problem really ?");
+    }
+    catch (NNExcept& ex)
+    {
+      NNERORR(ex.What());
 
-
+      NNERORR(ex.Func());
+    }
   }
 
   DISABLE_PRINT_ALLOC

@@ -12,6 +12,7 @@
 #include <string>
 #include <cassert>
 #include <iostream>
+#include <stdio.h>
 
 // Helps to get rid of unused variable warnings when dealing with
 // cross-platform functions
@@ -25,23 +26,32 @@
   #define __NNEFUNC__ __PRETTY_FUNCTION__
 #endif
 
+// Defining __fucn__ macro in case of MSVC compiler
+#ifdef _MSC_VER
+  #define __func__ __FUNCTION__
+#endif
+
 #ifndef NDEBUG
-  #define NNEASSERT(_msg) // assert(!_msg)
+  #define NNEASSERT(_msg) // Todo: remove comment, assert(!_msg)
 #else
   #define NNEASSERT(_msg)
 #endif
 
+#define NNEPRINTL(_msg) std::cout<<_msg<<std::endl;
+
+// Logs low level error
 // This macro logs the errors using std::cerr, it should only be used for Logger class
 // and in memotitor.hpp files
 // Streams don't throw exceptions by default, so using std::cerr is quiet safe here
 #define NNELLRORR(_msg) \
   std::cerr << __NNEFUNC__ << " --> " << _msg << std::endl; \
-  NNEASSERT(_msg);
+  NNEASSERT(_msg)
 
+// Logs error using Logger class
 // This macro logs the error in release mode and cause an assert in debug mode
 #define NNERORR(_msg)  \
   LogError(__NNEFUNC__, _msg); \
-  NNEASSERT(_msg);
+  NNEASSERT(_msg)
 
 
 namespace nne {
@@ -59,14 +69,14 @@ namespace nne {
   void HexToBuffer(void* p_buffer, const char* p_hex, const size_t p_hex_size);
 
   // Convert number of bytes to Kilo Byte, Mega Byte, Giga Byte, etc
-  // Hint: "sprintf_nne" throws exception, but this function is used in memonitor.hpp, which
+  // Hint: "sprintf_nne" throws exception, but this function is used in memon.hpp, which
   // is quiet low-level, so all exception will be reported internaly
   void BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t p_result_size) noexcept;
 
   // Compiler independent strcat
   // functions strcpy_nne, strcat_nne are used in error handling mechanisms in
   // Logger class (used for reporting and logging errors as well), and also in reporting errors
-  // within Logger and memonitor, so if they can throw expection and cause error, things gets ugly
+  // within Logger and memon.hpp, so if they can throw expection and cause error, things gets ugly
   // Their potential errors are:
   // 1. Memory Access violation which will be handled using signals by OS and will
   // lead to crash anyway, if happens, we already lost :|
@@ -82,5 +92,6 @@ namespace nne {
   // Throws exception in case of error
   template<typename ... Args>
   void sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args);
+
 }
 

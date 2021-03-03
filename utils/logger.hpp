@@ -33,7 +33,6 @@
 // 1. Failing to open the file, wrong file path, insuficient permission, etc.
 // 2. Failing to write to the file, insuficient permission, filesystem errors, etc.
 // 3. Failing to write on std::cerr, jsut let it go ...
-// 4.
 
 #pragma once
 
@@ -75,7 +74,7 @@ namespace nne {
     static Logger& GetInstance() noexcept;
 
     // Should be called once, for configuration, before using the object
-    static void Init(LogLevel p_level, bool p_log_to_console, bool p_log_to_file);
+    static void Init(LogLevel p_level, bool p_log_to_console, bool p_log_to_file) noexcept;
 
     static void SetLevel(LogLevel p_level) noexcept;
 
@@ -128,7 +127,7 @@ namespace nne {
     void OpenLogFile() noexcept;
     void CloseLogFile() noexcept;
 
-    void GetCurrentTime(char* p_date_time_str);
+    void GetCurrentTime(char* p_date_time_str) noexcept;
 
     void ReportOFStreamError(const char* p_message, bool p_include_filepath = false) noexcept;
 
