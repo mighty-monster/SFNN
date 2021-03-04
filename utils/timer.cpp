@@ -47,7 +47,7 @@ void Timer::PrintDuration() noexcept
   if (string_stream.fail())
     NNE_ERORR("Could not write duration to a std::ostringstream, don`t know why though!");
 
-  Logger::Debug(string_stream.str());
+  NNE_DEBUG(string_stream.str());
 };
 
 // Returns duration with period of steady_clock,

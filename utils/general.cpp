@@ -16,7 +16,7 @@
 // __FUNC__, __FUCNTION__, __FUNCSIG__, and __PRETTY_FUNCTION__ are not macros,
 // they are constant static char* variables, to add function name to
 // logged error, need to use a function in combination to a macro
-void nne::LogError(const char* p_file, int p_line, const char* p_function_name, const char* p_message) noexcept
+void nne::LogError(const char* p_filepath, int p_line, const char* p_function_name, const char* p_message) noexcept
 {
   char separator[] = ", ";
   char colon[] = ":";
@@ -25,9 +25,7 @@ void nne::LogError(const char* p_file, int p_line, const char* p_function_name, 
   // <- Converting line to string
   const uint8_t no_of_digits = 6;
   char line[no_of_digits];
-
   int result_code = nne::sprintf_nne(line, no_of_digits, "%d", p_line);
-
   // Just reporting in case of error, can not recover if something goes seriously wrong
   if (result_code < 0)
   {
@@ -37,17 +35,25 @@ void nne::LogError(const char* p_file, int p_line, const char* p_function_name, 
   }
   // -> Converting line to string
 
-  size_t filename_buffer_size = strlen(p_file) + 1;
-  char* filename_buffer = (char*)alloca(filename_buffer_size);
-  strcpy_nne(filename_buffer, filename_buffer_size, p_file, filename_buffer_size);
+  size_t filepath_buffer_size = strlen(p_filepath) + 1;
+  char* filepath_buffer = (char*)alloca(filepath_buffer_size);
+  strcpy_nne(filepath_buffer, filepath_buffer_size, p_filepath, filepath_buffer_size);
 
-  const char* last_pos = ExtractFilenameFromPath(filename_buffer);
+  // By extracting the filename first, less memory is allocated on stack in enxt steps
+  ExtractFilenameFromPath(filepath_buffer);
 
   // Alocating message memory on stack,
   // One byte extra added for null termination charachter,
+  // ----
   // Note: "strlen()" doesn`t include null termination charachter in reported length
-  size_t message_length = strlen(last_pos) + strlen(colon) + strlen(line) + strlen(separator) +
-      strlen(p_function_name) + strlen(arrow) + strlen(p_message) + 1;
+  // Fomrat: filename:line, function --> message
+  size_t message_length = strlen(filepath_buffer) +
+                          strlen(colon) +
+                          strlen(line) +
+                          strlen(separator) +
+                          strlen(p_function_name) +
+                          strlen(arrow) +
+                          strlen(p_message) + 1;
 
   // MSVC doesn`t support "char message[message_length]" as valid statement
   // So "alloca" was used to allocated memory for the message
@@ -55,7 +61,8 @@ void nne::LogError(const char* p_file, int p_line, const char* p_function_name, 
   memset(message, 0, message_length);
 
   // This error is too low level to handle, if we can not allocate few bytes on stack, chances
-  // are high that we can not proceed anymore, no point in handling the error, just reporting
+  // are high that we can not proceed anymore, no point in handling the error, still will try
+  // to report the error
   if (!message)
   {
     NNE_ERORR_LL("Could not allocate memory on stack for the message, so can not proceed");
@@ -65,8 +72,7 @@ void nne::LogError(const char* p_file, int p_line, const char* p_function_name, 
   // Null termination charchter is copied in each function call, but rewriten on the
   // next call and only the last null charachter will remain at the end.
   // This is necessary for strcat_nne to work.
-
-  nne::strcpy_nne(message, message_length, last_pos, strlen(last_pos) + 1);
+  nne::strcpy_nne(message, message_length, filepath_buffer, strlen(filepath_buffer) + 1);
   nne::strcat_nne(message, message_length, colon, strlen(colon) + 1);
   nne::strcat_nne(message, message_length, line, strlen(line) + 1);
   nne::strcat_nne(message, message_length, separator, strlen(separator) + 1);
@@ -77,37 +83,41 @@ void nne::LogError(const char* p_file, int p_line, const char* p_function_name, 
   Logger::Error(message);
 }
 
-void nne::LogErrorLL(const char* p_file, int p_line, const char* p_function_name, const char* p_message) noexcept
+// This is the low-level error log function, nothing should goes wrong in here
+// If it does, we are done! We can report error if reporting cause error
+void nne::LogErrorLL(const char* p_filepath, int p_line, const char* p_function_name, const char* p_message) noexcept
 {
+
   // <- Converting line to string
   const uint8_t no_of_digits = 6;
   char line[no_of_digits];
-
   int result_code = nne::sprintf_nne(line, no_of_digits, "%d", p_line);
-
-  // Just reporting in case of error, can not recover if something goes seriously wrong
+  // Can not recover if something goes seriously wrong, just emptying "line" variable
   if (result_code < 0)
-  {
-    NNE_ERORR_LL("Error in nne::sprintf_nne, will not include line of error");
-    // setting line to 0, will cause strlen(line) to be zero
     memset(line, 0, no_of_digits);
-  }
   // -> Converting line to string
 
-  size_t filename_buffer_size = strlen(p_file) + 1;
-  char* filename_buffer = (char*)alloca(filename_buffer_size);
-  strcpy_nne(filename_buffer, filename_buffer_size, p_file, filename_buffer_size);
+  // Should copy p_filepath to a temp buffer that is not const
+  const size_t filepath_buffer_size = strlen(p_filepath) + 1;
+  char* filepath_buffer = (char*)alloca(filepath_buffer_size);
+  strcpy_nne(filepath_buffer, filepath_buffer_size, p_filepath, filepath_buffer_size);
 
-  ExtractFilenameFromPath(filename_buffer);
+  ExtractFilenameFromPath(filepath_buffer);
 
   char current_time[NNE_DATETIME_BUFFER_SIZE];
   GetCurrentTime(current_time);
 
-  std::cerr << "|" << current_time << "| "<< "[LLE]: " << filename_buffer << ":" << line << ", " << p_function_name << " --> " << p_message << std::endl;
+  std::cerr << "|" << current_time << "| "
+            << "[LLE]: " << filepath_buffer << ":"
+            << line << ", " << p_function_name
+            << " --> " << p_message << std::endl;
 }
 
-
 // date_time_str size should atleast have 20 bytes
+// -----
+// Note: "nne::GetCurrentTime" is used in "LogErrorLL" to prevent, infinite recursive
+// loops, no error reporting is possible in this function, if somthing goes wrong,
+// "Unkown" is the answer
 void nne::GetCurrentTime(char* p_date_time_str) noexcept
 {
   static const char* m_str_unknown = "Unknown";
@@ -126,7 +136,6 @@ void nne::GetCurrentTime(char* p_date_time_str) noexcept
   struct tm tm_struct;
   if (localtime_s(&tm_struct, &time_t_now))
   {
-    NNE_ERORR_LL("Failed to convert time_t to tm struct");
     strcpy_nne(p_date_time_str, NNE_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
     return;
   }
@@ -144,25 +153,20 @@ void nne::GetCurrentTime(char* p_date_time_str) noexcept
   struct tm* tm_struct = localtime(&time_t_now);
   if (!tm_struct)
   {
-    NNE_ERORR_LL("Failed to convert time_t to tm struct");
-    strcpy_nne(p_date_time_str, NNE_LOGGER_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
+     strcpy_nne(p_date_time_str, NNE_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
     return;
   }
 
   // Format tm struct into the buffer
   if (!std::strftime(p_date_time_str,
-                     NNE_LOGGER_DATETIME_BUFFER_SIZE,
+                     NNE_DATETIME_BUFFER_SIZE,
                      "%Y-%m-%d %H:%M:%S",
                      tm_struct))
 #endif
   {
-    NNE_ERORR_LL("Failed to format tm struct");
     strcpy_nne(p_date_time_str, NNE_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
   }
 };
-
-
-
 
 // Dumps a block of memory as Hex string
 std::string nne::BufferToHex(void* p_buffer, size_t p_size)
@@ -278,34 +282,31 @@ void nne::BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t
 
   // Just reporting in case of error, can not recover if something goes seroiusly wrong
   if (result_code < 0)
-    NNE_ERORR_LL("Error in nne::sprintf_nne");
+    NNE_ERORR("Error in nne::sprintf_nne");
 }
 
-const char* nne::ExtractFilenameFromPath(char* p_path) noexcept
+// If applicable copies a substring of the input (filename) into begging of input buffer
+// -----
+// Note: "strcpy_nne" parameter should 100% be correct in this function, because it is
+// used in "LogErrorLL", if fails, we have infinite recursive loop of reporting errors
+void nne::ExtractFilenameFromPath(char* p_filepath) noexcept
 {
   const char* last_pos = nullptr;
 
   // Finding the position of last "\" or "/" charachters in the p_filename
-  last_pos = strrchr(p_path, '\\') ;
+  last_pos = strrchr(p_filepath, '\\') ;
   if (!last_pos)
-    last_pos = strrchr(p_path, '/');
+    last_pos = strrchr(p_filepath, '/');
 
   size_t length;
   if (last_pos)
   {
     // last_pos contain the pointer to the /, we want to start from the charachter after it
     // so "last_pos - p_filename" is the length of desired substring plus one
-    // that is why we didn`t add +1 to include null termination, it is already calculated
-    length = strlen(p_path) - (last_pos - p_path);
-
-    nne::strcpy_nne(p_path, strlen(p_path)+1, ++last_pos, length);
+    // that is why we didn`t add +1 for null termination, it is already calculated
+    length = strlen(p_filepath) - (last_pos - p_filepath);
+    nne::strcpy_nne(p_filepath, strlen(p_filepath)+1, ++last_pos, length);
   }
-  else
-  {
-    last_pos = p_path;
-  }
-
-  return last_pos;
 }
 
 // Compiler independent strcpy
@@ -316,7 +317,6 @@ void nne::strcpy_nne(char* p_dest, size_t p_dest_length, const char* p_src, size
     NNE_ERORR_LL("destination doesn`t have enough space");
     return;
   }
-
   memcpy(p_dest + p_offset, p_src, p_src_length);
 }
 

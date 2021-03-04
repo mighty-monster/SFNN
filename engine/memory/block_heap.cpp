@@ -125,7 +125,11 @@ void BlockHeapMemory<T>::Resize(const size_t& p_length)
 
   // Check whether avaible free memory is enough for resizing
   if ((p_length / m_no_of_blocks + (p_length % m_no_of_blocks ? 1 : 0))
-      == m_block_length) return;
+      == m_block_length)
+  {
+    m_length = p_length;
+    return;
+  }
 
   if (m_allocated)
   {

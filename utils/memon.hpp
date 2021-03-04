@@ -12,10 +12,7 @@
 // Including the header in more than one execution unit leads to linker errors, it should be
 // included only once, "DISABLE_PRINT_ALLOC" and "ENABLE_PRINT_ALLOC" macros do as they suggest
 // "PRINT_ALLOC_SUMMERY" macro prints allocated and deallocated bytes from beginning
-// ---------------------
-// Note: This is too low-level to use Logger class for reporting the errors, for example
-// exceptions might allocate memory and interfere monitoring and reproting of heap allocations
-// So the potential error are reported using "std::cerr" instead
+
 
 #pragma once
 
@@ -30,7 +27,7 @@
 
 namespace nne {
   // If true "PRINT_ALLOC_SUMMERY" macro does it`s trick
-  bool g_print_allocations = false;
+  volatile bool g_print_allocations = false;
 
   // Prix of printed lines, for searching and filtering
   const char* g_allocation_monitor_signature = "[Heap]: ";
@@ -39,12 +36,12 @@ namespace nne {
   // Will cause Linking error if included in more than one
   // Execution unit, even by making them static, operators
   // can`t be static and will cause Linking error
-  uint64_t g_allocation_counter = 0;
-  uint64_t g_allocated_counter = 0;
-  uint64_t g_deallocated_counter = 0;
-  uint64_t g_allocated_bytes = 0;
-  uint64_t g_deallocated_bytes = 0;
-  uint64_t g_allocation_table_bytes = 0;
+  volatile uint64_t g_allocation_counter = 0;
+  volatile uint64_t g_allocated_counter = 0;
+  volatile uint64_t g_deallocated_counter = 0;
+  volatile uint64_t g_allocated_bytes = 0;
+  volatile uint64_t g_deallocated_bytes = 0;
+  volatile uint64_t g_allocation_table_bytes = 0;
 
   // Streams don't throw exceptions by default
   void PrintAllocationSummery() noexcept
@@ -74,30 +71,40 @@ namespace nne {
       std::cout << "Memory leak detected :(, better to check it with valgrind!\n";
 
     std::cout << "---------------\n";
+
+    std::cout.flush();
   }
 
   // Streams don't throw exceptions by default
   void RecordAllocation(size_t p_size) noexcept
   {
-    nne::g_allocation_counter++;
-    nne::g_allocated_counter++;
-
-    nne::g_allocated_bytes += p_size;
+    // volatile variables should be assigned without += or ++ operators
+    // This way the left expression is evaluated twice and final assembly code
+    // actucaly differs from += case which will evaluate left expression once
+    nne::g_allocation_counter = nne::g_allocation_counter + 1;
+    nne::g_allocated_counter = nne::g_allocated_counter + 1;
+    nne::g_allocated_bytes = nne::g_allocated_bytes + p_size;
 
     if (nne::g_print_allocations)
+    {
       std::cout << nne::g_allocation_monitor_signature << p_size << " bytes allcoated\n";
+      std::cout.flush();
+    }
   }
 
   // Streams don't throw exceptions by default
   void RecordDeallocation(size_t p_size) noexcept
   {
-    nne::g_allocation_counter--;
-    nne::g_deallocated_counter++;
-
-    nne::g_deallocated_bytes += p_size;
+    // volatile variables should be assigned without += or ++ operators
+    nne::g_allocation_counter = nne::g_allocation_counter - 1;
+    nne::g_deallocated_counter = nne::g_deallocated_counter + 1;
+    nne::g_deallocated_bytes = nne::g_deallocated_bytes + p_size;
 
     if (nne::g_print_allocations)
+    {
       std::cout << nne::g_allocation_monitor_signature << p_size << " bytes deallcoated\n";
+      std::cout.flush();
+    }
   }
 
   // Simple data structure to store allocated memory address and size
@@ -132,7 +139,7 @@ namespace nne {
 
       if (!m_allocation_table)
       {
-        NNE_ERORR_LL("Could not allocate memory for allocation table using malloc, "
+        NNE_ERORR("Could not allocate memory for allocation table using malloc, "
                   "this realy should not happen, this is the end I guess... ");
         return;
       }
@@ -163,8 +170,8 @@ namespace nne {
         m_allocation_table = (AllocationInfo*)realloc(m_allocation_table, m_length*sizeof (AllocationInfo));
         if (!m_allocation_table)
         {
-          NNE_ERORR_LL("Insert to allocation table failed. Not enough memory!");
-          NNE_ERORR_LL("realloc failed, maybe a lot memory was allocated before and we are out of "
+          NNE_ERORR("Insert to allocation table failed. Not enough memory!");
+          NNE_ERORR("realloc failed, maybe a lot memory was allocated before and we are out of "
                     "memory, or it`s not possible to allocate a continous chunk, "
                     "anyway, this realy should not happen, this is the end I guess... ");
           return;
@@ -207,8 +214,8 @@ namespace nne {
       }
       catch (...)
       {
-        NNE_ERORR_LL("Something went wront with the mutex!");
-        NNE_ERORR_LL("Trying to remove without mutex");
+        NNE_ERORR("Something went wront with the mutex!");
+        NNE_ERORR("Trying to remove without mutex");
 
         for (uint64_t i=0; i<m_occupied; i++)
           if (m_allocation_table[i].m_memory == p_memory)
@@ -224,7 +231,6 @@ namespace nne {
             break;
           }
       }
-
     };
 
     // Get size of allocated memory to address "memory"
@@ -245,8 +251,8 @@ namespace nne {
       }
       catch (...)
       {
-        NNE_ERORR_LL("Something went wront with the mutex!");
-        NNE_ERORR_LL("Trying to get size without mutex");
+        NNE_ERORR("Something went wront with the mutex!");
+        NNE_ERORR("Trying to get size without mutex");
 
         for (uint64_t i=0; i<m_occupied; i++)
           if (m_allocation_table[i].m_memory == p_memory)
@@ -257,7 +263,7 @@ namespace nne {
       }
 
       if (!result)
-        NNE_ERORR_LL("Bad news, memory entry not found in allocation table, memory monitoring "
+        NNE_ERORR("Bad news, memory entry not found in allocation table, memory monitoring "
                   "module is not reliable anymore.");
 
       return result;

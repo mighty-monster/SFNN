@@ -5,7 +5,7 @@
 #include <cinttypes>
 #include <string>
 
-#define BLOCKMEMORY_DEFAULT_NO_OF_BLOCKS  2
+#define BLOCKMEMORY_DEFAULT_NO_OF_BLOCKS  4
 
 namespace nne {
 

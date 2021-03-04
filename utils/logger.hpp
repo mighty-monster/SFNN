@@ -143,7 +143,7 @@ namespace nne {
     const char* m_str_left_decorator = "|";
     const char* m_str_right_decorator = "| ";
 
-    LogLevel m_level = LevelError;
+    LogLevel m_level = LevelInfo;
     bool m_log_to_console = true;
     bool m_log_to_file = false;
 
