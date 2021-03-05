@@ -1,9 +1,9 @@
 #pragma once
 
-#include "memory/simple_heap.hpp"
+#include "memory/linear/linear_heap.hpp"
 
 template <typename T>
-using HeapMemory = nne::SimpleHeapMemory<T>;
+using HeapMemory = nne::LinearHeapMemory<T>;
 
 
 namespace nnc {

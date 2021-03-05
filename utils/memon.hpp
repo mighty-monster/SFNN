@@ -2,17 +2,20 @@
 // Author:        Arash Fatehi
 // Date:          18th Feb 2021
 // Description:   Simple header to monitor heap allocation
+
 // --------------------
 // Detail Description:
 // By including this header in one of the execution units, it overloads "new" and "delete"
 // operatations, in addition to detect meamory leaks, it is usefull to trace
 // third party libraries memory allocation calls when debuging
 // ---------------------
-// Help:
+
+// --------------------
+// Note:
 // Including the header in more than one execution unit leads to linker errors, it should be
 // included only once, "DISABLE_PRINT_ALLOC" and "ENABLE_PRINT_ALLOC" macros do as they suggest
 // "PRINT_ALLOC_SUMMERY" macro prints allocated and deallocated bytes from beginning
-
+// --------------------
 
 #pragma once
 
@@ -124,11 +127,13 @@ namespace nne {
     size_t m_size;
   };
 
-  // Using simple array of AllocationPair, stores allocaiton calls, because it is used
-  // only in debug mode, not tree was implemented to accelarate GetSize and Remove
-  // fucntions, the time complexity of GetSize and Remove is O(n)
+  // =====
+  // AllocationTable stores allocaiton calls using simple array of AllocationPair,
+  // the time complexity of "GetSize" and "Remove" is O(n) which is enough for debuging purposes
   // Needed memory is allocated using malloc to prevent stack overflow, for the same
   // reason std::map was not used
+  // =====
+
   class AllocationTable
   {
   public:

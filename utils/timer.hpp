@@ -2,10 +2,12 @@
 // Author:        Arash Fatehi
 // Date:          12th Feb 2021
 // Description:   Measeres execution time from it`s creation till end of it`s scope
+
 // ---------------------
 // Detail Description:
 // By creating an instance of object at begining of scope the execution time
 // of targeted scope will be measured automatically
+// --------------------
 
 #pragma once
 

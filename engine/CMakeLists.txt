@@ -1,13 +1,15 @@
 add_library(engine
-  memory/base.hpp
-  memory/simple.hpp
-  memory/simple.cpp
-  memory/simple_heap.hpp
-  memory/simple_heap.cpp
-  memory/block.hpp
-  memory/block.cpp
-  memory/block_heap.hpp
-  memory/block_heap.cpp
+  memory/allocator/blueprint.hpp
+  memory/allocator/mallocator.hpp
+  memory/allocator/mallocator.cpp
+  memory/linear/linear.hpp
+  memory/linear/linear.cpp
+  memory/linear/linear_heap.hpp
+  memory/linear/linear_heap.cpp
+  memory/block/block.hpp
+  memory/block/block.cpp
+  memory/block/block_heap.hpp
+  memory/block/block_heap.cpp
   math/tensor.hpp
   math/tensor.cpp
   )

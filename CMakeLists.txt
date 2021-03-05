@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 
 project(NNE LANGUAGES CXX)
 
+add_subdirectory(gui)
+add_subdirectory(cmd)
+add_subdirectory(api)
 add_subdirectory(engine)
 add_subdirectory(utils)
 
@@ -24,7 +27,7 @@ add_executable(${PROJECT_NAME}
   nne.hpp
   nne.cpp)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE engine utils)
+target_link_libraries(${PROJECT_NAME} PRIVATE engine utils api gui cmd)
 
 include_directories( ./ engine )
 
@@ -32,6 +35,6 @@ include_directories( ./ engine )
 add_executable(MemTest
   engine/memory/mem_test.cpp)
 
-target_link_libraries(MemTest PRIVATE utils )
+target_link_libraries(MemTest PRIVATE engine utils)
 
 

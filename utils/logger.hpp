@@ -2,15 +2,20 @@
 // Author:        Arash Fatehi
 // Date:          12th Feb 2021
 // Description:   Facilitates logging to console and files
+
 // ---------------------
 // Detail Description:
 // Thread safe logging mechanism for console output and files compatible
 // with windows and linux platforms.
 // Log Levels: Error, Warning, Info, Debug
 // ---------------------
-// Help:
+
+// ---------------------
+// Note:
 // Use "GetInstance()" to recieve a singleton instance of the object and static methods
 // "Error", "Warn", "Info", and "Debug" for logging
+// ---------------------
+
 // ---------------------
 // Note:
 // The Logger class will instantiate as a local static variable in "GetInstance()"
@@ -24,6 +29,8 @@
 // global object, this hinders the module to detect memory leaks at the end
 // of program and print a useful summery.
 // ---------------------
+
+// ---------------------
 // Note:
 // The Logger is used for reporting errors, as a result, if it throws exception, things
 // can get ugly, causing errors when handling an error is source of evile ;p
@@ -33,6 +40,7 @@
 // 1. Failing to open the file, wrong file path, insuficient permission, etc.
 // 2. Failing to write to the file, insuficient permission, filesystem errors, etc.
 // 3. Failing to write on std::cerr, jsut let it go ...
+// ---------------------
 
 #pragma once
 
@@ -72,10 +80,7 @@ namespace nne {
 
     static void SetLevel(LogLevel p_level) noexcept;
 
-    // Can be used to enable or disable logging methods
     static void EnableLogging(bool p_log_to_console, bool p_log_to_file) noexcept;
-
-    // Disable all logging methods
     static void DisableLogging() noexcept;
 
     static void Error(const char* p_message) noexcept;

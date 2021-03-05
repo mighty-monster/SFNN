@@ -2,13 +2,17 @@
 // Author:        Arash Fatehi
 // Date:          27th Feb 2021
 // Description:   Detects platform information
+
 // ---------------------
 // Detail Description:
 // Consists of macros and classes that be added as per NNE needs in future
 // Currently it only detect the Compiler and OS
+// --------------------
+
 // ---------------------
 // OS: Windows, Unix
 // Compiler: GCC, Clang, MSVC, MinGW
+// --------------------
 
 #pragma once
 

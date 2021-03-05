@@ -2,6 +2,7 @@
 // Author:        Arash Fatehi
 // Date:          3th Mar 2021
 // Description:   Base exception class for NNE project
+
 // --------------------
 // Detail Description:
 // The only reason exceptions are chosen for error handling is they way new[] works
@@ -14,6 +15,8 @@
 // Currently (4th Mar 2021) only one type of exception class is enough for error handling,
 // for cuda and OpenCL, maybe separate class be beneficial
 // --------------------
+
+// --------------------
 // Note:
 // Exceptions play role in both error reporting and handling, low-level classes and fucntions
 // in utils like Logger and Timer don`t use exception on rely on errno, but excpet those classes
@@ -21,9 +24,13 @@
 // include the errno in the exception, this way a unify error handling method will be used
 // throw all high-level parts of software
 // --------------------
+
+// --------------------
 // Note:
 // When designing classes, the destructor, move operation and if necessary swap function should
 // declare noexcept and any potential exception should be handled internaly
+// --------------------
+
 // --------------------
 // Note:
 // Fixed buffers are used to store NNExcept data in stack to prevent any potential exception
@@ -31,8 +38,11 @@
 // The size of buffer for m_message, m_function and m_filename is defined in configs.h file
 // By using stack variables, default move and copy constructors are safe to handle move and copy
 // --------------------
+
+// --------------------
 // Note:
 // By default m_message buffer`s size is 256 bytes, increase the buffer size if need more
+// --------------------
 
 #pragma once
 
@@ -67,10 +77,14 @@ namespace nne {
     int m_errno;
 
   public:
+
+    // =====
     // Additional inline functions that provide more information,
     // like filename, fucntion name and line
     // -----
     // Note: inline functions can not be defines in separate file
+    // =====
+
     inline const char* What() const noexcept {return what();};
     inline const char* Func() const noexcept {return m_function;};
     inline const char* File() const noexcept {return m_filename;};
