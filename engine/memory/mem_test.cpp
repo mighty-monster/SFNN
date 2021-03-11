@@ -9,9 +9,9 @@
 
 int main()
 {
-  //nne::Logger::Init(Logger::LevelDebug, true, true);
+  //mnt::Logger::Init(Logger::LevelDebug, true, true);
 
-  nne::Mallocator mallocator;
+  mnt::Mallocator mallocator;
 
   BlockHeapMemory<float> mem(128, &mallocator);
 
@@ -19,7 +19,7 @@ int main()
     mem[i] = 1.0f*i;
 
   for (size_t i=0; i<mem.Length(); i++)
-    NNE_PRINTL( mem[i]);
+    MNT_PRINTL( mem[i]);
 
   return 0;
 }

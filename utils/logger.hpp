@@ -52,7 +52,7 @@
 #include <string>
 #include <future>
 
-namespace nne {
+namespace mnt {
   class Logger
   {
   public:
@@ -149,7 +149,7 @@ namespace nne {
     bool m_log_to_file = false;
 
     // variable to store the formated message
-    char m_buffer[NNE_LOGGER_BUFFER_GLOBAL];
+    char m_buffer[MNT_LOGGER_BUFFER_GLOBAL];
 
     // The mutex used for thread safety when writing to log file
     // Note: std::mutex constructor is a noexcept method

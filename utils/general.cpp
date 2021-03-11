@@ -16,7 +16,7 @@
 // __FUNC__, __FUCNTION__, __FUNCSIG__, and __PRETTY_FUNCTION__ are not macros,
 // they are constant static char* variables, to add function name to
 // logged error, need to use a function in combination to a macro
-void nne::LogError(const char* p_filepath, int p_line, const char* p_function_name, const char* p_message) noexcept
+void mnt::LogError(const char* p_filepath, int p_line, const char* p_function_name, const char* p_message) noexcept
 {
   char separator[] = ", ";
   char colon[] = ":";
@@ -25,11 +25,11 @@ void nne::LogError(const char* p_filepath, int p_line, const char* p_function_na
   // <- Converting line to string
   const uint8_t no_of_digits = 6;
   char line[no_of_digits];
-  int result_code = nne::sprintf_nne(line, no_of_digits, "%d", p_line);
+  int result_code = mnt::sprintf_mnt(line, no_of_digits, "%d", p_line);
   // Just reporting in case of error, can not recover if something goes seriously wrong
   if (result_code < 0)
   {
-    NNE_ERORR_LL("Error in nne::sprintf_nne, will not include line of error");
+    MNT_ERORR_LL("Error in mnt::sprintf_mnt, will not include line of error");
     // setting line to 0, will cause strlen(line) to be zero
     memset(line, 0, no_of_digits);
   }
@@ -37,7 +37,7 @@ void nne::LogError(const char* p_filepath, int p_line, const char* p_function_na
 
   size_t filepath_buffer_size = strlen(p_filepath) + 1;
   char* filepath_buffer = (char*)alloca(filepath_buffer_size);
-  strcpy_nne(filepath_buffer, filepath_buffer_size, p_filepath, filepath_buffer_size);
+  strcpy_mnt(filepath_buffer, filepath_buffer_size, p_filepath, filepath_buffer_size);
 
   // By extracting the filename first, less memory is allocated on stack in enxt steps
   ExtractFilenameFromPath(filepath_buffer);
@@ -65,33 +65,33 @@ void nne::LogError(const char* p_filepath, int p_line, const char* p_function_na
   // to report the error
   if (!message)
   {
-    NNE_ERORR_LL("Could not allocate memory on stack for the message, so can not proceed");
+    MNT_ERORR_LL("Could not allocate memory on stack for the message, so can not proceed");
     return;
   }
 
   // Null termination charchter is copied in each function call, but rewriten on the
   // next call and only the last null charachter will remain at the end.
-  // This is necessary for strcat_nne to work.
-  nne::strcpy_nne(message, message_length, filepath_buffer, strlen(filepath_buffer) + 1);
-  nne::strcat_nne(message, message_length, colon, strlen(colon) + 1);
-  nne::strcat_nne(message, message_length, line, strlen(line) + 1);
-  nne::strcat_nne(message, message_length, separator, strlen(separator) + 1);
-  nne::strcat_nne(message, message_length, p_function_name, strlen(p_function_name) + 1);
-  nne::strcat_nne(message, message_length, arrow, strlen(arrow) + 1);
-  nne::strcat_nne(message, message_length, p_message, strlen(p_message) + 1);
+  // This is necessary for strcat_mnt to work.
+  mnt::strcpy_mnt(message, message_length, filepath_buffer, strlen(filepath_buffer) + 1);
+  mnt::strcat_mnt(message, message_length, colon, strlen(colon) + 1);
+  mnt::strcat_mnt(message, message_length, line, strlen(line) + 1);
+  mnt::strcat_mnt(message, message_length, separator, strlen(separator) + 1);
+  mnt::strcat_mnt(message, message_length, p_function_name, strlen(p_function_name) + 1);
+  mnt::strcat_mnt(message, message_length, arrow, strlen(arrow) + 1);
+  mnt::strcat_mnt(message, message_length, p_message, strlen(p_message) + 1);
 
   Logger::Error(message);
 }
 
 // This is the low-level error log function, nothing should goes wrong in here
 // If it does, we are done! We can report error if reporting cause error
-void nne::LogErrorLL(const char* p_filepath, int p_line, const char* p_function_name, const char* p_message) noexcept
+void mnt::LogErrorLL(const char* p_filepath, int p_line, const char* p_function_name, const char* p_message) noexcept
 {
 
   // <- Converting line to string
   const uint8_t no_of_digits = 6;
   char line[no_of_digits];
-  int result_code = nne::sprintf_nne(line, no_of_digits, "%d", p_line);
+  int result_code = mnt::sprintf_mnt(line, no_of_digits, "%d", p_line);
   // Can not recover if something goes seriously wrong, just emptying "line" variable
   if (result_code < 0)
     memset(line, 0, no_of_digits);
@@ -100,11 +100,11 @@ void nne::LogErrorLL(const char* p_filepath, int p_line, const char* p_function_
   // Should copy p_filepath to a temp buffer that is not const
   const size_t filepath_buffer_size = strlen(p_filepath) + 1;
   char* filepath_buffer = (char*)alloca(filepath_buffer_size);
-  strcpy_nne(filepath_buffer, filepath_buffer_size, p_filepath, filepath_buffer_size);
+  strcpy_mnt(filepath_buffer, filepath_buffer_size, p_filepath, filepath_buffer_size);
 
   ExtractFilenameFromPath(filepath_buffer);
 
-  char current_time[NNE_DATETIME_BUFFER_SIZE];
+  char current_time[MNT_DATETIME_BUFFER_SIZE];
   GetCurrentTime(current_time);
 
   std::cerr << "|" << current_time << "| "
@@ -115,10 +115,10 @@ void nne::LogErrorLL(const char* p_filepath, int p_line, const char* p_function_
 
 // date_time_str size should atleast have 20 bytes
 // -----
-// Note: "nne::GetCurrentTime" is used in "LogErrorLL" to prevent, infinite recursive
+// Note: "mnt::GetCurrentTime" is used in "LogErrorLL" to prevent, infinite recursive
 // loops, no error reporting is possible in this function, if somthing goes wrong,
 // "Unkown" is the answer
-void nne::GetCurrentTime(char* p_date_time_str) noexcept
+void mnt::GetCurrentTime(char* p_date_time_str) noexcept
 {
   static const char* m_str_unknown = "Unknown";
 
@@ -128,7 +128,7 @@ void nne::GetCurrentTime(char* p_date_time_str) noexcept
   // Convert time_point to time_t
   std::time_t time_t_now = std::chrono::system_clock::to_time_t(time_point_now);
 
-#if defined(NNE_WIN_MSVC)
+#if defined(MNT_WIN_MSVC)
   // MSVC prefers localtime_s
 
   // Convert time_t to tm struct
@@ -136,13 +136,13 @@ void nne::GetCurrentTime(char* p_date_time_str) noexcept
   struct tm tm_struct;
   if (localtime_s(&tm_struct, &time_t_now))
   {
-    strcpy_nne(p_date_time_str, NNE_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
+    strcpy_mnt(p_date_time_str, MNT_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
     return;
   }
 
   // Format tm struct into the buffer
   if (!std::strftime(p_date_time_str,
-                     NNE_DATETIME_BUFFER_SIZE,
+                     MNT_DATETIME_BUFFER_SIZE,
                      "%Y-%m-%d %H:%M:%S",
                      &tm_struct))
 
@@ -153,23 +153,23 @@ void nne::GetCurrentTime(char* p_date_time_str) noexcept
   struct tm* tm_struct = localtime(&time_t_now);
   if (!tm_struct)
   {
-     strcpy_nne(p_date_time_str, NNE_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
+     strcpy_mnt(p_date_time_str, MNT_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
     return;
   }
 
   // Format tm struct into the buffer
   if (!std::strftime(p_date_time_str,
-                     NNE_DATETIME_BUFFER_SIZE,
+                     MNT_DATETIME_BUFFER_SIZE,
                      "%Y-%m-%d %H:%M:%S",
                      tm_struct))
 #endif
   {
-    strcpy_nne(p_date_time_str, NNE_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
+    strcpy_mnt(p_date_time_str, MNT_DATETIME_BUFFER_SIZE, m_str_unknown, strlen(m_str_unknown) + 1);
   }
 };
 
-// Dumps a block of memory as Hex string
-std::string nne::BufferToHex(void* p_buffer, size_t p_size)
+// Dumps a buffer as an Hex string
+std::string mnt::BufferToHex(void* p_buffer, size_t p_size)
 {
   std::stringstream string_stream;
   string_stream << std::hex;
@@ -182,9 +182,9 @@ std::string nne::BufferToHex(void* p_buffer, size_t p_size)
   return string_stream.str();
 }
 
-// Loads an Hex string into a block of memory
+// Loads an Hex string into a buffer
 // The buffer should have enough allocated memory
-void nne::HexToBuffer(void* p_buffer, const std::string& p_hex)
+void mnt::HexToBuffer(void* p_buffer, const std::string& p_hex)
 {
   // This implementation is not optimized, should change it if
   // the function is used in performance critical sections of code
@@ -219,7 +219,7 @@ void nne::HexToBuffer(void* p_buffer, const std::string& p_hex)
 
 // Loads an Hex string into a block of memory
 // The buffer should have enough allocated memory
-void nne::HexToBuffer(void* p_buffer, const char* p_hex, const size_t p_hex_size)
+void mnt::HexToBuffer(void* p_buffer, const char* p_hex, const size_t p_hex_size)
 {
   // This implementation is not optimized, should change it if
   // the function is used in performance critical sections of code
@@ -255,7 +255,7 @@ void nne::HexToBuffer(void* p_buffer, const char* p_hex, const size_t p_hex_size
 }
 
 // Convert  bytes to Kilo Byte, Mega Byte, Giga Byte, etc
-void nne::BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t p_result_size) noexcept
+void mnt::BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t p_result_size) noexcept
 {
   const uint64_t exa  = 1000LL*1000*1000*1000*1000*1000;
   const uint64_t peta = 1000LL*1000*1000*1000*1000;
@@ -266,30 +266,30 @@ void nne::BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t
 
   int result_code = 0;
   if (p_size > exa)
-    nne::strcpy_nne(p_result, p_result_size, "? Exabyte(s)", strlen("? Exabyte(s)"));
+    mnt::strcpy_mnt(p_result, p_result_size, "? Exabyte(s)", strlen("? Exabyte(s)"));
   else if (p_size > peta)
-    result_code = nne::sprintf_nne (p_result, p_result_size ,"%0.2f Petabyte(s)", (double)p_size / exa);
+    result_code = mnt::sprintf_mnt (p_result, p_result_size ,"%0.2f Petabyte(s)", (double)p_size / exa);
   else if (p_size > tera)
-    result_code = nne::sprintf_nne (p_result, p_result_size, "%0.2f Terabyte(s)", (double)p_size / tera);
+    result_code = mnt::sprintf_mnt (p_result, p_result_size, "%0.2f Terabyte(s)", (double)p_size / tera);
   else if (p_size > giga)
-    result_code = nne::sprintf_nne (p_result, p_result_size, "%0.2f Gigabyte(s)", (double)p_size / giga);
+    result_code = mnt::sprintf_mnt (p_result, p_result_size, "%0.2f Gigabyte(s)", (double)p_size / giga);
   else if (p_size > mega)
-    result_code = nne::sprintf_nne (p_result, p_result_size, "%0.2f Megabyte(s)", (double)p_size / mega);
+    result_code = mnt::sprintf_mnt (p_result, p_result_size, "%0.2f Megabyte(s)", (double)p_size / mega);
   else if (p_size > kilo)
-    result_code = nne::sprintf_nne (p_result, p_result_size, "%0.2f Kilobyte(s)", (double)p_size / kilo);
+    result_code = mnt::sprintf_mnt (p_result, p_result_size, "%0.2f Kilobyte(s)", (double)p_size / kilo);
   else
-    result_code = nne::sprintf_nne (p_result, p_result_size, "%llu Byte(s)", p_size);
+    result_code = mnt::sprintf_mnt (p_result, p_result_size, "%llu Byte(s)", p_size);
 
   // Just reporting in case of error, can not recover if something goes seroiusly wrong
   if (result_code < 0)
-    NNE_ERORR("Error in nne::sprintf_nne");
+    MNT_ERORR("Error in mnt::sprintf_mnt");
 }
 
 // If applicable copies a substring of the input (filename) into begging of input buffer
 // -----
-// Note: "strcpy_nne" parameter should 100% be correct in this function, because it is
+// Note: "strcpy_mnt" parameter should 100% be correct in this function, because it is
 // used in "LogErrorLL", if fails, we have infinite recursive loop of reporting errors
-void nne::ExtractFilenameFromPath(char* p_filepath) noexcept
+void mnt::ExtractFilenameFromPath(char* p_filepath) noexcept
 {
   const char* last_pos = nullptr;
 
@@ -305,39 +305,39 @@ void nne::ExtractFilenameFromPath(char* p_filepath) noexcept
     // so "last_pos - p_filename" is the length of desired substring plus one
     // that is why we didn`t add +1 for null termination, it is already calculated
     length = strlen(p_filepath) - (last_pos - p_filepath);
-    nne::strcpy_nne(p_filepath, strlen(p_filepath)+1, ++last_pos, length);
+    mnt::strcpy_mnt(p_filepath, strlen(p_filepath)+1, ++last_pos, length);
   }
 }
 
 // Compiler independent strcpy
-void nne::strcpy_nne(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length, size_t p_offset) noexcept
+void mnt::strcpy_mnt(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length, size_t p_offset) noexcept
 {
   if (p_offset + p_src_length > p_dest_length)
   {
-    NNE_ERORR_LL("destination doesn`t have enough space");
+    MNT_ERORR_LL("destination doesn`t have enough space");
     return;
   }
   memcpy(p_dest + p_offset, p_src, p_src_length);
 }
 
 // Compiler independent strcat
-void nne::strcat_nne(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length) noexcept
+void mnt::strcat_mnt(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length) noexcept
 {
   if (p_src_length + strlen(p_dest) > p_dest_length)
   {
-    NNE_ERORR_LL("destination doesn`t have enough space");
+    MNT_ERORR_LL("destination doesn`t have enough space");
     return;
   }
 
-  strcpy_nne(p_dest, p_dest_length, p_src, p_src_length, strlen(p_dest));
+  strcpy_mnt(p_dest, p_dest_length, p_src, p_src_length, strlen(p_dest));
 }
 
 // Compiler independent sprintf
 // Returns a negative number if error happens
 template<typename ... Args>
-int nne::sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args) noexcept
+int mnt::sprintf_mnt(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args) noexcept
 {
-#ifdef NNE_WIN_MSVC
+#ifdef MNT_WIN_MSVC
   // MSVC Complains about using _snprintf
   #pragma warning(disable: 4996)
 #endif

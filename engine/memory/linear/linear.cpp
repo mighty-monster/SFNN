@@ -6,13 +6,13 @@
 #include "memory/linear/linear.hpp"
 
 #include "utils/general.hpp"
-#include "utils/nnexpect.hpp"
+#include "utils/mntexcept.hpp"
 
 #include <fstream>
 #include <string>
 #include <iostream>
 
-using namespace nne;
+using namespace mnt;
 
 template <typename T>
 void LinearMemory<T>::SaveToFile(const char* p_file_path)
@@ -20,14 +20,14 @@ void LinearMemory<T>::SaveToFile(const char* p_file_path)
   auto output_file = std::fstream(p_file_path, std::ios::out | std::ios::binary);
 
   if (output_file.fail())
-    NNE_THROW_C("file path is not valid", errno);
+    MNT_THROW_C("file path is not valid", errno);
 
   output_file.write((char*)m_memory, this->m_size);
 
   if (output_file.fail())
   {
     output_file.close();
-    NNE_THROW_C("failed to write content to the file", errno);
+    MNT_THROW_C("failed to write content to the file", errno);
   }
 
   output_file.close();

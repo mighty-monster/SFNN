@@ -5,7 +5,7 @@
 
 // ---------------------
 // Detail Description:
-// Consists of macros and classes that be added as per NNE needs in future
+// Consists of macros and classes that be added as per MNT needs in future
 // Currently it only detect the Compiler and OS
 // --------------------
 
@@ -18,17 +18,17 @@
 
 #if defined(_WIN32)
   #if defined(_MSC_VER)
-    #define NNE_WIN_MSVC
+    #define MNT_WIN_MSVC
   #elif defined(__clang__) || defined(__clang_version__)
-    #define NNE_WIN_CLANG
+    #define MNT_WIN_CLANG
   #elif defined(__MINGW32__) || defined(__GNUC__)
-    #define NNE_WIN_MINGW
+    #define MNT_WIN_MINGW
   #endif
 #elif defined(__unix__)
   #if defined(__GNUC_MINOR__)
-    #define NNE_UNIX_GCC
+    #define MNT_UNIX_GCC
   #elif defined(__clang_version__)
-    #define NNE_UNIX_CLANG
+    #define MNT_UNIX_CLANG
   #endif
 #endif
 

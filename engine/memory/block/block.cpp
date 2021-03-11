@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 
-using namespace nne;
+using namespace mnt;
 
 template <typename T>
 void BlockMemory<T>::SaveToFile(const char* p_file_path)
@@ -27,7 +27,7 @@ std::string BlockMemory<T>::ToHex()
   std::stringstream string_stream;
 
   for(size_t i=0; i < m_no_of_blocks; i++)
-    string_stream << nne::BufferToHex(*(m_block_array + i), m_block_size);
+    string_stream << mnt::BufferToHex(*(m_block_array + i), m_block_size);
 
   return string_stream.str();
 };

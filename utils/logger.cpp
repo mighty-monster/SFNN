@@ -12,7 +12,7 @@
 #include <cstring>
 #include <cerrno>
 
-using namespace nne;
+using namespace mnt;
 
 // If needed create and return the Logger object
 Logger& Logger::GetInstance() noexcept
@@ -142,28 +142,28 @@ void Logger::IAddTitle(const char* p_title,const char* p_message) noexcept
   size_t offset = 0;
 
   // One byte reduced to overwite the null termination character
-  // Note: NNE_LOGGER_DATETIME_BUFFER_SIZE is the size with null charachter
+  // Note: MNT_LOGGER_DATETIME_BUFFER_SIZE is the size with null charachter
   offset += strlen(m_str_left_decorator) +
-      NNE_DATETIME_BUFFER_SIZE + strlen(m_str_right_decorator) - 1;
+      MNT_DATETIME_BUFFER_SIZE + strlen(m_str_right_decorator) - 1;
 
   // Add content in place to m_buffer by calculating the proper offset
   // and copying the content in the right place
 
-  nne::strcpy_nne(m_buffer, NNE_LOGGER_BUFFER_GLOBAL,
+  mnt::strcpy_mnt(m_buffer, MNT_LOGGER_BUFFER_GLOBAL,
                   p_title, strlen(p_title), offset);
 
   offset += strlen(p_title);
-  nne::strcpy_nne(m_buffer, NNE_LOGGER_BUFFER_GLOBAL,
+  mnt::strcpy_mnt(m_buffer, MNT_LOGGER_BUFFER_GLOBAL,
                   p_message,   strlen(p_message),   offset);
 
   offset += strlen(p_message);
-  nne::strcpy_nne(m_buffer, NNE_LOGGER_BUFFER_GLOBAL,
+  mnt::strcpy_mnt(m_buffer, MNT_LOGGER_BUFFER_GLOBAL,
                   m_str_enter, strlen(m_str_enter), offset);
 
   // Adding null chachter to the end, "strlen" wont work here
   // because it will not count null charachter
   offset += strlen(m_str_enter);
-  nne::strcpy_nne(m_buffer, NNE_LOGGER_BUFFER_GLOBAL,
+  mnt::strcpy_mnt(m_buffer, MNT_LOGGER_BUFFER_GLOBAL,
                   m_str_null, 1, offset);
 }
 
@@ -186,7 +186,7 @@ void Logger::ILogToFile(const char* p_message)
   }
   else
   {
-    NNE_ERORR_LL("Log file is not open, can`t wite to it.");
+    MNT_ERORR_LL("Log file is not open, can`t wite to it.");
   }
 };
 
@@ -199,21 +199,21 @@ void Logger::ILogToFile(const char* p_message)
 // there is nothing to recover from at this point
 void Logger::ILog() noexcept
 {
-  char current_time[NNE_DATETIME_BUFFER_SIZE];
+  char current_time[MNT_DATETIME_BUFFER_SIZE];
   GetCurrentTime(current_time);
 
   // Add content in place to m_buffer by calculating the proper offset
   // and copying the content in the right place
   size_t offset = 0;
-  nne::strcpy_nne(m_buffer, NNE_LOGGER_BUFFER_GLOBAL,
+  mnt::strcpy_mnt(m_buffer, MNT_LOGGER_BUFFER_GLOBAL,
                   m_str_left_decorator, strlen(m_str_left_decorator), offset);
 
   offset += strlen(m_str_left_decorator);
-  nne::strcpy_nne(m_buffer, NNE_LOGGER_BUFFER_GLOBAL,
+  mnt::strcpy_mnt(m_buffer, MNT_LOGGER_BUFFER_GLOBAL,
                   current_time, strlen(current_time), offset);
 
   offset += strlen(current_time);
-  nne::strcpy_nne(m_buffer, NNE_LOGGER_BUFFER_GLOBAL,
+  mnt::strcpy_mnt(m_buffer, MNT_LOGGER_BUFFER_GLOBAL,
                   m_str_right_decorator, strlen(m_str_right_decorator), offset);
 
   if(m_log_to_console)
@@ -227,11 +227,11 @@ void Logger::ILog() noexcept
     }
     catch (std::exception& ex)
     {
-      NNE_ERORR_LL(ex.what());
+      MNT_ERORR_LL(ex.what());
     }
     catch (...)
     {
-      NNE_ERORR_LL("Unkown exception thrown in ILogToFile(char*)");
+      MNT_ERORR_LL("Unkown exception thrown in ILogToFile(char*)");
     }
   }
 
@@ -277,16 +277,16 @@ void Logger::ReportOFStreamError(const char* p_message, bool p_include_filepath)
   // are high that we can not proceed anymore, no point in handling the error, just reporting
   if (!final_message)
   {
-    NNE_ERORR_LL("Could not allocate memory on stack for the message, so can not proceed");
+    MNT_ERORR_LL("Could not allocate memory on stack for the message, so can not proceed");
     return;
   }
 
-  strcpy_nne(final_message, final_message_length, p_message, strlen(p_message) + 1);
+  strcpy_mnt(final_message, final_message_length, p_message, strlen(p_message) + 1);
 
   if (p_include_filepath)
   {
-    strcat_nne(final_message, final_message_length, separator, strlen(separator) + 1);
-    strcat_nne(final_message, final_message_length, m_log_file_name, strlen(m_log_file_name) + 1);
+    strcat_mnt(final_message, final_message_length, separator, strlen(separator) + 1);
+    strcat_mnt(final_message, final_message_length, m_log_file_name, strlen(m_log_file_name) + 1);
   }  
 
 
@@ -297,22 +297,22 @@ void Logger::ReportOFStreamError(const char* p_message, bool p_include_filepath)
 #ifdef _WIN32
   if ( strerror_s(reason, reason_length, errno) == 0 )
   {
-    strcat_nne(final_message, final_message_length, separator, strlen(separator) + 1);
-    strcat_nne(final_message, final_message_length, reason, strlen(reason) + 1);
+    strcat_mnt(final_message, final_message_length, separator, strlen(separator) + 1);
+    strcat_mnt(final_message, final_message_length, reason, strlen(reason) + 1);
   }
 #elif defined __USE_XOPEN2K && !defined __USE_GNU
   if ( strerror_r( errno, reason, reason_length) == 0 )
   {
-    strcat_nne(final_message, final_message_length, separator, strlen(separator) + 1);
-    strcat_nne(final_message, final_message_length, reason, strlen(reason) + 1);
+    strcat_mnt(final_message, final_message_length, separator, strlen(separator) + 1);
+    strcat_mnt(final_message, final_message_length, reason, strlen(reason) + 1);
   }
 #else
   // The GNU version of strerror_r returns the description as a char* and may or may not
   // use the provided buffer
   char* GNU_version_reason = strerror_r( errno, reason, reason_length);
-  strcat_nne(final_message, final_message_length, separator, strlen(separator) + 1);
-  strcat_nne(final_message, final_message_length, GNU_version_reason, strlen(GNU_version_reason) + 1);
+  strcat_mnt(final_message, final_message_length, separator, strlen(separator) + 1);
+  strcat_mnt(final_message, final_message_length, GNU_version_reason, strlen(GNU_version_reason) + 1);
 #endif
 
-  NNE_ERORR_LL(final_message);
+  MNT_ERORR_LL(final_message);
 }

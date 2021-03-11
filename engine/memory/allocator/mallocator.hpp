@@ -2,7 +2,7 @@
 
 #include "blueprint.hpp"
 
-namespace nne {
+namespace mnt {
 
   class Mallocator : public Allocator
   {

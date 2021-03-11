@@ -7,7 +7,7 @@
 
 #define BLOCKMEMORY_DEFAULT_NO_OF_BLOCKS  4
 
-namespace nne {
+namespace mnt {
   template <typename T>
   class BlockMemory
   {

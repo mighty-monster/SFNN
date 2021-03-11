@@ -2,7 +2,7 @@
 
 #include <cstdlib>
 
-using namespace nne;
+using namespace mnt;
 
 Mallocator::Mallocator() {};
 Mallocator::~Mallocator() noexcept {};

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(NNE LANGUAGES CXX)
+project(Momentum LANGUAGES CXX)
 
 add_subdirectory(gui)
 add_subdirectory(cmd)
@@ -14,18 +14,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 IF (UNIX)
   set( CMAKE_CXX_FLAGS " -pthread" )
-
-  if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-      #link_libraries("-stdlib=libc++")
-      set( CMAKE_CXX_FLAGS " -fsanitize=memory -fno-omit-frame-pointer" )
-  ENDIF()
-
 ENDIF()
 
 add_executable(${PROJECT_NAME}
   main.cpp
-  nne.hpp
-  nne.cpp)
+  mnt.hpp
+  mnt.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE engine utils api gui cmd)
 

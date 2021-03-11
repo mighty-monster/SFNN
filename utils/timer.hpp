@@ -14,7 +14,7 @@
 #include <iostream>
 #include <chrono>
 
-namespace nne {
+namespace mnt {
   class Timer
   {
   public:

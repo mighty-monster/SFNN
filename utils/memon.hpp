@@ -24,11 +24,11 @@
 #include <iostream>
 #include <future>
 
-#define DISABLE_PRINT_ALLOC nne::g_print_allocations = false;
-#define ENABLE_PRINT_ALLOC nne::g_print_allocations = true;
-#define PRINT_ALLOC_SUMMERY nne::PrintAllocationSummery();
+#define DISABLE_PRINT_ALLOC mnt::g_print_allocations = false;
+#define ENABLE_PRINT_ALLOC mnt::g_print_allocations = true;
+#define PRINT_ALLOC_SUMMERY mnt::PrintAllocationSummery();
 
-namespace nne {
+namespace mnt {
   // If true "PRINT_ALLOC_SUMMERY" macro does it`s trick
   volatile bool g_print_allocations = false;
 
@@ -49,24 +49,24 @@ namespace nne {
   // Streams don't throw exceptions by default
   void PrintAllocationSummery() noexcept
   {
-    const size_t buffer_size = NNE_MEMON_INITIAL_TABLE_SIZE;
+    const size_t buffer_size = MNT_MEMON_INITIAL_TABLE_SIZE;
     char human_readable[buffer_size];
 
     std::cout << "\n---------------\n----Summery----\n";
-    std::cout << "Allocation Calls: "<<nne::g_allocated_counter<<std::endl;
-    std::cout << "Deallocation Calls: "<<nne::g_deallocated_counter<<std::endl;
+    std::cout << "Allocation Calls: "<<mnt::g_allocated_counter<<std::endl;
+    std::cout << "Deallocation Calls: "<<mnt::g_deallocated_counter<<std::endl;
 
-    nne::BytesToHumanReadableSize(nne::g_allocated_bytes, human_readable, buffer_size);
+    mnt::BytesToHumanReadableSize(mnt::g_allocated_bytes, human_readable, buffer_size);
     std::cout << "Allocated: "<< human_readable << ", " <<
-                 nne::g_allocated_bytes << " Byte(s)" <<std::endl;
+                 mnt::g_allocated_bytes << " Byte(s)" <<std::endl;
 
-    nne::BytesToHumanReadableSize(nne::g_deallocated_bytes, human_readable, buffer_size);
+    mnt::BytesToHumanReadableSize(mnt::g_deallocated_bytes, human_readable, buffer_size);
     std::cout << "Deallocated: "<< human_readable << ", " <<
-                 nne::g_deallocated_bytes << " Byte(s)" << std::endl;
+                 mnt::g_deallocated_bytes << " Byte(s)" << std::endl;
 
-    nne::BytesToHumanReadableSize(nne::g_allocation_table_bytes, human_readable, buffer_size);
+    mnt::BytesToHumanReadableSize(mnt::g_allocation_table_bytes, human_readable, buffer_size);
     std::cout << "Allocation Table: "<< human_readable << ", " <<
-                 nne::g_allocation_table_bytes << " Byte(s)" << std::endl;
+                 mnt::g_allocation_table_bytes << " Byte(s)" << std::endl;
 
     if (g_allocated_bytes == g_deallocated_bytes)
       std::cout << "No memory leak detected, we are safe ;)\n";
@@ -84,13 +84,13 @@ namespace nne {
     // volatile variables should be assigned without += or ++ operators
     // This way the left expression is evaluated twice and final assembly code
     // actucaly differs from += case which will evaluate left expression once
-    nne::g_allocation_counter = nne::g_allocation_counter + 1;
-    nne::g_allocated_counter = nne::g_allocated_counter + 1;
-    nne::g_allocated_bytes = nne::g_allocated_bytes + p_size;
+    mnt::g_allocation_counter = mnt::g_allocation_counter + 1;
+    mnt::g_allocated_counter = mnt::g_allocated_counter + 1;
+    mnt::g_allocated_bytes = mnt::g_allocated_bytes + p_size;
 
-    if (nne::g_print_allocations)
+    if (mnt::g_print_allocations)
     {
-      std::cout << nne::g_allocation_monitor_signature << p_size << " bytes allcoated\n";
+      std::cout << mnt::g_allocation_monitor_signature << p_size << " bytes allcoated\n";
       std::cout.flush();
     }
   }
@@ -99,13 +99,13 @@ namespace nne {
   void RecordDeallocation(size_t p_size) noexcept
   {
     // volatile variables should be assigned without += or ++ operators
-    nne::g_allocation_counter = nne::g_allocation_counter - 1;
-    nne::g_deallocated_counter = nne::g_deallocated_counter + 1;
-    nne::g_deallocated_bytes = nne::g_deallocated_bytes + p_size;
+    mnt::g_allocation_counter = mnt::g_allocation_counter - 1;
+    mnt::g_deallocated_counter = mnt::g_deallocated_counter + 1;
+    mnt::g_deallocated_bytes = mnt::g_deallocated_bytes + p_size;
 
-    if (nne::g_print_allocations)
+    if (mnt::g_print_allocations)
     {
-      std::cout << nne::g_allocation_monitor_signature << p_size << " bytes deallcoated\n";
+      std::cout << mnt::g_allocation_monitor_signature << p_size << " bytes deallcoated\n";
       std::cout.flush();
     }
   }
@@ -144,7 +144,7 @@ namespace nne {
 
       if (!m_allocation_table)
       {
-        NNE_ERORR("Could not allocate memory for allocation table using malloc, "
+        MNT_ERORR("Could not allocate memory for allocation table using malloc, "
                   "this realy should not happen, this is the end I guess... ");
         return;
       }
@@ -175,8 +175,8 @@ namespace nne {
         m_allocation_table = (AllocationInfo*)realloc(m_allocation_table, m_length*sizeof (AllocationInfo));
         if (!m_allocation_table)
         {
-          NNE_ERORR("Insert to allocation table failed. Not enough memory!");
-          NNE_ERORR("realloc failed, maybe a lot memory was allocated before and we are out of "
+          MNT_ERORR("Insert to allocation table failed. Not enough memory!");
+          MNT_ERORR("realloc failed, maybe a lot memory was allocated before and we are out of "
                     "memory, or it`s not possible to allocate a continous chunk, "
                     "anyway, this realy should not happen, this is the end I guess... ");
           return;
@@ -219,8 +219,8 @@ namespace nne {
       }
       catch (...)
       {
-        NNE_ERORR("Something went wront with the mutex!");
-        NNE_ERORR("Trying to remove without mutex");
+        MNT_ERORR("Something went wront with the mutex!");
+        MNT_ERORR("Trying to remove without mutex");
 
         for (uint64_t i=0; i<m_occupied; i++)
           if (m_allocation_table[i].m_memory == p_memory)
@@ -256,8 +256,8 @@ namespace nne {
       }
       catch (...)
       {
-        NNE_ERORR("Something went wront with the mutex!");
-        NNE_ERORR("Trying to get size without mutex");
+        MNT_ERORR("Something went wront with the mutex!");
+        MNT_ERORR("Trying to get size without mutex");
 
         for (uint64_t i=0; i<m_occupied; i++)
           if (m_allocation_table[i].m_memory == p_memory)
@@ -268,7 +268,7 @@ namespace nne {
       }
 
       if (!result)
-        NNE_ERORR("Bad news, memory entry not found in allocation table, memory monitoring "
+        MNT_ERORR("Bad news, memory entry not found in allocation table, memory monitoring "
                   "module is not reliable anymore.");
 
       return result;
@@ -279,7 +279,7 @@ namespace nne {
     std::mutex m_mutex;
 
     // The length of array
-    uint64_t m_length = NNE_MEMON_INITIAL_TABLE_SIZE;
+    uint64_t m_length = MNT_MEMON_INITIAL_TABLE_SIZE;
 
     // Last item`s index, no of occupied records in the array
     uint64_t m_occupied = 0;
@@ -297,14 +297,14 @@ namespace nne {
 // operator overload for "new"
 void* operator new (size_t p_size)
 {
-  nne::RecordAllocation(p_size);
+  mnt::RecordAllocation(p_size);
 
   void* memory = malloc(p_size);
 
   if (!memory)
     throw std::bad_alloc();
 
-  nne::g_allocation_table.Insert(memory, p_size);
+  mnt::g_allocation_table.Insert(memory, p_size);
 
   return memory;
 }
@@ -312,14 +312,14 @@ void* operator new (size_t p_size)
 // operator overload for "new[]"
 void* operator new[] (size_t p_size)
 {
-  nne::RecordAllocation(p_size);
+  mnt::RecordAllocation(p_size);
 
   void* memory = malloc(p_size);
 
   if (!memory)
     throw std::bad_alloc();
 
-  nne::g_allocation_table.Insert(memory, p_size);
+  mnt::g_allocation_table.Insert(memory, p_size);
 
   return memory;
 }
@@ -327,11 +327,11 @@ void* operator new[] (size_t p_size)
 // operator overload for "delete"
 void operator delete(void* p_memory) noexcept
 {
-  size_t size = nne::g_allocation_table.GetSize(p_memory);
+  size_t size = mnt::g_allocation_table.GetSize(p_memory);
 
-  nne::RecordDeallocation(size);
+  mnt::RecordDeallocation(size);
 
-  nne::g_allocation_table.Remove(p_memory);
+  mnt::g_allocation_table.Remove(p_memory);
 
   free(p_memory);
 }
@@ -339,11 +339,11 @@ void operator delete(void* p_memory) noexcept
 // operator overload for "delete[]"
 void operator delete[](void* p_memory) noexcept
 {
-  size_t size = nne::g_allocation_table.GetSize(p_memory);
+  size_t size = mnt::g_allocation_table.GetSize(p_memory);
 
-  nne::RecordDeallocation(size);
+  mnt::RecordDeallocation(size);
 
-  nne::g_allocation_table.Remove(p_memory);
+  mnt::g_allocation_table.Remove(p_memory);
 
   free(p_memory);
 }

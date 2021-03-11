@@ -3,7 +3,7 @@
 #include "memory/block/block.hpp"
 #include "memory/block/block.cpp"
 
-namespace nne {
+namespace mnt {
   template <typename T>
   class BlockHeapMemory : public BlockMemory<T>
   {

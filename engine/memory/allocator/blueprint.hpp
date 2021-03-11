@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <stdlib.h>
 
-namespace nne {
+namespace mnt {
 
   class Allocator
   {

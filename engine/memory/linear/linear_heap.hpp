@@ -33,7 +33,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace nne {
+namespace mnt {
   template <typename T>
   class LinearHeapMemory : public LinearMemory<T>
   {

@@ -12,8 +12,8 @@
 
 // ---------------------
 // Note:
-// "SaveToFile" and "LoadFromFile" functions work with memory ignoring the ISA`s endianness, they dump and load
-// memory as it is. So we can`t transfer files between computers with different endianness
+// "SaveToFile" and "LoadFromFile" functions work with memory ignoring the ISA`s endiamntss, they dump and load
+// memory as it is. So we can`t transfer files between computers with different endiamntss
 // ---------------------
 
 // ---------------------
@@ -43,7 +43,7 @@
 
 #include <string>
 
-namespace nne {
+namespace mnt {
   template <typename T>
   class LinearMemory
   {

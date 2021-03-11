@@ -9,7 +9,7 @@
 
 #include <sstream>
 
-using namespace nne;
+using namespace mnt;
 
 // Pass false as parameter to hinder automatic logging
 Timer::Timer(bool p_auto_print) noexcept
@@ -45,9 +45,9 @@ void Timer::PrintDuration() noexcept
                    / std::chrono::steady_clock::period::den << " Seconds";
 
   if (string_stream.fail())
-    NNE_ERORR("Could not write duration to a std::ostringstream, don`t know why though!");
+    MNT_ERORR("Could not write duration to a std::ostringstream, don`t know why though!");
 
-  NNE_DEBUG(string_stream.str());
+  MNT_DEBUG(string_stream.str());
 };
 
 // Returns duration with period of steady_clock,

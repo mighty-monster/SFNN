@@ -10,7 +10,7 @@
 #include <cstring>
 #include <fstream>
 
-using namespace nne;
+using namespace mnt;
 
 template <typename T>
 LinearHeapMemory<T>::LinearHeapMemory(const char* p_file_path)
@@ -37,7 +37,7 @@ void LinearHeapMemory<T>::Allocate(const size_t p_length)
 {
   this->m_memory = new T[p_length];
   if (!this->m_memory)
-    NNE_THROW("new operation failed, this is a severe error!");
+    MNT_THROW("new operation failed, this is a severe error!");
 
   this->m_length = p_length;
   this->m_size = p_length * sizeof(T);
@@ -60,14 +60,14 @@ void LinearHeapMemory<T>::LoadFromFile(const char* p_file_path)
   auto input_file = std::fstream(p_file_path, std::ios::in | std::ios::binary | std::ios::ate);
 
   if (input_file.fail())
-    NNE_THROW_C("file path is not valid", errno);
+    MNT_THROW_C("file path is not valid", errno);
 
   size_t file_size = input_file.tellg();
 
   if (input_file.fail())
   {
     input_file.close();
-    NNE_THROW_C( "failed to get file size", errno);
+    MNT_THROW_C( "failed to get file size", errno);
   }
 
   size_t previous_size = this->m_size;
@@ -90,7 +90,7 @@ void LinearHeapMemory<T>::LoadFromFile(const char* p_file_path)
 
     Resize(previous_size);
 
-    NNE_THROW_C( "failed to read the file", errno);
+    MNT_THROW_C( "failed to read the file", errno);
   }
 
   input_file.close();

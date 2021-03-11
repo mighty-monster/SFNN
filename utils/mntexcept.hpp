@@ -1,7 +1,7 @@
-// File Name:     nnexcept.hpp
+// File Name:     mntexcept.hpp
 // Author:        Arash Fatehi
 // Date:          3th Mar 2021
-// Description:   Base exception class for NNE project
+// Description:   Base exception class for MNT project
 
 // --------------------
 // Detail Description:
@@ -20,7 +20,7 @@
 // Note:
 // Exceptions play role in both error reporting and handling, low-level classes and fucntions
 // in utils like Logger and Timer don`t use exception on rely on errno, but excpet those classes
-// all others, should use NNExcept for reporting errors, if need to use C style functions are used
+// all others, should use MNTxcept for reporting errors, if need to use C style functions are used
 // include the errno in the exception, this way a unify error handling method will be used
 // throw all high-level parts of software
 // --------------------
@@ -33,7 +33,7 @@
 
 // --------------------
 // Note:
-// Fixed buffers are used to store NNExcept data in stack to prevent any potential exception
+// Fixed buffers are used to store MNTxcept data in stack to prevent any potential exception
 // in calling new and also boosting performance by using just stack varibales
 // The size of buffer for m_message, m_function and m_filename is defined in configs.h file
 // By using stack variables, default move and copy constructors are safe to handle move and copy
@@ -52,26 +52,31 @@
 #include <exception>
 
 // The macro to throw new exception in case of error
-#define NNE_THROW(_msg) NNE_THROW_C(_msg, 0)
+#define MNT_THROW(_msg) MNT_THROW_C(_msg, 0)
 
 // The macro to include error code in the thrown exception
-#define NNE_THROW_C(_msg, _code) \
-  throw nne::NNExcept(_msg, __NNEFUNC__, __FILE__, __LINE__, _code)
+#define MNT_THROW_C(_msg, _code) \
+  throw mnt::MNTExcept(_msg, __MNTFUNC__, __FILE__, __LINE__, _code)
 
-namespace nne {
-  class NNExcept : public std::exception
+namespace mnt {
+  class MNTExcept : public std::exception
   {
   public:
-    explicit NNExcept(const char* p_message,const char* p_function, const char* p_filepath, int p_line, int p_errno) noexcept;
-    virtual ~NNExcept() noexcept  = default;
+    explicit MNTExcept(const char* p_message, 
+                       const char* p_function, 
+                       const char* p_filepath, 
+                       int p_line, 
+                       int p_errno) noexcept;
+
+    virtual ~MNTExcept() noexcept  = default;
 
     // Implementing the original what() function to stay API compatible with std::exception
     const char* what() const noexcept override;
 
   private:
-    char m_message[NNE_EXCEPTION_MESSAGE_SIZE];
-    char m_function[NNE_EXCEPTION_FUNCNAME_SIZE];
-    char m_filename[NNE_EXCEPTION_FILENAME_SIZE];
+    char m_message[MNT_EXCEPTION_MESSAGE_SIZE];
+    char m_function[MNT_EXCEPTION_FUNCNAME_SIZE];
+    char m_filename[MNT_EXCEPTION_FILENAME_SIZE];
 
     int m_line;
     int m_errno;

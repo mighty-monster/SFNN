@@ -3,7 +3,7 @@
 #include "memory/linear/linear_heap.hpp"
 
 template <typename T>
-using HeapMemory = nne::LinearHeapMemory<T>;
+using HeapMemory = mnt::LinearHeapMemory<T>;
 
 
 namespace nnc {

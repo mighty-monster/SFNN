@@ -18,24 +18,24 @@
 
 // Helps to get rid of unused variable warnings when dealing with
 // cross-platform functions
-#define NNEUSE(_exp) (void)_exp;
+#define MNTUSE(_exp) (void)_exp;
 
 // Prints a message to std::cout and goes to next line
-#define NNE_PRINTL(_msg) std::cout<<_msg<<std::endl
+#define MNT_PRINTL(_msg) std::cout<<_msg<<std::endl
 
 // Prints execution time from declaration till end of scope at Debug log level
-#define NNE_PRINT_DUR nne::Timer nne_print_dur_timer;
+#define MNT_PRINT_DUR mnt::Timer mnt_print_dur_timer;
 
-// Defining __NNEFUNC__ as the macro that returns the functions signature
+// Defining __MNTFUNC__ as the macro that returns the functions signature
 // on MSVC, GCC, and Clang
-#ifdef NNEXCEPT_FULL_FUNCNAME
+#ifdef MNTEXCEPT_FULL_FUNCNAME
   #ifdef _MSC_VER
-    #define __NNEFUNC__ __FUNCSIG__
+    #define __MNTFUNC__ __FUNCSIG__
   #elif defined(__GNUC__) || defined(__clang__)
-    #define __NNEFUNC__ __PRETTY_FUNCTION__
+    #define __MNTFUNC__ __PRETTY_FUNCTION__
   #endif
 #else
-  #define __NNEFUNC__ __func__
+  #define __MNTFUNC__ __func__
 #endif
 
 // Defining __fucn__ macro in case of MSVC compiler
@@ -45,14 +45,14 @@
 
 
 // Macros to use Logger class out of the box
-#define NNE_WARN(_msg) nne::Logger::Warn(_msg)
-#define NNE_INFO(_msg) nne::Logger::Info(_msg)
-#define NNE_DEBUG(_msg) nne::Logger::Debug(_msg)
+#define MNT_WARN(_msg) mnt::Logger::Warn(_msg)
+#define MNT_INFO(_msg) mnt::Logger::Info(_msg)
+#define MNT_DEBUG(_msg) mnt::Logger::Debug(_msg)
 
 // Logs the error using Logger class as per what an object of
-// class NNExcept describes, should be used in catch blocks
-#define NNE_ERORR_EX(_ex) \
-  nne::LogError(_ex.File(), _ex.Line(), _ex.Func(), _ex.What())
+// class MNTxcept describes, should be used in catch blocks
+#define MNT_ERORR_EX(_ex) \
+  mnt::LogError(_ex.File(), _ex.Line(), _ex.Func(), _ex.What())
 
 // Logs low level error
 // This macro logs the errors using std::cerr, it should only be used for Logger class
@@ -60,38 +60,38 @@
 // ----
 // For error reporting we use our Logger mechanism, but it is quiet high leve,
 // for example support strings, etc. if something goes wrong within low-level mechanism
-// like Logger and memon.hpp, nne::LogErrorLL function is used to report directly to std::cerr
-#define NNE_ERORR_LL(_msg) \
-  nne::LogErrorLL(__FILE__, __LINE__, __NNEFUNC__, _msg)
+// like Logger and memon.hpp, mnt::LogErrorLL function is used to report directly to std::cerr
+#define MNT_ERORR_LL(_msg) \
+  mnt::LogErrorLL(__FILE__, __LINE__, __MNTFUNC__, _msg)
 
 // Logs error using Logger class
-#define NNE_ERORR(_msg)  \
-  nne::LogError(__FILE__, __LINE__, __NNEFUNC__, _msg)
+#define MNT_ERORR(_msg)  \
+  mnt::LogError(__FILE__, __LINE__, __MNTFUNC__, _msg)
 
-// The macro "NNE_ERRNO_PRINT_REASON" prints description about _errno code, it is platform
+// The macro "MNT_ERRNO_PRINT_REASON" prints description about _errno code, it is platform
 // and compiler specific
 // On window "strerror_s" is used
 // On unix "strerror_r" is used, but two implementation exits with different functionalities
 // The GNU version is used when __USE_GNU is defined, otherwise Posix version will be used
 #ifdef _WIN32
-  #define NNE_ERRNO_PRINT_REASON(_reason, _reason_length, _errno) \
+  #define MNT_ERRNO_PRINT_REASON(_reason, _reason_length, _errno) \
   if ( strerror_s(_reason, _reason_length, _errno) == 0 ) \
   { \
-   NNE_ERORR(_reason); \
+   MNT_ERORR(_reason); \
   }
 #elif defined __USE_XOPEN2K && !defined __USE_GNU
-  #define NNE_ERRNO_PRINT_REASON(_reason, _reason_length, _errno) \
+  #define MNT_ERRNO_PRINT_REASON(_reason, _reason_length, _errno) \
   if ( strerror_r( _errno, _reason, _reason_length) == 0 ) \
   { \
-   NNE_ERORR(_reason); \
+   MNT_ERORR(_reason); \
   }
 #else
-  #define NNE_ERRNO_PRINT_REASON(_reason, _reason_length, _errno) \
-  NNE_ERORR(strerror_r( _errno, _reason, _reason_length))
+  #define MNT_ERRNO_PRINT_REASON(_reason, _reason_length, _errno) \
+  MNT_ERORR(strerror_r( _errno, _reason, _reason_length))
 
 #endif
 
-namespace nne {
+namespace mnt {
   // __FUNC__, __FUCNTION__, __FUNCSIG__, and __PRETTY_FUNCTION__ are not macros,
   // they are constant static char* variables, to add function name to
   // logged error, need to use a function in combination to a macro
@@ -123,30 +123,28 @@ namespace nne {
   void ExtractFilenameFromPath(char* p_filepath) noexcept;
 
   // Compiler independent strcat and strcpy
-  // functions strcpy_nne, strcat_nne are used in error handling mechanisms in
-  // Logger class (used for reporting and logging errors as well), and also in reporting potential
-  // errors within Logger and memon.hpp within "LogErrorLL" function,
+  // functions strcpy_mnt, strcat_mnt are used in error handling mechanisms in
+  // Logger class, and also in reporting potential
+  // errors within Logger and memon.hpp using "LogErrorLL" function,
   // so if they can throw expection and cause error, things gets ugly
   // ----
   // Note: Their potential errors are
   // 1. Memory Access violation which will be handled using signals by OS and will
   // lead to crash anyway, if happens, we already lost :|
-  // 2. Not having enough space in "p_dest" buffer, which cause the operation to not be performed
-  // In case of error 2, it will only log to std::cerr using "LogErrorLL", here we have a loop
-  // If there is a error in std::cerr, again we have already lost and
-  // there is no point in reporting the error for recovery
+  // 2. Not having enough space in "p_dest" buffer, which causes the operation to not perform at all
+  // In case of error 2, it will only log to std::cerr using "LogErrorLL"
   // ----
-  // "LogErrorLL" uses strcpy_nne and vise-versa, but reported error in strcpy_nne are logical
-  // and wont happen if paramters are sane, so having an error in strcpy_nne wont cause infite loop
-  // of error reporting, because used parameters in "LogErrorLL" are sane, hopefuly ;p
+  // "LogErrorLL" uses strcpy_mnt and vise-versa, but it wont happen if paramters are sane, 
+  // so having an error in strcpy_mnt wont cause infite loop of error reporting, 
+  // because used parameters in "LogErrorLL" are sane, hopefuly ;p
   // ----
   // P.S. Streams don't throw exceptions by default
-  void strcpy_nne(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length, size_t p_offset = 0) noexcept;
-  void strcat_nne(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length) noexcept;
+  void strcpy_mnt(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length, size_t p_offset = 0) noexcept;
+  void strcat_mnt(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length) noexcept;
 
   // Compiler independent sprintf
   // Returns a negative number if error happens
   template<typename ... Args>
-  int sprintf_nne(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args) noexcept;
+  int sprintf_mnt(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args) noexcept;
 }
 

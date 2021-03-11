@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-using namespace nne;
+using namespace mnt;
 
 template <typename T>
 BlockHeapMemory<T>::BlockHeapMemory(Allocator* p_allocator)
