@@ -1,3 +1,6 @@
+#ifndef MEMORY_BLOCK_CPP
+#define MEMORY_BLOCK_CPP
+
 #include "memory/block/block.hpp"
 
 #include "utils/general.hpp"
@@ -7,6 +10,10 @@
 #include <string>
 
 using namespace mnt;
+
+template <typename T>
+BlockMemory<T>::BlockMemory(Allocator* p_allocator): MNTMemory<T> (p_allocator)
+{};
 
 template <typename T>
 void BlockMemory<T>::SaveToFile(const char* p_file_path)
@@ -53,3 +60,5 @@ void BlockMemory<T>::SetAsType(const size_t p_index, const U& p_value)
   void* block_address = *(m_block_array + (block_index));
   *((U*)block_address + (in_block_index)) = p_value;
 };
+
+#endif

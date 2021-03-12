@@ -1,5 +1,8 @@
-#pragma once
+#ifndef MEMORY_BLOCK_HPP
+#define MEMORY_BLOCK_HPP
 
+#include "memory/memory.hpp"
+#include "memory/memory.cpp"
 #include "memory/allocator/blueprint.hpp"
 
 #include <cinttypes>
@@ -9,10 +12,9 @@
 
 namespace mnt {
   template <typename T>
-  class BlockMemory
+  class BlockMemory : public MNTMemory<T>
   {
   public:
-    inline size_t SizeInBytes() noexcept { return this->m_size;};
     inline uint16_t NoOfBlocks() {return m_no_of_blocks;};
 
     virtual void SaveToFile(const char* p_file_path);
@@ -29,18 +31,14 @@ namespace mnt {
     template<typename U>
     void SetAsType(const size_t p_index, const U& p_value);
 
-    inline size_t Length() {return m_length;};
-
   protected:
-    BlockMemory() = default;
+    BlockMemory(Allocator* p_allocator = nullptr);
     virtual ~BlockMemory() noexcept = default;
     size_t m_block_size;
     size_t m_block_length;
     void** m_block_array;
     uint16_t m_no_of_blocks = BLOCKMEMORY_DEFAULT_NO_OF_BLOCKS;
-    size_t m_length = 0;
-    size_t m_size = 0;
-    bool m_allocated = false;
-    Allocator* m_allocator = nullptr;
   };
 }
+
+#endif

@@ -3,6 +3,9 @@
 // Date:          26th Feb 2021
 // Description:   A base class for simple linear memory classes
 
+#ifndef MEMORY_LINEAR_CPP
+#define MEMORY_LINEAR_CPP
+
 #include "memory/linear/linear.hpp"
 
 #include "utils/general.hpp"
@@ -13,6 +16,10 @@
 #include <iostream>
 
 using namespace mnt;
+
+template <typename T>
+LinearMemory<T>::LinearMemory(Allocator* p_allocator): MNTMemory<T> (p_allocator)
+{};
 
 template <typename T>
 void LinearMemory<T>::SaveToFile(const char* p_file_path)
@@ -63,3 +70,5 @@ void LinearMemory<T>::SetAsType(const size_t p_index, const U& value) noexcept
   // Caution: be aware of possible unaligned memory access
   *(U*)((char*)m_memory + (p_index)) = value;
 };
+
+#endif

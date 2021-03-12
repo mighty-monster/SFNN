@@ -17,8 +17,6 @@ IF (UNIX)
 ENDIF()
 
 add_executable(${PROJECT_NAME}
-  main.cpp
-  mnt.hpp
   mnt.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE engine utils api gui cmd)

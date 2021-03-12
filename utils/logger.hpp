@@ -42,7 +42,8 @@
 // 3. Failing to write on std::cerr, jsut let it go ...
 // ---------------------
 
-#pragma once
+#ifndef UTILS_LOGGER_HPP
+#define UTILS_LOGGER_HPP
 
 #include "configs.hpp"
 #include "platform.hpp"
@@ -96,8 +97,6 @@ namespace mnt {
     static void Debug(const std::string& p_message) noexcept;
 
   private:
-    // Streams don't throw exceptions by default, so construtor can be noexcept
-
     Logger() = default;
     ~Logger() noexcept;
 
@@ -156,3 +155,5 @@ namespace mnt {
     std::mutex m_mutex;
   };
 }
+
+#endif

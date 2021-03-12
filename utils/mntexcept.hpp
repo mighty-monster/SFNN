@@ -44,7 +44,8 @@
 // By default m_message buffer`s size is 256 bytes, increase the buffer size if need more
 // --------------------
 
-#pragma once
+#ifndef UTILS_MNTEXCEPT_HPP
+#define UTILS_MNTEXCEPT_HPP
 
 #include "configs.hpp"
 #include "general.hpp"
@@ -98,4 +99,6 @@ namespace mnt {
 
   };
 }
+
+#endif
 

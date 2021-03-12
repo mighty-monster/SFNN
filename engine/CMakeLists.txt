@@ -1,4 +1,6 @@
 add_library(engine
+  memory/memory.hpp
+  memory/memory.cpp
   memory/allocator/blueprint.hpp
   memory/allocator/mallocator.hpp
   memory/allocator/mallocator.cpp

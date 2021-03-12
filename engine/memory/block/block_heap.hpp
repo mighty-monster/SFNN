@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MEMORY_BLOCK_HEAP_HPP
+#define MEMORY_BLOCK_HEAP_HPP
 
 #include "memory/block/block.hpp"
 #include "memory/block/block.cpp"
@@ -24,9 +25,11 @@ namespace mnt {
     void Resize(const size_t p_length);
     void Reshape(const uint16_t p_no_of_blocks) override;
 
-    T& operator [] (const size_t p_index);
-    const T& operator [] (const size_t p_index) const;
+    T& operator [] (const size_t p_index) noexcept override;
+    const T& operator [] (const size_t p_index) const noexcept override;
 
   };
 
 }
+
+#endif

@@ -3,6 +3,9 @@
 // Date:          27th Feb 2021
 // Description:   Typed linear heap memory class
 
+#ifndef MEMORY_LINEAR_HEAP_CPP
+#define MEMORY_LINEAR_HEAP_CPP
+
 #include "memory/linear/linear_heap.hpp"
 
 #include "utils/general.hpp"
@@ -13,13 +16,15 @@
 using namespace mnt;
 
 template <typename T>
-LinearHeapMemory<T>::LinearHeapMemory(const char* p_file_path)
+LinearHeapMemory<T>::LinearHeapMemory(const char* p_file_path, Allocator* p_allocator)
+  :LinearMemory<T> (p_allocator)
 {
   LoadFromFile(p_file_path);
 };
 
 template <typename T>
-LinearHeapMemory<T>::LinearHeapMemory(const size_t p_length)
+LinearHeapMemory<T>::LinearHeapMemory(const size_t p_length, Allocator* p_allocator)
+  :LinearMemory<T> (p_allocator)
 {
   if (p_length > 0)
     Allocate(p_length);
@@ -35,7 +40,11 @@ LinearHeapMemory<T>::~LinearHeapMemory() noexcept
 template <typename T>
 void LinearHeapMemory<T>::Allocate(const size_t p_length)
 {
-  this->m_memory = new T[p_length];
+
+  this->m_memory = this->m_allocator ?
+          (this->m_allocator->Allocate(p_length * sizeof(T))) :
+          new T[p_length];
+
   if (!this->m_memory)
     MNT_THROW("new operation failed, this is a severe error!");
 
@@ -47,7 +56,11 @@ void LinearHeapMemory<T>::Allocate(const size_t p_length)
 template <typename T>
 void LinearHeapMemory<T>::Deallocate() noexcept
 {
-  delete[] (T*)this->m_memory;
+
+  this->m_allocator ?
+            this->m_allocator->Deallocate(this->m_memory) :
+            delete[] (T*)this->m_memory;
+
   this->m_length = 0;
   this->m_size = 0;
   this->m_allocated = false;
@@ -144,6 +157,7 @@ const T& LinearHeapMemory<T> ::operator [] (const size_t p_index) const noexcept
   return *((T*)(this->m_memory) + p_index);
 };
 
+#endif
 
 
 

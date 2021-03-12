@@ -5,6 +5,7 @@
 
 #include "general.hpp"
 #include "logger.hpp"
+#include "mntexcept.hpp"
 
 #include <sstream>
 #include <iomanip>
@@ -22,7 +23,7 @@ void mnt::LogError(const char* p_filepath, int p_line, const char* p_function_na
   char colon[] = ":";
   char arrow[] = " --> ";
 
-  // <- Converting line to string
+  // -> Converting line to string
   const uint8_t no_of_digits = 6;
   char line[no_of_digits];
   int result_code = mnt::sprintf_mnt(line, no_of_digits, "%d", p_line);
@@ -33,13 +34,13 @@ void mnt::LogError(const char* p_filepath, int p_line, const char* p_function_na
     // setting line to 0, will cause strlen(line) to be zero
     memset(line, 0, no_of_digits);
   }
-  // -> Converting line to string
+  // <- Converting line to string
 
   size_t filepath_buffer_size = strlen(p_filepath) + 1;
   char* filepath_buffer = (char*)alloca(filepath_buffer_size);
   strcpy_mnt(filepath_buffer, filepath_buffer_size, p_filepath, filepath_buffer_size);
 
-  // By extracting the filename first, less memory is allocated on stack in enxt steps
+  // By extracting the filename first, less memory is allocated on stack in the next steps
   ExtractFilenameFromPath(filepath_buffer);
 
   // Alocating message memory on stack,
@@ -88,14 +89,14 @@ void mnt::LogError(const char* p_filepath, int p_line, const char* p_function_na
 void mnt::LogErrorLL(const char* p_filepath, int p_line, const char* p_function_name, const char* p_message) noexcept
 {
 
-  // <- Converting line to string
+  // -> Converting line to string
   const uint8_t no_of_digits = 6;
   char line[no_of_digits];
   int result_code = mnt::sprintf_mnt(line, no_of_digits, "%d", p_line);
   // Can not recover if something goes seriously wrong, just emptying "line" variable
   if (result_code < 0)
     memset(line, 0, no_of_digits);
-  // -> Converting line to string
+  // <- Converting line to string
 
   // Should copy p_filepath to a temp buffer that is not const
   const size_t filepath_buffer_size = strlen(p_filepath) + 1;
@@ -129,7 +130,10 @@ void mnt::GetCurrentTime(char* p_date_time_str) noexcept
   std::time_t time_t_now = std::chrono::system_clock::to_time_t(time_point_now);
 
 #if defined(MNT_WIN_MSVC)
+
+  // =====
   // MSVC prefers localtime_s
+  // =====
 
   // Convert time_t to tm struct
   // localtime_s returns 0 if succesfull, that`s why the if`s logic is twisted ;)
@@ -147,7 +151,10 @@ void mnt::GetCurrentTime(char* p_date_time_str) noexcept
                      &tm_struct))
 
 #else
+
+  // =====
   // GCC doesn`t suport localtime_s, others might not as well
+  // =====
 
   // Convert time_t to tm struct
   struct tm* tm_struct = localtime(&time_t_now);
@@ -192,7 +199,7 @@ void mnt::HexToBuffer(void* p_buffer, const std::string& p_hex)
   // Hex string should have even number of characters
   if (p_hex.size() % 2 != 0)
   {
-    //Todo: Add error message
+    MNT_THROW("Length of hex string should be even, 2 hex chars = 1 Byte");
   }
   else
   {

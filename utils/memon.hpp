@@ -17,7 +17,8 @@
 // "PRINT_ALLOC_SUMMERY" macro prints allocated and deallocated bytes from beginning
 // --------------------
 
-#pragma once
+#ifndef UTILS_MEMON_HPP
+#define UTILS_MEMON_HPP
 
 #include "general.hpp"
 
@@ -347,3 +348,5 @@ void operator delete[](void* p_memory) noexcept
 
   free(p_memory);
 }
+
+#endif

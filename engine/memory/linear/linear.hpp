@@ -37,18 +37,20 @@
 // as it was a vairiable type U
 // =====
 
-#pragma once
+#ifndef MEMORY_LINEAR_HPP
+#define MEMORY_LINEAR_HPP
 
+#include "memory/memory.hpp"
+#include "memory/memory.cpp"
 #include "memory/allocator/blueprint.hpp"
 
 #include <string>
 
 namespace mnt {
   template <typename T>
-  class LinearMemory
+  class LinearMemory : public MNTMemory<T>
   {
   public:
-    inline size_t SizeInBytes() noexcept {return this->m_size;};
 
     void SaveToFile(const char* p_file_path);
     virtual void LoadFromFile(const char* p_file_path) = 0;
@@ -62,17 +64,12 @@ namespace mnt {
     virtual T& operator [] (const size_t p_index) noexcept = 0;
     virtual const T& operator [] (const size_t p_index) const noexcept = 0;
 
-    inline size_t Length() {return m_length;};
-
   protected:
-    LinearMemory() = default;
+    LinearMemory(Allocator* p_allocator = nullptr);
     virtual ~LinearMemory() noexcept = default;
 
     void* m_memory;
-    size_t m_length = 0;
-    size_t m_size = 0;
-    bool m_allocated = false;
-
-    Allocator* m_allocator = nullptr;
   };
 }
+
+#endif

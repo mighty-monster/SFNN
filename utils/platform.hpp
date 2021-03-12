@@ -14,7 +14,8 @@
 // Compiler: GCC, Clang, MSVC, MinGW
 // --------------------
 
-#pragma once
+#ifndef UTILS_PLATFORM_HPP
+#define UTILS_PLATFORM_HPP
 
 #if defined(_WIN32)
   #if defined(_MSC_VER)
@@ -30,6 +31,8 @@
   #elif defined(__clang_version__)
     #define MNT_UNIX_CLANG
   #endif
+#endif
+
 #endif
 
 

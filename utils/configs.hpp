@@ -3,6 +3,9 @@
 // Date:          4th Mar 2021
 // Description:   Compile time configuration for Utils module
 
+#ifndef UTILS_CONFIGS_HPP
+#define UTILS_CONFIGS_HPP
+
 // If defined the full signature of fucntions will be used while logging
 // otherwise just the name of function
 #define MNTEXCEPT_FULL_FUNCNAME
@@ -22,9 +25,13 @@
 // function name and filename, if needed increase buffer size here
 // Note: the objects store the data on stack, so be careful with these values
 #define MNT_EXCEPTION_MESSAGE_SIZE 256
+
 #ifdef MNTEXCEPT_FULL_FUNCNAME
   #define MNT_EXCEPTION_FUNCNAME_SIZE 96
 #else
   #define MNT_EXCEPTION_FUNCNAME_SIZE 48
 #endif
+
 #define MNT_EXCEPTION_FILENAME_SIZE 64
+
+#endif

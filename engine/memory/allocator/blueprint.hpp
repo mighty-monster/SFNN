@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MEMORY_BLUEPRINT_HPP
+#define MEMORY_BLUEPRINT_HPP
 
 #include <cstddef>
 #include <stdlib.h>
@@ -16,3 +17,4 @@ namespace mnt {
   };
 }
 
+#endif

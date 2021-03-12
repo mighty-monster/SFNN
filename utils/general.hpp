@@ -3,7 +3,8 @@
 // Date:          19th Feb 2021
 // Description:   Contains general fucntions and macros
 
-#pragma once
+#ifndef UTILS_GENERAL_HPP
+#define UTILS_GENERAL_HPP
 
 #include "configs.hpp"
 #include "platform.hpp"
@@ -88,7 +89,6 @@
 #else
   #define MNT_ERRNO_PRINT_REASON(_reason, _reason_length, _errno) \
   MNT_ERORR(strerror_r( _errno, _reason, _reason_length))
-
 #endif
 
 namespace mnt {
@@ -147,4 +147,6 @@ namespace mnt {
   template<typename ... Args>
   int sprintf_mnt(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args) noexcept;
 }
+
+#endif
 

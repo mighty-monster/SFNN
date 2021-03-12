@@ -9,7 +9,8 @@
 // of targeted scope will be measured automatically
 // --------------------
 
-#pragma once
+#ifndef UTILS_TIMER_HPP
+#define UTILS_TIMER_HPP
 
 #include <iostream>
 #include <chrono>
@@ -38,4 +39,6 @@ namespace mnt {
     bool m_auto_print = true;
   };
 }
+
+#endif
 

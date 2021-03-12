@@ -1,3 +1,6 @@
+#ifndef MEMORY_BLOCK_HEAP_CPP
+#define MEMORY_BLOCK_HEAP_CPP
+
 #include "memory/block/block_heap.hpp"
 
 #include <cstring>
@@ -6,30 +9,27 @@ using namespace mnt;
 
 template <typename T>
 BlockHeapMemory<T>::BlockHeapMemory(Allocator* p_allocator)
-{
-  this->m_allocator = p_allocator;
-};
+  :BlockMemory<T> (p_allocator)
+{};
 
 template <typename T>
 BlockHeapMemory<T>::BlockHeapMemory(const char* p_file_path, Allocator* p_allocator)
+  : BlockMemory<T> (p_allocator)
 {
-  this->m_allocator = p_allocator;
   LoadFromFile(p_file_path);
 };
 
 template <typename T>
 BlockHeapMemory<T>::BlockHeapMemory(const char* p_file_path, const uint16_t p_no_of_blocks, Allocator* p_allocator)
+  : BlockMemory<T> (p_allocator)
 {
-  this->m_allocator = p_allocator;
   LoadFromFile(p_file_path, p_no_of_blocks);
 };
 
 template <typename T>
 BlockHeapMemory<T>::BlockHeapMemory(const size_t p_length, Allocator* p_allocator)
-  : BlockHeapMemory(p_length, BLOCKMEMORY_DEFAULT_NO_OF_BLOCKS)
-{
-  this->m_allocator = p_allocator;
-};
+  : BlockHeapMemory(p_length, BLOCKMEMORY_DEFAULT_NO_OF_BLOCKS, p_allocator)
+{};
 
 template <typename T>
 BlockHeapMemory<T>::BlockHeapMemory(const size_t p_length, const uint16_t p_no_of_blocks, Allocator* p_allocator)
@@ -73,10 +73,14 @@ void BlockHeapMemory<T>::Deallocate()
 {
   for(uint16_t i=0; i<this->m_no_of_blocks; i++)
   {
-    delete[] (T*)(*(this->m_block_array + i));
+    this->m_allocator ?
+            this->m_allocator->Deallocate(this->m_block_array[i]) :
+            delete[] (T*)(*(this->m_block_array + i));
   }
 
-  delete[] (this->m_block_array);
+  this->m_allocator ?
+          this->m_allocator->Deallocate(this->m_block_array) :
+          delete[] (this->m_block_array);
 
   this->m_length = 0;
   this->m_size = 0;
@@ -264,7 +268,7 @@ void BlockHeapMemory<T>::Reshape(const uint16_t p_no_of_blocks)
 };
 
 template <typename T>
-T& BlockHeapMemory<T>::operator [] (const size_t p_index)
+T& BlockHeapMemory<T>::operator [] (const size_t p_index) noexcept
 {
   size_t block_index = p_index / (this->m_block_length);
   size_t in_block_index = p_index % (this->m_block_length);
@@ -274,7 +278,7 @@ T& BlockHeapMemory<T>::operator [] (const size_t p_index)
 };
 
 template <typename T>
-const T& BlockHeapMemory<T>::operator [] (const size_t p_index) const
+const T& BlockHeapMemory<T>::operator [] (const size_t p_index) const noexcept
 {
   size_t block_index = p_index / (this->m_block_length);
   size_t in_block_index = p_index % (this->m_block_length);
@@ -283,3 +287,4 @@ const T& BlockHeapMemory<T>::operator [] (const size_t p_index) const
   return *((T*)block_address + (in_block_index));
 };
 
+#endif

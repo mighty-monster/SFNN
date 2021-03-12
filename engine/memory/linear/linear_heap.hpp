@@ -25,7 +25,8 @@
 // -----
 // [operator []]: Returns the p_index`th item of the array
 
-#pragma once
+#ifndef MEMORY_LINEAR_HEAP_HPP
+#define MEMORY_LINEAR_HEAP_HPP
 
 #include "memory/linear/linear.hpp"
 #include "memory/linear/linear.cpp"
@@ -38,21 +39,24 @@ namespace mnt {
   class LinearHeapMemory : public LinearMemory<T>
   {
   public:
-    LinearHeapMemory() noexcept = default;
-    LinearHeapMemory(const char* p_file_path);
-    LinearHeapMemory(const size_t p_length);
+    LinearHeapMemory(Allocator* p_allocator = nullptr) noexcept;
+    LinearHeapMemory(const char* p_file_path, Allocator* p_allocator = nullptr);
+    LinearHeapMemory(const size_t p_length, Allocator* p_allocator = nullptr);
     ~LinearHeapMemory() noexcept;
 
+    void LoadFromFile(const char* p_file_path) override;
+    void Resize(const size_t p_length) override;
+
+    T& operator [] (const size_t p_index) noexcept override;
+    const T& operator [] (const size_t p_index) const noexcept override;
+
+  protected:
     void Allocate(const size_t p_length);
     void Deallocate() noexcept;
 
-    void LoadFromFile(const char* p_file_path) override;
-
-    void Resize(const size_t p_length) override;
-
-    T& operator [] (const size_t p_index) noexcept;
-    const T& operator [] (const size_t p_index) const noexcept;
   };
 }
+
+#endif
 
 
