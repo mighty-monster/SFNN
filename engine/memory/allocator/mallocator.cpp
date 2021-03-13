@@ -1,5 +1,9 @@
+// File Name:     memory/allocator/mallocator.cpp
+// Author:        Arash Fatehi
+// Date:          13th Mar 2021
+// Description:   A simple Allocator class using malloc and free for testing purposes
 
-#include "mallocator.hpp"
+#include "memory/allocator/mallocator.hpp"
 
 #include "utils/mntexcept.hpp"
 

@@ -1,9 +1,56 @@
+// File Name:     block.hpp
+// Author:        Arash Fatehi
+// Date:          13th Mar 2021
+// Description:   A base class for block memory classes
+
+// ---------------------
+// Detail Description:
+// Block memory classes allcote memory to an array of pointers(blockes), instead of
+// a single pointer, their structure is a little bit more complex than
+// linear memory classes with the cost of calculation overhead for accessing the memory.
+// It can be useful if allocating a big chunk of memory fails, specialy when dealing
+// with pinned memory.
+// ---------------------
+
+// ---------------------
+// Note:
+// "SaveToFile" and "LoadFromFile" functions work with memory ignoring the ISA`s endianness,
+// they dump and load memory as it is.
+// So we can`t transfer files between computers with different endianness
+// ---------------------
+
+// ---------------------
+// Note:
+// "GetAsType" and "SetAsType" can interpret memory as variables with unaligned memory,
+// it can decrease the performance and can cause race condition problems, so be carefull
+// ---------------------
+
+// =====
+// [operator []]: Returns the p_index`th item if blocks where a continuous array
+// =====
+
+// =====
+// [SaveToFile(p_file_path)]: Save content of memory to a binary file, it is not a serrialization
+// function and doesn`t save the entire class, only the content that memory class refers to
+// =====
+
+// =====
+// [GetAsType(p_index)]: Returns a reference to the content of memory
+// from p_index to p_index + sizeof(U) interpreted as type U
+// =====
+
+// =====
+// [SetAsType(p_index, p_value)]: Copies the p_value to memory from p_index to p_index + sizeof(U)
+// as it was a vairiable type U
+// =====
+
+
 #ifndef MEMORY_BLOCK_HPP
 #define MEMORY_BLOCK_HPP
 
+#include "memory/allocator/blueprint.hpp"
 #include "memory/memory.hpp"
 #include "memory/memory.cpp"
-#include "memory/allocator/blueprint.hpp"
 
 #include <cinttypes>
 #include <string>
@@ -15,15 +62,10 @@ namespace mnt {
   class BlockMemory : public MNTMemory<T>
   {
   public:
-    inline uint16_t NoOfBlocks() {return m_no_of_blocks;};
+    virtual ~BlockMemory() noexcept = default;
 
-    virtual void SaveToFile(const char* p_file_path);
-    virtual void LoadFromFile(const char* p_file_path) = 0;
-    virtual void LoadFromFile(const char* p_file_path, const uint16_t p_no_of_blocks) = 0;
-
-    virtual void Reshape(const uint16_t no_of_blocks) = 0;
-
-    virtual std::string ToHex();
+    T& operator [] (const size_t p_index) noexcept override;
+    const T& operator [] (const size_t p_index) const noexcept override;
 
     template<typename U>
     U& GetAsType(const size_t p_index);
@@ -31,9 +73,18 @@ namespace mnt {
     template<typename U>
     void SetAsType(const size_t p_index, const U& p_value);
 
+    inline uint16_t NoOfBlocks() {return m_no_of_blocks;};
+
+    void SaveToFile(const char* p_file_path);
+    virtual void LoadFromFile(const char* p_file_path) = 0;
+    virtual void LoadFromFile(const char* p_file_path, const uint16_t p_no_of_blocks) = 0;
+
+    virtual void Reshape(const uint16_t p_no_of_blocks) = 0;
+
   protected:
     BlockMemory(Allocator* p_allocator = nullptr);
-    virtual ~BlockMemory() noexcept = default;
+
+  protected:
     size_t m_block_size;
     size_t m_block_length;
     void** m_block_array;

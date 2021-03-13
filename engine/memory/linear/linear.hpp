@@ -1,4 +1,4 @@
-// File Name:     memory/linear/linear.hpp
+// File Name:     linear.hpp
 // Author:        Arash Fatehi
 // Date:          26th Feb 2021
 // Description:   A base class for simple linear memory classes
@@ -12,8 +12,8 @@
 
 // ---------------------
 // Note:
-// "SaveToFile" and "LoadFromFile" functions work with memory ignoring the ISA`s endiamntss, they dump and load
-// memory as it is. So we can`t transfer files between computers with different endiamntss
+// "SaveToFile" and "LoadFromFile" functions work with memory ignoring the ISA`s endianness, they dump and load
+// memory as it is. So we can`t transfer files between computers with different endianness
 // ---------------------
 
 // ---------------------
@@ -23,8 +23,7 @@
 // ---------------------
 
 // =====
-// [SaveToFile(p_file_path)]: Save content of memory to a binary file, it is not a serrialization function
-// and doesn`t save the entire class, only the content that memory class refers to
+// [operator []]: Returns the p_index`th item of the array
 // =====
 
 // =====
@@ -35,6 +34,11 @@
 // =====
 // [SetAsType(p_index, p_value)]: Copies the p_value to memory from p_index to p_index + sizeof(U)
 // as it was a vairiable type U
+// =====
+
+// =====
+// [SaveToFile(p_file_path)]: Save content of memory to a binary file, it is not a serrialization function
+// and doesn`t save the entire class, only the content that memory class refers to
 // =====
 
 #ifndef MEMORY_LINEAR_HPP
@@ -51,23 +55,23 @@ namespace mnt {
   class LinearMemory : public MNTMemory<T>
   {
   public:
+    virtual T& operator [] (const size_t p_index) noexcept;
+    virtual const T& operator [] (const size_t p_index) const noexcept;
+
+    template<typename U>
+    U& GetAsType(const size_t p_index);
+
+    template<typename U>
+    void SetAsType(const size_t p_index, const U& p_value);
 
     void SaveToFile(const char* p_file_path);
     virtual void LoadFromFile(const char* p_file_path) = 0;
-
-    template<typename U>
-    U& GetAsType(const size_t p_index) noexcept;
-
-    template<typename U>
-    void SetAsType(const size_t p_index, const U& p_value) noexcept;
-
-    virtual T& operator [] (const size_t p_index) noexcept = 0;
-    virtual const T& operator [] (const size_t p_index) const noexcept = 0;
 
   protected:
     LinearMemory(Allocator* p_allocator = nullptr);
     virtual ~LinearMemory() noexcept = default;
 
+  protected:
     void* m_memory;
   };
 }

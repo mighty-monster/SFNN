@@ -16,15 +16,13 @@
 using namespace mnt;
 
 template <typename T>
-LinearHeapMemory<T>::LinearHeapMemory(const char* p_file_path, Allocator* p_allocator)
-  :LinearMemory<T> (p_allocator)
+LinearHeapMemory<T>::LinearHeapMemory(const char* p_file_path)
 {
   LoadFromFile(p_file_path);
 };
 
 template <typename T>
-LinearHeapMemory<T>::LinearHeapMemory(const size_t p_length, Allocator* p_allocator)
-  :LinearMemory<T> (p_allocator)
+LinearHeapMemory<T>::LinearHeapMemory(const size_t p_length)
 {
   if (p_length > 0)
     Allocate(p_length);
@@ -36,7 +34,7 @@ LinearHeapMemory<T>::~LinearHeapMemory() noexcept
   Deallocate();
 };
 
-// "Allocate" function provides strong exception safety
+// Provides strong exception safety
 template <typename T>
 void LinearHeapMemory<T>::Allocate(const size_t p_length)
 {
@@ -66,14 +64,14 @@ void LinearHeapMemory<T>::Deallocate() noexcept
   this->m_allocated = false;
 };
 
-// "LoadFromFile" function provides basic exception safety
+// Provides basic exception safety
 template <typename T>
 void LinearHeapMemory<T>::LoadFromFile(const char* p_file_path)
 {
   auto input_file = std::fstream(p_file_path, std::ios::in | std::ios::binary | std::ios::ate);
 
   if (input_file.fail())
-    MNT_THROW_C("file path is not valid", errno);
+    MNT_THROW_C("file path is not valid or filesystem error", errno);
 
   size_t file_size = input_file.tellg();
 
@@ -83,7 +81,7 @@ void LinearHeapMemory<T>::LoadFromFile(const char* p_file_path)
     MNT_THROW_C( "failed to get file size", errno);
   }
 
-  size_t previous_size = this->m_size;
+  size_t previous_length = this->m_length;
 
   try
   {
@@ -101,7 +99,7 @@ void LinearHeapMemory<T>::LoadFromFile(const char* p_file_path)
   {
     input_file.close();
 
-    Resize(previous_size);
+    Resize(previous_length);
 
     MNT_THROW_C( "failed to read the file", errno);
   }
@@ -136,25 +134,6 @@ void LinearHeapMemory<T>::Resize(const size_t p_length)
   {
     Allocate(p_length);
   }
-};
-
-// =====
-// Note:
-// If encounters access violation errors, exceptions are not the way to handle
-// the error, so "operator []"s are defined noexcept
-// because they do not throw exceptions
-// =====
-
-template <typename T>
-T& LinearHeapMemory<T> ::operator [] (const size_t p_index) noexcept
-{
-  return *((T*)(this->m_memory) + p_index);
-};
-
-template <typename T>
-const T& LinearHeapMemory<T> ::operator [] (const size_t p_index) const noexcept
-{
-  return *((T*)(this->m_memory) + p_index);
 };
 
 #endif

@@ -1,4 +1,4 @@
-// File Name:     memory/memory.hpp
+// File Name:     memory.hpp
 // Author:        Arash Fatehi
 // Date:          25th Feb 2021
 // Description:   The base class for memory subsystem of engine
@@ -44,8 +44,10 @@
 // =====
 // [MNTMemory]:
 // The base class of memory subsystem, it is an abstract class that needs implementation
-// Memory classes can recieve custome allocator and deallocator functions as their template params
+// Memory classes can recieve custome "mnt::Allocator" class as their constructor parameter,
+// If no Allocator class provided, "new" and "delete" will be used.
 // =====
+
 
 #ifndef MEMORY_MEMORY_HPP
 #define MEMORY_MEMORY_HPP
@@ -60,22 +62,33 @@ namespace mnt {
   class MNTMemory
   {
   public:
+    virtual ~MNTMemory() noexcept = default;
+
+    // Removing copy, move constructors and assignment operator
+    MNTMemory(const MNTMemory&) = delete;
+    MNTMemory(MNTMemory&) = delete;
+    MNTMemory(const MNTMemory&&) = delete;
+    MNTMemory(MNTMemory&&) = delete;
+    void operator = (const MNTMemory&) = delete;
+    void operator = (const MNTMemory&&) = delete;
+
     virtual T& operator [] (const size_t p_index) noexcept = 0;
     virtual const T& operator [] (const size_t p_index) const noexcept = 0;
 
+    inline size_t Size() noexcept {return this->m_size;}
+    inline size_t Length() {return m_length;};
+
     // Attention: "Resize" gets the length as parameter, not the size
     virtual void Resize(const size_t p_length) = 0;
-    inline size_t Length() {return m_length;};
-    inline size_t Size() noexcept {return this->m_size;};
-
-    virtual ~MNTMemory() noexcept = default;
 
   protected:
     MNTMemory(Allocator* p_allocator = nullptr) noexcept;
-    size_t m_length = 0;
-    size_t m_size = 0;
-    bool m_allocated = false;
 
+  protected:
+    size_t m_size = 0;
+    size_t m_length = 0;
+
+    bool m_allocated = false;
     Allocator* m_allocator = nullptr;
   };
 }
