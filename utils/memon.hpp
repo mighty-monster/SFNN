@@ -80,33 +80,33 @@ namespace mnt {
   }
 
   // Streams don't throw exceptions by default
-  void RecordAllocation(size_t p_size) noexcept
+  void RecordAllocation(size_t _size) noexcept
   {
     // volatile variables should be assigned without += or ++ operators
     // This way the left expression is evaluated twice and final assembly code
     // actucaly differs from += case which will evaluate left expression once
     mnt::g_allocation_counter = mnt::g_allocation_counter + 1;
     mnt::g_allocated_counter = mnt::g_allocated_counter + 1;
-    mnt::g_allocated_bytes = mnt::g_allocated_bytes + p_size;
+    mnt::g_allocated_bytes = mnt::g_allocated_bytes + _size;
 
     if (mnt::g_print_allocations)
     {
-      std::cout << mnt::g_allocation_monitor_signature << p_size << " bytes allcoated\n";
+      std::cout << mnt::g_allocation_monitor_signature << _size << " bytes allcoated\n";
       std::cout.flush();
     }
   }
 
   // Streams don't throw exceptions by default
-  void RecordDeallocation(size_t p_size) noexcept
+  void RecordDeallocation(size_t _size) noexcept
   {
     // volatile variables should be assigned without += or ++ operators
     mnt::g_allocation_counter = mnt::g_allocation_counter - 1;
     mnt::g_deallocated_counter = mnt::g_deallocated_counter + 1;
-    mnt::g_deallocated_bytes = mnt::g_deallocated_bytes + p_size;
+    mnt::g_deallocated_bytes = mnt::g_deallocated_bytes + _size;
 
     if (mnt::g_print_allocations)
     {
-      std::cout << mnt::g_allocation_monitor_signature << p_size << " bytes deallcoated\n";
+      std::cout << mnt::g_allocation_monitor_signature << _size << " bytes deallcoated\n";
       std::cout.flush();
     }
   }
@@ -118,10 +118,10 @@ namespace mnt {
     AllocationInfo() noexcept = default;
     ~AllocationInfo() noexcept = default;
 
-    void Set(void*& p_memory, size_t& p_size) noexcept
+    void Set(void*& _memory, size_t& _size) noexcept
     {
-      m_memory = p_memory;
-      m_size = p_size;
+      m_memory = _memory;
+      m_size = _size;
     };
 
     void* m_memory;
@@ -159,7 +159,7 @@ namespace mnt {
     }
 
     // Add new record of info to the table
-    void Insert(void*& p_memory, size_t& p_size)
+    void Insert(void*& _memory, size_t& _size)
     {
       // "std::lock_guard" might throw exception, as per it`s definition
       // could not find any resource to suggest otherwise
@@ -187,7 +187,7 @@ namespace mnt {
       }
 
       // Inserting the allocation info to last item in the array
-      m_allocation_table[m_occupied].Set(p_memory, p_size);
+      m_allocation_table[m_occupied].Set(_memory, _size);
 
       // Increase last item`s index
       m_occupied++;
@@ -197,7 +197,7 @@ namespace mnt {
     // Is called in delete ... so it should be noexcept
     // It`s not a good idea to throw error on deleteing or destructing
     // It interfere the RAII resource deallocation
-    void Remove(void* p_memory) noexcept
+    void Remove(void* _memory) noexcept
     {
       try
       {
@@ -205,7 +205,7 @@ namespace mnt {
         std::lock_guard<std::mutex> lock(m_mutex);
 
         for (uint64_t i=0; i<m_occupied; i++)
-          if (m_allocation_table[i].m_memory == p_memory)
+          if (m_allocation_table[i].m_memory == _memory)
           {
             //Exchange the last item with the one to remove
             m_allocation_table[i].Set(
@@ -224,7 +224,7 @@ namespace mnt {
         MNT_ERORR("Trying to remove without mutex");
 
         for (uint64_t i=0; i<m_occupied; i++)
-          if (m_allocation_table[i].m_memory == p_memory)
+          if (m_allocation_table[i].m_memory == _memory)
           {
             //Exchange the last item with the one to remove
             m_allocation_table[i].Set(
@@ -241,7 +241,7 @@ namespace mnt {
 
     // Get size of allocated memory to address "memory"
     // Is called in delete ... so it should be noexcept
-    size_t GetSize(void* p_memory) noexcept
+    size_t GetSize(void* _memory) noexcept
     {
       size_t result = 0;
       try
@@ -249,7 +249,7 @@ namespace mnt {
         std::lock_guard<std::mutex> lock(m_mutex);
 
         for (uint64_t i=0; i<m_occupied; i++)
-          if (m_allocation_table[i].m_memory == p_memory)
+          if (m_allocation_table[i].m_memory == _memory)
           {
             result = m_allocation_table[i].m_size;
             break;
@@ -261,7 +261,7 @@ namespace mnt {
         MNT_ERORR("Trying to get size without mutex");
 
         for (uint64_t i=0; i<m_occupied; i++)
-          if (m_allocation_table[i].m_memory == p_memory)
+          if (m_allocation_table[i].m_memory == _memory)
           {
             result = m_allocation_table[i].m_size;
             break;
@@ -296,57 +296,57 @@ namespace mnt {
 
 
 // operator overload for "new"
-void* operator new (size_t p_size)
+void* operator new (size_t _size)
 {
-  mnt::RecordAllocation(p_size);
+  mnt::RecordAllocation(_size);
 
-  void* memory = malloc(p_size);
+  void* memory = malloc(_size);
 
   if (!memory)
     throw std::bad_alloc();
 
-  mnt::g_allocation_table.Insert(memory, p_size);
+  mnt::g_allocation_table.Insert(memory, _size);
 
   return memory;
 }
 
 // operator overload for "new[]"
-void* operator new[] (size_t p_size)
+void* operator new[] (size_t _size)
 {
-  mnt::RecordAllocation(p_size);
+  mnt::RecordAllocation(_size);
 
-  void* memory = malloc(p_size);
+  void* memory = malloc(_size);
 
   if (!memory)
     throw std::bad_alloc();
 
-  mnt::g_allocation_table.Insert(memory, p_size);
+  mnt::g_allocation_table.Insert(memory, _size);
 
   return memory;
 }
 
 // operator overload for "delete"
-void operator delete(void* p_memory) noexcept
+void operator delete(void* _memory) noexcept
 {
-  size_t size = mnt::g_allocation_table.GetSize(p_memory);
+  size_t size = mnt::g_allocation_table.GetSize(_memory);
 
   mnt::RecordDeallocation(size);
 
-  mnt::g_allocation_table.Remove(p_memory);
+  mnt::g_allocation_table.Remove(_memory);
 
-  free(p_memory);
+  free(_memory);
 }
 
 // operator overload for "delete[]"
-void operator delete[](void* p_memory) noexcept
+void operator delete[](void* _memory) noexcept
 {
-  size_t size = mnt::g_allocation_table.GetSize(p_memory);
+  size_t size = mnt::g_allocation_table.GetSize(_memory);
 
   mnt::RecordDeallocation(size);
 
-  mnt::g_allocation_table.Remove(p_memory);
+  mnt::g_allocation_table.Remove(_memory);
 
-  free(p_memory);
+  free(_memory);
 }
 
 #endif

@@ -13,7 +13,7 @@
 using namespace mnt;
 
 template <typename T>
-BlockMemory<T>::BlockMemory(Allocator* p_allocator): MNTMemory<T> (p_allocator)
+BlockMemory<T>::BlockMemory(Allocator* _allocator): MNTMemory<T> (_allocator)
 {};
 
 // =====
@@ -24,13 +24,13 @@ BlockMemory<T>::BlockMemory(Allocator* p_allocator): MNTMemory<T> (p_allocator)
 // =====
 
 template <typename T>
-T& BlockMemory<T>::operator [] (const size_t p_index) noexcept
+T& BlockMemory<T>::operator [] (const size_t _index) noexcept
 {
   // Counting on compiler optimization for removing extra
   // charachter declaration --> better check the assembly later
 
-  size_t block_index = p_index / m_block_length;
-  size_t block_offset = p_index % m_block_length;
+  size_t block_index = _index / m_block_length;
+  size_t block_offset = _index % m_block_length;
 
   // Same as this->m_block_array[block_index]
   void* block_address = *(m_block_array + block_index);
@@ -40,25 +40,36 @@ T& BlockMemory<T>::operator [] (const size_t p_index) noexcept
 };
 
 template <typename T>
-const T& BlockMemory<T>::operator [] (const size_t p_index) const noexcept
+const T& BlockMemory<T>::operator [] (const size_t _index) const noexcept
 {
-  size_t block_index = p_index / m_block_length;
-  size_t block_offset = p_index % m_block_length;
+  size_t block_index = _index / m_block_length;
+  size_t block_offset = _index % m_block_length;
 
   // Same as this->m_block_array[block_index]
   void* block_address = *(m_block_array + block_index);
 
   // Same as (T*)block_address[block_offset]
   return *((T*)block_address + block_offset);
+};
+
+template <typename T>
+void BlockMemory<T>::Write(const size_t _offset, const void* _buffer, const size_t _buffer_length)
+{
+  if (_offset + _buffer_length >= this->m_length)
+    MNT_THROW("This memory object doesn`t have enought memory for this operation");
+
+  // This is inefficient - Change the implementation if become necessary
+  for(size_t i=_offset; i < _buffer_length; i++)
+    this[0][i] = ((T*)_buffer)[0][i];
 };
 
 // Provides strong exception safety
 template <typename T>
 template<typename U>
-U& BlockMemory<T>::GetAsType(const size_t p_index)
+U& BlockMemory<T>::GetAsType(const size_t _index)
 {
-  size_t block_index = p_index / (m_block_size);
-  size_t block_offset = p_index % m_block_size;
+  size_t block_index = _index / (m_block_size);
+  size_t block_offset = _index % m_block_size;
 
   if (this->m_block_size - block_offset < sizeof (U))
     MNT_THROW("Accessing unallocated memory");
@@ -71,10 +82,10 @@ U& BlockMemory<T>::GetAsType(const size_t p_index)
 // Provides strong exception safety, if assignment operation of type U provides basic exception safety
 template <typename T>
 template<typename U>
-void BlockMemory<T>::SetAsType(const size_t p_index, const U& p_value)
+void BlockMemory<T>::SetAsType(const size_t _index, const U& _value)
 {
-  size_t block_index = p_index / m_block_size;
-  size_t block_offset = p_index % m_block_size;
+  size_t block_index = _index / m_block_size;
+  size_t block_offset = _index % m_block_size;
 
   if (this->m_block_size - block_offset < sizeof (U))
     MNT_THROW("Accessing unallocated memory");
@@ -82,14 +93,14 @@ void BlockMemory<T>::SetAsType(const size_t p_index, const U& p_value)
   void* block_address = *(m_block_array + block_index);
 
   // The assignment operation of type U can throw exceptions
-  *((U*)block_address + block_offset) = p_value;
+  *((U*)block_address + block_offset) = _value;
 };
 
 // Provides strong exception safety
 template <typename T>
-void BlockMemory<T>::SaveToFile(const char* p_file_path)
+void BlockMemory<T>::SaveToFile(const char* _file_path)
 {
-  auto output_file = std::fstream(p_file_path, std::ios::out | std::ios::binary);
+  auto output_file = std::fstream(_file_path, std::ios::out | std::ios::binary);
 
   if (output_file.fail())
     MNT_THROW_C("file path is not valid or filesystem error", errno);

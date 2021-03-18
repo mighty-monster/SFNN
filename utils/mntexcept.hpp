@@ -63,11 +63,11 @@ namespace mnt {
   class MNTExcept : public std::exception
   {
   public:
-    explicit MNTExcept(const char* p_message, 
-                       const char* p_function, 
-                       const char* p_filepath, 
-                       int p_line, 
-                       int p_errno) noexcept;
+    explicit MNTExcept(const char* _message, 
+                       const char* _function, 
+                       const char* _filepath, 
+                       int _line, 
+                       int _errno) noexcept;
 
     virtual ~MNTExcept() noexcept  = default;
 

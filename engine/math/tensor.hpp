@@ -1,21 +1,35 @@
-#pragma once
+#ifndef MATH_TENSOR_HPP
+#define MATH_TENSOR_HPP
 
-#include "memory/linear/linear_heap.hpp"
+#include "configs.hpp"
 
-template <typename T>
-using HeapMemory = mnt::LinearHeapMemory<T>;
+#include "memory/memory.hpp"
+#include "memory/memory.cpp"
 
+#include <vector>
+#include <string>
+#include <memory>
 
-namespace nnc {
+namespace mnt {
   template <typename T>
   class Tensor
   {
   public:
-    Tensor();
+    Tensor(std::vector<TSHAPE_TYPE> _shape);
+
+    // These should be separate functions or part of class ?? And why ??
+    void Reshape(std::vector<TSHAPE_TYPE> _shape);
+
+    Tensor View(std::vector<TSHAPE_TYPE> _shape);
+
+    virtual Tensor Transpose(std::vector<TSHAPE_TYPE> _perm);
+
+    std::string Shape();
+
   private:
-    HeapMemory<T> m_memory;
+    std::shared_ptr<MNTMemory<T>> m_memory;
+    std::vector<TSHAPE_TYPE> m_shape;
   };
 }
 
-
-
+#endif

@@ -72,17 +72,20 @@ namespace mnt {
     void operator = (const MNTMemory&) = delete;
     void operator = (const MNTMemory&&) = delete;
 
-    virtual T& operator [] (const size_t p_index) noexcept = 0;
-    virtual const T& operator [] (const size_t p_index) const noexcept = 0;
+    virtual T& operator [] (const size_t _index) noexcept = 0;
+    virtual const T& operator [] (const size_t _index) const noexcept = 0;
 
     inline size_t Size() noexcept {return this->m_size;}
     inline size_t Length() {return m_length;};
 
     // Attention: "Resize" gets the length as parameter, not the size
-    virtual void Resize(const size_t p_length) = 0;
+    virtual void Resize(const size_t _length) = 0;
+
+    // Attention: Be careful about _buffer_length ... it is not the size, it is the length
+    virtual void Write(const size_t _offset, const void* _buffer,const size_t _buffer_length) =0;
 
   protected:
-    MNTMemory(Allocator* p_allocator = nullptr) noexcept;
+    MNTMemory(Allocator* _allocator = nullptr) noexcept;
 
   protected:
     size_t m_size = 0;

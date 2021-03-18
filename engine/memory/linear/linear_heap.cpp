@@ -3,8 +3,8 @@
 // Date:          27th Feb 2021
 // Description:   Typed linear heap memory class
 
-#ifndef MEMORY_LINEAR_HEAP_CPP
-#define MEMORY_LINEAR_HEAP_CPP
+#ifndef MEMORY_LINEAR_HEA_CPP
+#define MEMORY_LINEAR_HEA_CPP
 
 #include "memory/linear/linear_heap.hpp"
 
@@ -16,16 +16,16 @@
 using namespace mnt;
 
 template <typename T>
-LinearHeapMemory<T>::LinearHeapMemory(const char* p_file_path)
+LinearHeapMemory<T>::LinearHeapMemory(const char* _file_path)
 {
-  LoadFromFile(p_file_path);
+  LoadFromFile(_file_path);
 };
 
 template <typename T>
-LinearHeapMemory<T>::LinearHeapMemory(const size_t p_length)
+LinearHeapMemory<T>::LinearHeapMemory(const size_t _length)
 {
-  if (p_length > 0)
-    Allocate(p_length);
+  if (_length > 0)
+    Allocate(_length);
 };
 
 template <typename T>
@@ -36,18 +36,18 @@ LinearHeapMemory<T>::~LinearHeapMemory() noexcept
 
 // Provides strong exception safety
 template <typename T>
-void LinearHeapMemory<T>::Allocate(const size_t p_length)
+void LinearHeapMemory<T>::Allocate(const size_t _length)
 {
 
   this->m_memory = this->m_allocator ?
-          (this->m_allocator->Allocate(p_length * sizeof(T))) :
-          new T[p_length];
+          (this->m_allocator->Allocate(_length * sizeof(T))) :
+          new T[_length];
 
   if (!this->m_memory)
     MNT_THROW("new operation failed, this is a severe error!");
 
-  this->m_length = p_length;
-  this->m_size = p_length * sizeof(T);
+  this->m_length = _length;
+  this->m_size = _length * sizeof(T);
   this->m_allocated = true;
 };
 
@@ -66,9 +66,9 @@ void LinearHeapMemory<T>::Deallocate() noexcept
 
 // Provides basic exception safety
 template <typename T>
-void LinearHeapMemory<T>::LoadFromFile(const char* p_file_path)
+void LinearHeapMemory<T>::LoadFromFile(const char* _file_path)
 {
-  auto input_file = std::fstream(p_file_path, std::ios::in | std::ios::binary | std::ios::ate);
+  auto input_file = std::fstream(_file_path, std::ios::in | std::ios::binary | std::ios::ate);
 
   if (input_file.fail())
     MNT_THROW_C("file path is not valid or filesystem error", errno);
@@ -109,30 +109,30 @@ void LinearHeapMemory<T>::LoadFromFile(const char* p_file_path)
 
 // "Resize" function provides strong exception safety
 template <typename T>
-void LinearHeapMemory<T>::Resize(const size_t p_length)
+void LinearHeapMemory<T>::Resize(const size_t _length)
 {
-  if (p_length == this->m_length) return;
-  if (p_length == 0) {Deallocate(); return;}
+  if (_length == this->m_length) return;
+  if (_length == 0) {Deallocate(); return;}
 
   if (this->m_allocated)
   {
     void* previous_pointer = this->m_memory;
 
-    this->m_memory = new T[p_length];
+    this->m_memory = new T[_length];
 
-    size_t copy_size_bytes = sizeof (T) * (p_length > this->m_length ? this->m_length : p_length);
+    size_t copy_size_bytes = sizeof (T) * (_length > this->m_length ? this->m_length : _length);
     memcpy(this->m_memory, previous_pointer, copy_size_bytes);
 
     delete[] (T*)previous_pointer;
 
-    this->m_length = p_length;
-    this->m_size = p_length * sizeof(T);
+    this->m_length = _length;
+    this->m_size = _length * sizeof(T);
 
     this->m_allocated = true;
   }
   else
   {
-    Allocate(p_length);
+    Allocate(_length);
   }
 };
 

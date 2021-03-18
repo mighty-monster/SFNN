@@ -1,5 +1,5 @@
-#ifndef MEMORY_BLOCK_HEAP_CPP
-#define MEMORY_BLOCK_HEAP_CPP
+#ifndef MEMORY_BLOCK_HEA_CPP
+#define MEMORY_BLOCK_HEA_CPP
 
 #include "memory/block/block_heap.hpp"
 
@@ -31,27 +31,27 @@
 using namespace mnt;
 
 template <typename T>
-BlockHeapMemory<T>::BlockHeapMemory(const char* p_file_path)
+BlockHeapMemory<T>::BlockHeapMemory(const char* _file_path)
 {
-  LoadFromFile(p_file_path);
+  LoadFromFile(_file_path);
 };
 
 template <typename T>
-BlockHeapMemory<T>::BlockHeapMemory(const char* p_file_path, const uint16_t p_no_of_blocks)
+BlockHeapMemory<T>::BlockHeapMemory(const char* _file_path, const uint16_t _no_of_blocks)
 {
-  LoadFromFile(p_file_path, p_no_of_blocks);
+  LoadFromFile(_file_path, _no_of_blocks);
 };
 
 template <typename T>
-BlockHeapMemory<T>::BlockHeapMemory(const size_t p_length)
-  : BlockHeapMemory(p_length, BLOCKMEMORY_DEFAULT_NO_OF_BLOCKS)
+BlockHeapMemory<T>::BlockHeapMemory(const size_t _length)
+  : BlockHeapMemory(_length, BLOCKMEMORY_DEFAULT_NO_OF_BLOCKS)
 {};
 
 template <typename T>
-BlockHeapMemory<T>::BlockHeapMemory(const size_t p_length, const uint16_t p_no_of_blocks)
+BlockHeapMemory<T>::BlockHeapMemory(const size_t _length, const uint16_t _no_of_blocks)
 {
-  if (p_length > 0)
-    Allocate(p_length, p_no_of_blocks);
+  if (_length > 0)
+    Allocate(_length, _no_of_blocks);
 };
 
 template <typename T>
@@ -60,7 +60,7 @@ BlockHeapMemory<T>::~BlockHeapMemory()
 
 // Provides strong exception safety
 template <typename T>
-void BlockHeapMemory<T>::Allocate(const size_t p_length, const uint16_t p_no_of_blocks)
+void BlockHeapMemory<T>::Allocate(const size_t _length, const uint16_t _no_of_blocks)
 {
   char exception_message[MNT_EXCEPTION_MESSAGE_SIZE];
 
@@ -69,7 +69,7 @@ void BlockHeapMemory<T>::Allocate(const size_t p_length, const uint16_t p_no_of_
   size_t previous_block_length = this->m_block_length;
   size_t previous_block_size = this->m_block_size;
 
-  ALLOCATE_BASE_ARRAY(this->m_block_array, p_no_of_blocks);
+  ALLOCATE_BASE_ARRAY(this->m_block_array, _no_of_blocks);
 
   if (!this->m_block_array)
   {
@@ -80,13 +80,13 @@ void BlockHeapMemory<T>::Allocate(const size_t p_length, const uint16_t p_no_of_
     MNT_THROW(exception_message);
   }
 
-  this->m_no_of_blocks = p_no_of_blocks;
+  this->m_no_of_blocks = _no_of_blocks;
 
   // Allocating one extra item per blocks simplifies resize() and reshape() functions
-  this->m_block_length = p_length / p_no_of_blocks + 1;
+  this->m_block_length = _length / _no_of_blocks + 1;
   this->m_block_size = this->m_block_length * sizeof (T);
 
-  for(uint16_t i=0; i<p_no_of_blocks; i++)
+  for(uint16_t i=0; i<_no_of_blocks; i++)
   {
     try
     {
@@ -117,7 +117,7 @@ void BlockHeapMemory<T>::Allocate(const size_t p_length, const uint16_t p_no_of_
     }
   }
 
-  this->m_length = p_length;
+  this->m_length = _length;
   this->m_size = this->m_block_size * this->m_no_of_blocks;
 
   this->m_allocated = true;
@@ -139,14 +139,14 @@ void BlockHeapMemory<T>::Deallocate() noexcept
 
 // Provides basic exception safety
 template <typename T>
-void BlockHeapMemory<T>::LoadFromFile(const char* p_file_path)
-{ LoadFromFile(p_file_path, this->m_no_of_blocks); };
+void BlockHeapMemory<T>::LoadFromFile(const char* _file_path)
+{ LoadFromFile(_file_path, this->m_no_of_blocks); };
 
 // Provides basic exception safety
 template <typename T>
-void BlockHeapMemory<T>::LoadFromFile(const char* p_file_path, const uint16_t p_no_of_blocks)
+void BlockHeapMemory<T>::LoadFromFile(const char* _file_path, const uint16_t _no_of_blocks)
 {
-  auto input_file = std::fstream(p_file_path, std::ios::in | std::ios::binary | std::ios::ate);
+  auto input_file = std::fstream(_file_path, std::ios::in | std::ios::binary | std::ios::ate);
 
   if (input_file.fail())
     MNT_THROW_C("file path is not valid or filesystem error", errno);
@@ -166,7 +166,7 @@ void BlockHeapMemory<T>::LoadFromFile(const char* p_file_path, const uint16_t p_
   try
   {
     Resize(length);
-    Reshape(p_no_of_blocks);
+    Reshape(_no_of_blocks);
   }
   catch (std::exception& ex)
   {
@@ -196,17 +196,17 @@ void BlockHeapMemory<T>::LoadFromFile(const char* p_file_path, const uint16_t p_
 
 // Provides strong exception safety
 template <typename T>
-void BlockHeapMemory<T>::Resize(const size_t p_length)
+void BlockHeapMemory<T>::Resize(const size_t _length)
 {
-  if (p_length == this->m_length) return;
-  if (p_length == 0) {Deallocate(); return;}
+  if (_length == this->m_length) return;
+  if (_length == 0) {Deallocate(); return;}
 
-  size_t new_size = p_length * sizeof(T);
+  size_t new_size = _length * sizeof(T);
 
   // Check if allocation and deallocation is unnecessary
   if (new_size > (this->m_size - this->m_block_size ) && new_size <= this->m_size)
   {
-    this->m_length = p_length;
+    this->m_length = _length;
     return;
   }
 
@@ -214,13 +214,13 @@ void BlockHeapMemory<T>::Resize(const size_t p_length)
   {
     char exception_message[MNT_EXCEPTION_MESSAGE_SIZE];
 
-    int64_t extra_memory_bytes = (int64_t)(p_length - this->m_length) * sizeof (T);
+    int64_t extra_memory_bytes = (int64_t)(_length - this->m_length) * sizeof (T);
 
     void** previous_block_array = this->m_block_array;
     uint16_t previous_no_of_blocks = this->m_no_of_blocks;
 
     int16_t no_of_new_blocks = (int16_t)(extra_memory_bytes / (int64_t)(this->m_block_size));
-    no_of_new_blocks += p_length > this->m_length ? 1 : 0;
+    no_of_new_blocks += _length > this->m_length ? 1 : 0;
 
     if (no_of_new_blocks != 0)
     {
@@ -246,7 +246,7 @@ void BlockHeapMemory<T>::Resize(const size_t p_length)
       }
 
 
-      if (p_length > this->m_length)
+      if (_length > this->m_length)
       {
         memcpy(this->m_block_array,
                previous_block_array,
@@ -293,29 +293,29 @@ void BlockHeapMemory<T>::Resize(const size_t p_length)
       DEALLOCATE_BASE_ARRAY(previous_block_array);
     }
 
-    this->m_length = p_length;
+    this->m_length = _length;
     this->m_size = this->m_no_of_blocks * this->m_block_size;
 
   }
   else
   {
-    Allocate(p_length, this->m_no_of_blocks);
+    Allocate(_length, this->m_no_of_blocks);
   }
 
 };
 
 template <typename T>
-void BlockHeapMemory<T>::Reshape(const uint16_t p_no_of_blocks)
+void BlockHeapMemory<T>::Reshape(const uint16_t _no_of_blocks)
 {
-  if (p_no_of_blocks == 0) {return;}
-  if (p_no_of_blocks == this->m_no_of_blocks) {return;}
+  if (_no_of_blocks == 0) {return;}
+  if (_no_of_blocks == this->m_no_of_blocks) {return;}
 
   uint16_t old_no_of_blocks = this->m_no_of_blocks;
   size_t old_block_size = this->m_block_size;
   void** old_block_array = this->m_block_array;
   size_t old_size = this->m_size;
 
-  Allocate(this->m_length, p_no_of_blocks);
+  Allocate(this->m_length, _no_of_blocks);
 
   size_t old_index = 0;
   size_t new_index = 0;

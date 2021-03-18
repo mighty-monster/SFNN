@@ -77,24 +77,24 @@ namespace mnt {
     static Logger& GetInstance() noexcept;
 
     // Should be called once, for configuration, before using the object
-    static void Init(LogLevel p_level, bool p_log_to_console, bool p_log_to_file) noexcept;
+    static void Init(LogLevel _level, bool _log_to_console, bool _log_to_file) noexcept;
 
-    static void SetLevel(LogLevel p_level) noexcept;
+    static void SetLevel(LogLevel _level) noexcept;
 
-    static void EnableLogging(bool p_log_to_console, bool p_log_to_file) noexcept;
+    static void EnableLogging(bool _log_to_console, bool _log_to_file) noexcept;
     static void DisableLogging() noexcept;
 
-    static void Error(const char* p_message) noexcept;
-    static void Error(const std::string& p_message) noexcept;
+    static void Error(const char* _message) noexcept;
+    static void Error(const std::string& _message) noexcept;
 
-    static void Warn(const char* p_message) noexcept;
-    static void Warn(const std::string& p_message) noexcept;
+    static void Warn(const char* _message) noexcept;
+    static void Warn(const std::string& _message) noexcept;
 
-    static void Info(const char* p_message) noexcept;
-    static void Info(const std::string& p_message) noexcept;
+    static void Info(const char* _message) noexcept;
+    static void Info(const std::string& _message) noexcept;
 
-    static void Debug(const char* p_message) noexcept;
-    static void Debug(const std::string& p_message) noexcept;
+    static void Debug(const char* _message) noexcept;
+    static void Debug(const std::string& _message) noexcept;
 
   private:
     Logger() = default;
@@ -102,23 +102,23 @@ namespace mnt {
 
     // Internal implementations of logging functions, which are used by
     // public static functions
-    void IError(const char* p_message) noexcept;
-    void IWarn(const char* p_message) noexcept;
-    void IInfo(const char* p_message) noexcept;
-    void IDebug(const char* p_message) noexcept;
+    void IError(const char* _message) noexcept;
+    void IWarn(const char* _message) noexcept;
+    void IInfo(const char* _message) noexcept;
+    void IDebug(const char* _message) noexcept;
 
     // Decorates the message with proper title
     // Note: All used functions are noexcept, only memory access violation can
     // be the major error, in that case we are already doomed :(
-    void IAddTitle(const char* p_title,const char* p_message) noexcept;
+    void IAddTitle(const char* _title,const char* _message) noexcept;
 
     // Streams don't throw exceptions by default
-    void ILogToConsole(const char* p_message) noexcept;
+    void ILogToConsole(const char* _message) noexcept;
 
-    void ILogToFile(const char* p_message);
+    void ILogToFile(const char* _message);
     void ILog() noexcept;
 
-    void ReportOFStreamError(const char* p_message, bool p_include_filepath = false) noexcept;
+    void ReportOFStreamError(const char* _message, bool _include_filepath = false) noexcept;
 
     void OpenLogFile() noexcept;
 #ifdef NDEBUG

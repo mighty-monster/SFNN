@@ -11,9 +11,9 @@
 using namespace mnt;
 
 template<typename T>
-MNTMemory<T>::MNTMemory(Allocator* p_allocator) noexcept
+MNTMemory<T>::MNTMemory(Allocator* _allocator) noexcept
 {
-  m_allocator = p_allocator;
+  m_allocator = _allocator;
 };
 
 #endif

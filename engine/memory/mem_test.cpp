@@ -2,46 +2,25 @@
 #include "utils/memon.hpp"
 #include "utils/general.hpp"
 #include "utils/general.cpp"
-#include "memory/memory.hpp"
-#include "memory/linear/linear_heap.hpp"
-#include "memory/linear/linear_heap.cpp"
-#include "memory/block/block.hpp"
-#include "memory/block/block.cpp"
-#include "memory/block/block_heap.hpp"
-#include "memory/block/block_heap.cpp"
-#include "memory/allocator/mallocator.hpp"
 
+#include "math/tensor.hpp"
+#include "math/tensor.cpp"
+
+#include <vector>
 
 
 int main()
 {
   mnt::Logger::Init(Logger::LevelDebug, true, false);
 
-
+  ENABLE_PRINT_ALLOC
   {
-    MNT_PRINT_DUR;
-    mnt::Mallocator mallocator;
+    mnt::Tensor<float> ts({1,3,4});
 
-    mnt::MNTMemory<float>* mem;
-    mem = new LinearHeapMemory<float>(1024*1024*128);
+    //ts.Reshape({});
 
-    {
-      MNT_PRINT_DUR;
-      for (size_t i=0; i<mem[0].Length(); i++)
-        mem[0][i] = 3.3f*i;
+    MNT_PRINTL(ts.Shape());
 
-      std::cout<<"\nWriting time:\n";
-    }
-
-    {
-      MNT_PRINT_DUR;
-      for (size_t i=0; i<mem[0].Length(); i++)
-        assert(mem[0][i] == 3.3f*i);
-      std::cout<<"\nAssert time:\n";
-    }
-    delete mem;
-
-    std::cout<<"\nOveral time:\n";
   }
 
   PRINT_ALLOC_SUMMERY

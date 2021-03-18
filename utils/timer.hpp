@@ -20,7 +20,7 @@ namespace mnt {
   {
   public:
     // Pass false as parameter to hinder automatic logging
-    Timer(bool p_auto_print = true) noexcept;
+    Timer(bool _auto_print = true) noexcept;
     ~Timer() noexcept;
 
     void Start() noexcept;

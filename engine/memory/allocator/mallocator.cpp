@@ -11,9 +11,9 @@
 
 using namespace mnt;
 
-void* Mallocator::Allocate(size_t p_size)
+void* Mallocator::Allocate(size_t _size)
 {
-  void* memptr = malloc(p_size);
+  void* memptr = malloc(_size);
 
   if(!memptr)
     MNT_THROW("failed to allocate memory using malloc");
@@ -21,7 +21,7 @@ void* Mallocator::Allocate(size_t p_size)
   return memptr;
 };
 
-void Mallocator::Deallocate(void* p_memory) noexcept
+void Mallocator::Deallocate(void* _memory) noexcept
 {
-  free (p_memory);
+  free (_memory);
 };

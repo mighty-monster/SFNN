@@ -1,4 +1,5 @@
 add_library(engine
+  configs.hpp
   memory/memory.hpp
   memory/memory.cpp
   memory/allocator/blueprint.hpp

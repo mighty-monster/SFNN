@@ -12,9 +12,9 @@
 using namespace mnt;
 
 // Pass false as parameter to hinder automatic logging
-Timer::Timer(bool p_auto_print) noexcept
+Timer::Timer(bool _auto_print) noexcept
 {
-  m_auto_print = p_auto_print;
+  m_auto_print = _auto_print;
   Start();
 };
 

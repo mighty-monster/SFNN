@@ -24,23 +24,23 @@
 // ---------------------
 
 // =====
-// [LoadFromFile(p_file_path)]: Load content of memory from a binary file
+// [LoadFromFile(_file_path)]: Load content of memory from a binary file
 // =====
 
 // =====
-// [Resize(p_length)]: Allocate or Deallocate blocks, no allocation will happen if current
-// configuration (m_no_of_blocks * m_block_size) is suitable for storing p_length items of type T
-// Allocate a new blocks if needs more memory, and Deallocates unnecessary blocks if p_length < m_length
+// [Resize(_length)]: Allocate or Deallocate blocks, no allocation will happen if current
+// configuration (m_no_of_blocks * m_block_size) is suitable for storing _length items of type T
+// Allocate a new blocks if needs more memory, and Deallocates unnecessary blocks if _length < m_length
 // =====
 
 // =====
-// [Reshape(p_no_of_blocks)]: Changes the number of memory blockes, it is a very expensive operation
+// [Reshape(_no_of_blocks)]: Changes the number of memory blockes, it is a very expensive operation
 // when big amount of memory is allocated, despite the need for reallocations of blocks, the copy logic
 // is also relatively complicated, but still the time complexity is O(n), so avoid unless necessary.
 // =====
 
-#ifndef MEMORY_BLOCK_HEAP_HPP
-#define MEMORY_BLOCK_HEAP_HPP
+#ifndef MEMORY_BLOCK_HEA_HPP
+#define MEMORY_BLOCK_HEA_HPP
 
 #include "memory/block/block.hpp"
 #include "memory/block/block.cpp"
@@ -51,20 +51,20 @@ namespace mnt {
   {
   public:
     BlockHeapMemory() = default;
-    BlockHeapMemory(const char* p_file_path);
-    BlockHeapMemory(const char* p_file_path, const uint16_t p_no_of_blocks);
-    BlockHeapMemory(const size_t p_length);
-    BlockHeapMemory(const size_t p_length, const uint16_t p_no_of_blocks);
+    BlockHeapMemory(const char* _file_path);
+    BlockHeapMemory(const char* _file_path, const uint16_t _no_of_blocks);
+    BlockHeapMemory(const size_t _length);
+    BlockHeapMemory(const size_t _length, const uint16_t _no_of_blocks);
     ~BlockHeapMemory();
 
-    void Allocate(const size_t p_length, const uint16_t p_no_of_blocks);
+    void Allocate(const size_t _length, const uint16_t _no_of_blocks);
     void Deallocate() noexcept;
 
-    virtual void LoadFromFile(const char* p_file_path) override;
-    virtual void LoadFromFile(const char* p_file_path, const uint16_t p_no_of_blocks) override;
+    virtual void LoadFromFile(const char* _file_path) override;
+    virtual void LoadFromFile(const char* _file_path, const uint16_t _no_of_blocks) override;
 
-    void Resize(const size_t p_length) override;
-    void Reshape(const uint16_t p_no_of_blocks) override;
+    void Resize(const size_t _length) override;
+    void Reshape(const uint16_t _no_of_blocks) override;
 
   };
 

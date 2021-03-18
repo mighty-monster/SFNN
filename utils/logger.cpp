@@ -23,27 +23,27 @@ Logger& Logger::GetInstance() noexcept
 };
 
 // Should be called once, for configuration, before using the object
-void Logger::Init(LogLevel p_level, bool p_log_to_console, bool p_log_to_file) noexcept
+void Logger::Init(LogLevel _level, bool _log_to_console, bool _log_to_file) noexcept
 {
-  SetLevel(p_level);
-  EnableLogging(p_log_to_console, p_log_to_file);
+  SetLevel(_level);
+  EnableLogging(_log_to_console, _log_to_file);
 };
 
-void Logger::SetLevel(LogLevel p_level) noexcept
+void Logger::SetLevel(LogLevel _level) noexcept
 {
-  GetInstance().m_level = p_level;
+  GetInstance().m_level = _level;
 };
 
 // Can be used to enable or disable logging methods
-void Logger::EnableLogging(bool p_log_to_console, bool p_log_to_file) noexcept
+void Logger::EnableLogging(bool _log_to_console, bool _log_to_file) noexcept
 {
-  GetInstance().m_log_to_console = p_log_to_console;
-  GetInstance().m_log_to_file = p_log_to_file;
+  GetInstance().m_log_to_console = _log_to_console;
+  GetInstance().m_log_to_file = _log_to_file;
 
-  // By defualt p_log_to_file is false, in case class is used without calling "Init"
+  // By defualt _log_to_file is false, in case class is used without calling "Init"
   // File should not be opened untill user asks specificaly to use loggin to file
   // either by calling "EnableLogging" or "Init" methods.
-  if(p_log_to_file)
+  if(_log_to_file)
     GetInstance().OpenLogFile();
   else
     GetInstance().CloseLogFile();
@@ -55,44 +55,44 @@ void Logger::DisableLogging() noexcept
   EnableLogging(false, false);
 };
 
-void Logger::Error(const char* p_message) noexcept
+void Logger::Error(const char* _message) noexcept
 {
-  GetInstance().IError(p_message);
+  GetInstance().IError(_message);
 };
 
-void Logger::Error(const std::string& p_message) noexcept
+void Logger::Error(const std::string& _message) noexcept
 {
-  GetInstance().IError(p_message.c_str());
+  GetInstance().IError(_message.c_str());
 };
 
-void Logger::Warn(const char* p_message) noexcept
+void Logger::Warn(const char* _message) noexcept
 {
-  GetInstance().IWarn(p_message);
+  GetInstance().IWarn(_message);
 };
 
-void Logger::Warn(const std::string& p_message) noexcept
+void Logger::Warn(const std::string& _message) noexcept
 {
-  GetInstance().IWarn(p_message.c_str());
+  GetInstance().IWarn(_message.c_str());
 };
 
-void Logger::Info(const char* p_message) noexcept
+void Logger::Info(const char* _message) noexcept
 {
-  GetInstance().IInfo(p_message);
+  GetInstance().IInfo(_message);
 };
 
-void Logger::Info(const std::string& p_message) noexcept
+void Logger::Info(const std::string& _message) noexcept
 {
-  GetInstance().IInfo(p_message.c_str());
+  GetInstance().IInfo(_message.c_str());
 };
 
-void Logger::Debug(const char* p_message) noexcept
+void Logger::Debug(const char* _message) noexcept
 {
-  GetInstance().IDebug(p_message);
+  GetInstance().IDebug(_message);
 };
 
-void Logger::Debug(const std::string& p_message) noexcept
+void Logger::Debug(const std::string& _message) noexcept
 {
-  GetInstance().IDebug(p_message.c_str());
+  GetInstance().IDebug(_message.c_str());
 };
 
 // Logger destructor
@@ -101,43 +101,43 @@ Logger::~Logger() noexcept
   CloseLogFile();
 };
 
-void Logger::IError(const char* p_message) noexcept
+void Logger::IError(const char* _message) noexcept
 {
   if (m_level >= LevelError)
   {
-    IAddTitle(m_str_error, p_message);
+    IAddTitle(m_str_error, _message);
     ILog();
   }
 };
 
-void Logger::IWarn(const char* p_message) noexcept
+void Logger::IWarn(const char* _message) noexcept
 {
   if (m_level >= LevelWarning)
   {
-    IAddTitle(m_str_warning, p_message);
+    IAddTitle(m_str_warning, _message);
     ILog();
   }
 };
 
-void Logger::IInfo(const char* p_message) noexcept
+void Logger::IInfo(const char* _message) noexcept
 {
   if (m_level >= LevelInfo)
   {
-    IAddTitle(m_str_info, p_message);
+    IAddTitle(m_str_info, _message);
     ILog();
   }
 };
 
-void Logger::IDebug(const char* p_message) noexcept
+void Logger::IDebug(const char* _message) noexcept
 {
   if (m_level >= LevelDebug)
   {    
-    IAddTitle(m_str_debug, p_message);
+    IAddTitle(m_str_debug, _message);
     ILog();
   }
 };
 
-void Logger::IAddTitle(const char* p_title,const char* p_message) noexcept
+void Logger::IAddTitle(const char* _title,const char* _message) noexcept
 {
   size_t offset = 0;
 
@@ -150,13 +150,13 @@ void Logger::IAddTitle(const char* p_title,const char* p_message) noexcept
   // and copying the content in the right place
 
   mnt::strcpy_mnt(m_buffer, MNT_LOGGER_BUFFER_GLOBAL,
-                  p_title, strlen(p_title), offset);
+                  _title, strlen(_title), offset);
 
-  offset += strlen(p_title);
+  offset += strlen(_title);
   mnt::strcpy_mnt(m_buffer, MNT_LOGGER_BUFFER_GLOBAL,
-                  p_message,   strlen(p_message),   offset);
+                  _message,   strlen(_message),   offset);
 
-  offset += strlen(p_message);
+  offset += strlen(_message);
   mnt::strcpy_mnt(m_buffer, MNT_LOGGER_BUFFER_GLOBAL,
                   m_str_enter, strlen(m_str_enter), offset);
 
@@ -167,20 +167,20 @@ void Logger::IAddTitle(const char* p_title,const char* p_message) noexcept
                   m_str_null, 1, offset);
 }
 
-void Logger::ILogToConsole(const char* p_message) noexcept
+void Logger::ILogToConsole(const char* _message) noexcept
 {
   // Streams don't throw exceptions by default
-  std::cout << p_message;
+  std::cout << _message;
 };
 
-void Logger::ILogToFile(const char* p_message)
+void Logger::ILogToFile(const char* _message)
 {
   if (m_log_file.is_open())
   {
     // lock constructor might throw exception
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    GetInstance().m_log_file << p_message;
+    GetInstance().m_log_file << _message;
     if(m_log_file.fail())
        ReportOFStreamError("Failed to write to log file: ");
   }
@@ -259,7 +259,7 @@ void Logger::CloseLogFile() noexcept
   }
 }
 
-void Logger::ReportOFStreamError(const char* p_message, bool p_include_filepath) noexcept
+void Logger::ReportOFStreamError(const char* _message, bool _include_filepath) noexcept
 {
   // getting errno can thorw exception, again, if that happens, let us be doomed ...
 
@@ -268,8 +268,8 @@ void Logger::ReportOFStreamError(const char* p_message, bool p_include_filepath)
   const size_t reason_length = 256;
   char reason[reason_length];
 
-  size_t final_message_length = strlen(p_message) + strlen(separator) + reason_length + 1;
-  final_message_length += p_include_filepath ? strlen(m_log_file_name) + strlen(separator) : 0;
+  size_t final_message_length = strlen(_message) + strlen(separator) + reason_length + 1;
+  final_message_length += _include_filepath ? strlen(m_log_file_name) + strlen(separator) : 0;
 
   char* final_message = (char*)alloca(final_message_length);
 
@@ -281,9 +281,9 @@ void Logger::ReportOFStreamError(const char* p_message, bool p_include_filepath)
     return;
   }
 
-  strcpy_mnt(final_message, final_message_length, p_message, strlen(p_message) + 1);
+  strcpy_mnt(final_message, final_message_length, _message, strlen(_message) + 1);
 
-  if (p_include_filepath)
+  if (_include_filepath)
   {
     strcat_mnt(final_message, final_message_length, separator, strlen(separator) + 1);
     strcat_mnt(final_message, final_message_length, m_log_file_name, strlen(m_log_file_name) + 1);

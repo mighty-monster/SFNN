@@ -95,32 +95,32 @@ namespace mnt {
   // __FUNC__, __FUCNTION__, __FUNCSIG__, and __PRETTY_FUNCTION__ are not macros,
   // they are constant static char* variables, to add function name to
   // logged error, need to use a function in combination to a macro
-  void LogError(const char* p_filepath, int p_line, const char* p_function_name, const char* p_message) noexcept;
+  void LogError(const char* _filepath, int _line, const char* _function_name, const char* _message) noexcept;
 
   // Same as "LogError", but used for low level logging to std::cerr
-  void LogErrorLL(const char* p_filepath, int p_line, const char* p_function_name, const char* p_message) noexcept;
+  void LogErrorLL(const char* _filepath, int _line, const char* _function_name, const char* _message) noexcept;
 
   // Fills current datatime with format of  YYYY-MM-DD HH:MM:SS
   // in provided buffer, it needs atleast 20 bytes
-  void GetCurrentTime(char* p_date_time_str) noexcept;
+  void GetCurrentTime(char* _date_time_str) noexcept;
 
   // Dumps a block of memory as Hex string
-  std::string BufferToHex(void* p_buffer, size_t p_size);
+  std::string BufferToHex(void* _buffer, size_t _size);
 
   // Loads an hex string into a block of memory
   // The buffer should have enough allocated memory
-  void HexToBuffer(void* p_buffer, const std::string& p_hex);
-  void HexToBuffer(void* p_buffer, const char* p_hex, const size_t p_hex_size);
+  void HexToBuffer(void* _buffer, const std::string& _hex);
+  void HexToBuffer(void* _buffer, const char* _hex, const size_t _hex_size);
 
   // Convert number of bytes to Kilo Byte, Mega Byte, Giga Byte, etc
-  void BytesToHumanReadableSize(uint64_t p_size, char* p_result, const size_t p_result_size) noexcept;
+  void BytesToHumanReadableSize(uint64_t _size, char* _result, const size_t _result_size) noexcept;
 
   // Given the full path of a file, extracts the file name and stores it
   // at the begining of the given buffer, so it act destructive and alter
   // the input
   // ----
   // Note: All used functions are noexcept
-  void ExtractFilenameFromPath(char* p_filepath) noexcept;
+  void ExtractFilenameFromPath(char* _filepath) noexcept;
 
   // Compiler independent strcat and strcpy
   // functions strcpy_mnt, strcat_mnt are used in error handling mechanisms in
@@ -131,7 +131,7 @@ namespace mnt {
   // Note: Their potential errors are
   // 1. Memory Access violation which will be handled using signals by OS and will
   // lead to crash anyway, if happens, we already lost :|
-  // 2. Not having enough space in "p_dest" buffer, which causes the operation to not perform at all
+  // 2. Not having enough space in "_dest" buffer, which causes the operation to not perform at all
   // In case of error 2, it will only log to std::cerr using "LogErrorLL"
   // ----
   // "LogErrorLL" uses strcpy_mnt and vise-versa, but it wont happen if paramters are sane, 
@@ -139,13 +139,13 @@ namespace mnt {
   // because used parameters in "LogErrorLL" are sane, hopefuly ;p
   // ----
   // P.S. Streams don't throw exceptions by default
-  void strcpy_mnt(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length, size_t p_offset = 0) noexcept;
-  void strcat_mnt(char* p_dest, size_t p_dest_length, const char* p_src, size_t p_src_length) noexcept;
+  void strcpy_mnt(char* _dest, size_t _dest_length, const char* _src, size_t _src_length, size_t _offset = 0) noexcept;
+  void strcat_mnt(char* _dest, size_t _dest_length, const char* _src, size_t _src_length) noexcept;
 
   // Compiler independent sprintf
   // Returns a negative number if error happens
   template<typename ... Args>
-  int sprintf_mnt(char* p_dest, size_t p_dest_length, const char* const p_format, Args ... p_args) noexcept;
+  int sprintf_mnt(char* _dest, size_t _dest_length, const char* const _format, Args ... _args) noexcept;
 }
 
 #endif

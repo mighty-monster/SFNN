@@ -11,17 +11,17 @@
 // ---------------------
 
 // =====
-// [LoadFromFile(p_file_path)]: Load content of memory from a binary file
+// [LoadFromFile(_file_path)]: Load content of memory from a binary file
 // =====
 
 // =====
-// [Resize(p_length)]: Allocates new memory, copies the content and deallocates old one
+// [Resize(_length)]: Allocates new memory, copies the content and deallocates old one
 // It is a heavy operation, should be avoided unless necessary or harmless
 // =====
 
 
-#ifndef MEMORY_LINEAR_HEAP_HPP
-#define MEMORY_LINEAR_HEAP_HPP
+#ifndef MEMORY_LINEAR_HEA_HPP
+#define MEMORY_LINEAR_HEA_HPP
 
 #include "memory/linear/linear.hpp"
 #include "memory/linear/linear.cpp"
@@ -35,15 +35,15 @@ namespace mnt {
   {
   public:
     LinearHeapMemory() = default;
-    LinearHeapMemory(const char* p_file_path);
-    LinearHeapMemory(const size_t p_length);
+    LinearHeapMemory(const char* _file_path);
+    LinearHeapMemory(const size_t _length);
     ~LinearHeapMemory() noexcept;
 
-    void LoadFromFile(const char* p_file_path) override;
-    void Resize(const size_t p_length) override;
+    void LoadFromFile(const char* _file_path) override;
+    void Resize(const size_t _length) override;
 
   protected:
-    void Allocate(const size_t p_length);
+    void Allocate(const size_t _length);
     void Deallocate() noexcept;
 
   };
