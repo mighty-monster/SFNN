@@ -1,10 +1,10 @@
-// File Name:     simple.hpp
+// File Name:     linear.inl
 // Author:        Arash Fatehi
 // Date:          26th Feb 2021
 // Description:   A base class for simple linear memory classes
 
-#ifndef MEMORY_LINEAR_CPP
-#define MEMORY_LINEAR_CPP
+#ifndef ENGINE_MEMORY_LINEAR_INL
+#define ENGINE_MEMORY_LINEAR_INL
 
 #include "memory/linear/linear.hpp"
 

@@ -2,7 +2,6 @@
 // Author:        Arash Fatehi
 // Date:          13th Mar 2021
 // Description:   Block heap memory class
-// ---------------------
 
 // ---------------------
 // Detail Description:
@@ -39,11 +38,10 @@
 // is also relatively complicated, but still the time complexity is O(n), so avoid unless necessary.
 // =====
 
-#ifndef MEMORY_BLOCK_HEA_HPP
-#define MEMORY_BLOCK_HEA_HPP
+#ifndef ENGINE_MEMORY_BLOCK_HEAP_HPP
+#define ENGINE_MEMORY_BLOCK_HEAP_HPP
 
 #include "memory/block/block.hpp"
-#include "memory/block/block.cpp"
 
 namespace mnt {
   template <typename T>
@@ -69,5 +67,7 @@ namespace mnt {
   };
 
 }
+
+#include "memory/block/block_heap.inl"
 
 #endif

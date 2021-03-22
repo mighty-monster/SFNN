@@ -1,10 +1,10 @@
-// File Name:     simple_heap.hpp
+// File Name:     simple_heap.inl
 // Author:        Arash Fatehi
 // Date:          27th Feb 2021
 // Description:   Typed linear heap memory class
 
-#ifndef MEMORY_LINEAR_HEA_CPP
-#define MEMORY_LINEAR_HEA_CPP
+#ifndef ENGINE_MEMORY_LINEAR_HEAP_INL
+#define ENGINE_MEMORY_LINEAR_HEAP_INL
 
 #include "memory/linear/linear_heap.hpp"
 

@@ -1,10 +1,10 @@
-// File Name:     memory/memory.hpp
+// File Name:     memory/memory.inl
 // Author:        Arash Fatehi
 // Date:          12th Mar 2021
 // Description:   The base class for memory subsystem of engine
 
-#ifndef MEMORY_MEMORY_CPP
-#define MEMORY_MEMORY_CPP
+#ifndef ENGINE_MEMORY_MEMORY_INL
+#define ENGINE_MEMORY_MEMORY_INL
 
 #include "memory/memory.hpp"
 

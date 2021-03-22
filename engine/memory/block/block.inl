@@ -1,5 +1,10 @@
-#ifndef MEMORY_BLOCK_CPP
-#define MEMORY_BLOCK_CPP
+// File Name:     block.inl
+// Author:        Arash Fatehi
+// Date:          13th Mar 2021
+// Description:   A base class for block memory classes
+
+#ifndef ENGINE_MEMORY_BLOCK_INL
+#define ENGINE_MEMORY_BLOCK_INL
 
 #include "memory/block/block.hpp"
 

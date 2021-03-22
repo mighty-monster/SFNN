@@ -41,11 +41,10 @@
 // and doesn`t save the entire class, only the content that memory class refers to
 // =====
 
-#ifndef MEMORY_LINEAR_HPP
-#define MEMORY_LINEAR_HPP
+#ifndef ENGINE_MEMORY_LINEAR_HPP
+#define ENGINE_MEMORY_LINEAR_HPP
 
 #include "memory/memory.hpp"
-#include "memory/memory.cpp"
 #include "memory/allocator/blueprint.hpp"
 
 #include <string>
@@ -55,8 +54,8 @@ namespace mnt {
   class LinearMemory : public MNTMemory<T>
   {
   public:
-    virtual T& operator [] (const size_t _index) noexcept;
-    virtual const T& operator [] (const size_t _index) const noexcept;
+    virtual T& operator [] (const size_t _index) noexcept override;
+    virtual const T& operator [] (const size_t _index) const noexcept override;
 
     void Write(const size_t _offset, const void* _buffer,const size_t _buffer_length) override;
 
@@ -77,5 +76,7 @@ namespace mnt {
     void* m_memory;
   };
 }
+
+#include "memory/linear/linear.inl"
 
 #endif

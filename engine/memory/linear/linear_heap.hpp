@@ -20,11 +20,10 @@
 // =====
 
 
-#ifndef MEMORY_LINEAR_HEA_HPP
-#define MEMORY_LINEAR_HEA_HPP
+#ifndef ENGINE_MEMORY_LINEAR_HEA_HPP
+#define ENGINE_MEMORY_LINEAR_HEA_HPP
 
 #include "memory/linear/linear.hpp"
-#include "memory/linear/linear.cpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -48,6 +47,8 @@ namespace mnt {
 
   };
 }
+
+#include "memory/linear/linear_heap.inl"
 
 #endif
 

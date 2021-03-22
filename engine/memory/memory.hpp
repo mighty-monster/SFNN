@@ -49,8 +49,8 @@
 // =====
 
 
-#ifndef MEMORY_MEMORY_HPP
-#define MEMORY_MEMORY_HPP
+#ifndef ENGINE_MEMORY_MEMORY_HPP
+#define ENGINE_MEMORY_MEMORY_HPP
 
 #include "memory/allocator/blueprint.hpp"
 
@@ -95,6 +95,8 @@ namespace mnt {
     Allocator* m_allocator = nullptr;
   };
 }
+
+#include "memory/memory.inl"
 
 #endif
 

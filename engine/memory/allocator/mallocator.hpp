@@ -3,8 +3,8 @@
 // Date:          13th Mar 2021
 // Description:   A simple Allocator class using malloc and free for testing purposes
 
-#ifndef MEMORY_MALLOCATOR_HPP
-#define MEMORY_MALLOCATOR_HPP
+#ifndef ENGINE_MEMORY_MALLOCATOR_HPP
+#define ENGINE_MEMORY_MALLOCATOR_HPP
 
 #include "memory/allocator/blueprint.hpp"
 

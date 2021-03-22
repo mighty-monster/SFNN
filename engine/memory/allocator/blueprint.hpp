@@ -10,8 +10,8 @@
 // and transfer to GPU memory, remote devices, etc.
 // ---------------------
 
-#ifndef MEMORY_BLUEPRINT_HPP
-#define MEMORY_BLUEPRINT_HPP
+#ifndef ENGINE_MEMORY_BLUEPRINT_HPP
+#define ENGINE_MEMORY_BLUEPRINT_HPP
 
 #include <cstddef>
 #include <stdlib.h>

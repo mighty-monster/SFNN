@@ -1,5 +1,10 @@
-#ifndef MEMORY_BLOCK_HEA_CPP
-#define MEMORY_BLOCK_HEA_CPP
+// File Name:     block_heap.inl
+// Author:        Arash Fatehi
+// Date:          13th Mar 2021
+// Description:   Block heap memory class
+
+#ifndef ENGINE_MEMORY_BLOCK_HEAP_INL
+#define ENGINE_MEMORY_BLOCK_HEAP_INL
 
 #include "memory/block/block_heap.hpp"
 

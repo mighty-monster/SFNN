@@ -45,12 +45,11 @@
 // =====
 
 
-#ifndef MEMORY_BLOCK_HPP
-#define MEMORY_BLOCK_HPP
+#ifndef ENGINE_MEMORY_BLOCK_HPP
+#define ENGINE_MEMORY_BLOCK_HPP
 
 #include "memory/allocator/blueprint.hpp"
 #include "memory/memory.hpp"
-#include "memory/memory.cpp"
 
 #include <cinttypes>
 #include <string>
@@ -93,5 +92,7 @@ namespace mnt {
     uint16_t m_no_of_blocks = BLOCKMEMORY_DEFAULT_NO_OF_BLOCKS;
   };
 }
+
+#include "memory/block/block.inl"
 
 #endif
