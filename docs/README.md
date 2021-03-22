@@ -7,7 +7,7 @@ Currently, at the early stages of development, the main focus is on "Make It Wor
 
 <br>
 
-###Why develop a new framework?
+### Why develop a new framework?
 * Despite being user-friendly for end-users, I found advanced frameworks like TensorFlow overwhelmingly complex from a developer point of view. Learning from its code-base about the implementation of neural networks is not an easy task.
 
 * C++ is the implementation language of most advanced frameworks. But it is not a first-class citizen when it comes to end-user API.
