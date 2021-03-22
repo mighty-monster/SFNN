@@ -12,7 +12,7 @@ Currently, at the early stages of development, the main focus is on "Make It Wor
 
 * C++ is the implementation language of most advanced frameworks. But it is not a first-class citizen when it comes to end-user API.
 
-* I needed a lightweight framework with minimal dependencies that is easily tweakable, and I could not find one that suites my needs, so I am developing one ;)
+* I needed a lightweight framework with minimal dependencies that is easily tweakable, and I could not find one that suits my needs, so I am developing one ;)
 
 <br>
 
