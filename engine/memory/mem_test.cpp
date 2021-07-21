@@ -5,7 +5,6 @@
 
 #include <vector>
 
-
 int main()
 {
   mnt::Logger::Init(Logger::LevelDebug, true, false);

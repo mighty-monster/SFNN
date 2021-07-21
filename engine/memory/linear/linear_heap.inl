@@ -87,7 +87,7 @@ void LinearHeapMemory<T>::LoadFromFile(const char* _file_path)
   {
     Resize(file_size/sizeof(T));
   }
-  catch (std::exception& ex)
+  catch (std::exception)
   {
     input_file.close();
     throw;
